@@ -1,0 +1,264 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  user-select: none;
+  gap: var(--spacing-2);
+  transition: opacity var(--animation-duration-fast) ease;
+}
+
+.logo:hover {
+  opacity: 0.9;
+}
+
+.logo:active {
+  opacity: 0.8;
+}
+
+/* Dropdown Trigger */
+.dropdownTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-1);
+  border-radius: var(--radius-sm);
+  color: var(--muted-foreground);
+  transition: all var(--animation-duration-fast) ease;
+  margin-top: 4px; /* Slight visual adjustment to align with text baseline */
+}
+
+.dropdownTrigger:hover,
+.dropdownTrigger[data-state="open"] {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
+
+.chevronIcon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform var(--animation-duration-fast) ease;
+}
+
+.dropdownTrigger[data-state="open"] .chevronIcon {
+  transform: rotate(180deg);
+}
+
+/* Icon Wrapper */
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 
+  USA Flag Colors:
+  Red: #B22234
+  Blue: #3C3B6E
+*/
+
+.shieldIcon {
+  color: #1E90FF;
+  fill: #1E90FF;
+  filter: drop-shadow(0 2px 8px rgba(30, 144, 255, 0.4));
+}
+
+.houseIcon {
+  position: absolute;
+  color: #FFFFFF;
+  /* Center visually within the shield */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%); 
+  z-index: 2;
+}
+
+.starIcon {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  color: #B22234;
+  fill: #B22234;
+  z-index: 3;
+  filter: drop-shadow(0 1px 2px rgba(178, 34, 52, 0.2));
+}
+
+/* Text Wrapper */
+.textWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  line-height: 1;
+  direction: ltr;
+}
+
+.mainText {
+  font-family: var(--font-family-heading);
+  font-weight: 800;
+  color: #1E90FF; /* Bright Dodger Blue */
+  letter-spacing: -0.02em;
+}
+
+.domainText {
+  font-family: var(--font-family-monospace);
+  font-weight: 700;
+  color: #B22234; /* Matching the red star */
+  margin-right: 2px;
+}
+
+/* Sizes */
+.sm {
+  gap: var(--spacing-1);
+}
+
+.sm .iconWrapper {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.sm .shieldIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.sm .houseIcon {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.sm .starIcon {
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+.sm .mainText {
+  font-size: 1.125rem;
+}
+
+.sm .domainText {
+  font-size: 0.65rem;
+}
+
+.md {
+  gap: var(--spacing-2);
+}
+
+.md .iconWrapper {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.md .shieldIcon {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.md .houseIcon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.md .starIcon {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.md .mainText {
+  font-size: 1.5rem;
+}
+
+.md .domainText {
+  font-size: 0.75rem;
+}
+
+.lg {
+  gap: var(--spacing-3);
+}
+
+.lg .iconWrapper {
+  width: 3rem;
+  height: 3rem;
+}
+
+.lg .shieldIcon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.lg .houseIcon {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.lg .starIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.lg .mainText {
+  font-size: 2.25rem;
+}
+
+.lg .domainText {
+  font-size: 1rem;
+}
+
+/* Dropdown Menu Styles */
+.dropdownContent {
+  width: 14rem;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  z-index: var(--z-nav-sticky);
+}
+
+.menuItemLink {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+}
+
+.menuIcon {
+  margin-right: var(--spacing-3);
+  opacity: 0.7;
+}
+
+/* RTL Support for Menu */
+:global([dir="rtl"]) .menuIcon {
+  margin-right: 0;
+  margin-left: var(--spacing-3);
+}
+
+/* Dark Mode Adjustments */
+/* Maintain brand colors while ensuring readability in dark mode */
+
+:global(.dark) .mainText {
+  color: #00BFFF; /* Deep Sky Blue for dark mode */
+}
+
+:global(.dark) .domainText {
+  color: #FF6B7A; /* Lighter red derivative of Old Glory Red for dark mode readability */
+}
+
+:global(.dark) .shieldIcon {
+  color: #00BFFF;
+  fill: #00BFFF;
+  filter: drop-shadow(0 2px 8px rgba(0, 191, 255, 0.4));
+}
+
+:global(.dark) .starIcon {
+  color: #FF6B7A;
+  fill: #FF6B7A;
+  filter: drop-shadow(0 1px 3px rgba(255, 107, 122, 0.4));
+}

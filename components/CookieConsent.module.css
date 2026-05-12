@@ -1,0 +1,134 @@
+.container {
+  position: fixed;
+  bottom: var(--spacing-4);
+  left: var(--spacing-4);
+  right: var(--spacing-4);
+  max-width: 500px;
+  background-color: var(--popup);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-5);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-overlay);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Position on desktop */
+@media (min-width: 768px) {
+  .container {
+    left: auto; /* Align to right on desktop */
+    right: var(--spacing-6);
+    bottom: var(--spacing-6);
+  }
+}
+
+.content {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.iconWrapper {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  background-color: var(--secondary);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.textWrapper {
+  flex: 1;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-1);
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.link {
+  color: var(--primary);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.link:hover {
+  color: color-mix(in srgb, var(--primary), black 10%);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-2);
+  justify-content: flex-end;
+}
+
+.rejectButton {
+  color: var(--muted-foreground);
+}
+
+.rejectButton:hover {
+  color: var(--foreground);
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  background: none;
+  border: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  padding: var(--spacing-1);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: var(--muted);
+  color: var(--foreground);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* RTL Support */
+:global([dir="rtl"]) .container {
+  left: var(--spacing-4);
+  right: auto;
+}
+
+@media (max-width: 768px) {
+  :global([dir="rtl"]) .container {
+    right: var(--spacing-4);
+    left: var(--spacing-4);
+  }
+}
+
+:global([dir="rtl"]) .closeButton {
+  right: auto;
+  left: var(--spacing-2);
+}

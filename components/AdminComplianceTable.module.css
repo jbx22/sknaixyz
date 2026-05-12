@@ -1,0 +1,189 @@
+.tableContainer {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 800px;
+}
+
+.th {
+  text-align: start;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.thExpand {
+  width: 40px;
+  padding: var(--spacing-3);
+  background-color: var(--muted);
+}
+
+.tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tr:hover {
+  background-color: var(--secondary);
+}
+
+.tr.expanded {
+  background-color: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.td {
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--foreground);
+  vertical-align: middle;
+}
+
+.tdExpand {
+  padding: var(--spacing-3);
+  text-align: center;
+  color: var(--muted-foreground);
+}
+
+/* Cell Styles */
+.dateCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.date {
+  font-weight: 500;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.userCell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.systemBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  background-color: var(--muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.actionText {
+  font-weight: 500;
+}
+
+.ipText {
+  font-family: var(--font-family-monospace);
+  color: var(--muted-foreground);
+}
+
+/* Details Row */
+.detailsRow {
+  background-color: var(--muted);
+}
+
+.detailsTd {
+  padding: 0;
+}
+
+.detailsContent {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.detailsTitle {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.jsonBlock {
+  margin: 0;
+  background-color: var(--background);
+  padding: var(--spacing-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-family: var(--font-family-monospace);
+  font-size: 0.8125rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  color: var(--foreground);
+}
+
+/* Loading & Empty States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.skeletonRow {
+  height: 60px;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  color: var(--muted-foreground);
+  gap: var(--spacing-4);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.emptyIcon {
+  opacity: 0.5;
+}
+
+/* Pagination */
+.paginationWrapper {
+  padding: var(--spacing-4);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+
+.disabledLink {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .paginationWrapper {
+    overflow-x: auto;
+  }
+}

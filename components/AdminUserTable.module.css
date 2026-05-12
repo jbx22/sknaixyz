@@ -1,0 +1,177 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+/* RTL support for search icon */
+:global([dir="rtl"]) .searchIcon {
+  left: auto;
+  right: var(--spacing-3);
+}
+
+.searchInput {
+  padding-left: 2.5rem;
+}
+
+:global([dir="rtl"]) .searchInput {
+  padding-left: var(--spacing-3);
+  padding-right: 2.5rem;
+}
+
+.filterSelect {
+  width: 140px;
+}
+
+.tableWrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  background-color: var(--card);
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 800px; /* Ensure table doesn't squash too much */
+}
+
+.table th {
+  text-align: start;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-top: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.deleteBtn {
+  color: var(--error);
+}
+
+.deleteBtn:hover {
+  background-color: color-mix(in srgb, var(--error) 10%, transparent);
+}
+
+.suspendBtn {
+  color: var(--warning);
+}
+
+.suspendBtn:hover {
+  background-color: color-mix(in srgb, var(--warning) 10%, transparent);
+}
+
+.activateBtn {
+  color: var(--success);
+}
+
+.activateBtn:hover {
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.deactivateBtn {
+  color: var(--muted-foreground);
+}
+
+.deactivateBtn:hover {
+  background-color: color-mix(in srgb, var(--muted-foreground) 10%, transparent);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+.rowSkeleton {
+  height: 40px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.formRow {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.flex1 {
+  flex: 1;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+
+  .searchWrapper, .filterSelect {
+    width: 100%;
+    min-width: 0;
+  }
+  
+  .filterSelect {
+    width: 100%;
+  }
+
+  /* Form inside dialog */
+  .formRow {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+}

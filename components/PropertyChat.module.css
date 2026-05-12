@@ -1,0 +1,283 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  height: 100%;
+  max-height: 600px;
+  min-height: 400px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface);
+}
+
+.headerIcon {
+  color: var(--primary);
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-4);
+  background-color: var(--background);
+  display: flex;
+  flex-direction: column;
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.messageItem {
+  display: flex;
+  gap: var(--spacing-3);
+  max-width: 85%;
+}
+
+.messageItemMe {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.messageItemOther {
+  align-self: flex-start;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.messageContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  min-width: 0; /* Prevent overflow */
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.messageItemMe .messageHeader {
+  flex-direction: row-reverse;
+}
+
+.userName {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.deleteButton {
+  background: none;
+  border: none;
+  padding: 2px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteButton:hover {
+  color: var(--error);
+}
+
+.messageItem:hover .deleteButton {
+  opacity: 1;
+}
+
+.messageBubble {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  word-break: break-word;
+  position: relative;
+}
+
+.messageItemMe .messageBubble {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border-bottom-left-radius: var(--radius-md);
+  border-bottom-right-radius: var(--spacing-1);
+}
+
+.messageItemOther .messageBubble {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border-bottom-left-radius: var(--spacing-1);
+  border-bottom-right-radius: var(--radius-md);
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  padding: var(--spacing-2);
+}
+
+.skeletonWrapper {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.avatarSkeleton {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.contentSkeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.nameSkeleton {
+  width: 30%;
+  height: 0.8rem;
+}
+
+.textSkeleton {
+  width: 70%;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+}
+
+/* Empty & Error States */
+.emptyState,
+.errorState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.errorState {
+  color: var(--error);
+}
+
+/* Footer */
+.footer {
+  padding: var(--spacing-3);
+  border-top: 1px solid var(--border);
+  background-color: var(--surface);
+}
+
+.inputForm {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.input {
+  flex: 1;
+}
+
+.sendButton {
+  flex-shrink: 0;
+}
+
+.loginPrompt {
+  display: flex;
+  justify-content: center;
+}
+
+.loginButton {
+  width: 100%;
+}
+
+/* RTL Adjustments handled by flex-direction and logical properties mostly, 
+   but specific overrides for RTL context if needed */
+:global([dir="rtl"]) .messageItemMe {
+  /* In RTL, flex-direction: row-reverse on the item makes the avatar go to the left (end) 
+     and content to the right (start). 
+     We want "Me" messages to be on the LEFT in RTL? 
+     Usually in RTL chat apps:
+     - "Me" is on the LEFT (start of reading? No, end of line).
+     - "Others" is on the RIGHT.
+     
+     Let's stick to visual logic:
+     LTR: Me = Right, Others = Left
+     RTL: Me = Left, Others = Right
+  */
+  flex-direction: row; /* Reset reverse because RTL flips it naturally? No. */
+  align-self: flex-end; /* Left side in RTL is flex-end */
+}
+
+:global([dir="rtl"]) .messageItemOther {
+  align-self: flex-start; /* Right side in RTL is flex-start */
+}
+
+/* Actually, flex-start in RTL is Right. flex-end is Left.
+   So:
+   LTR: Start=Left, End=Right.
+   RTL: Start=Right, End=Left.
+   
+   Standard Chat UI:
+   Me: Always "End" (Right in LTR, Left in RTL).
+   Others: Always "Start" (Left in LTR, Right in RTL).
+   
+   So align-self: flex-end works for "Me" in both directions correctly.
+   align-self: flex-start works for "Others" in both directions correctly.
+   
+   The only issue is the internal order of Avatar vs Bubble.
+   LTR Me: [Bubble] [Avatar] -> flex-direction: row-reverse
+   RTL Me: [Avatar] [Bubble] -> Wait, usually avatars are on the outside.
+   
+   RTL Me (Left side): [Avatar] [Bubble]
+   LTR Me (Right side): [Bubble] [Avatar]
+   
+   So in RTL, we want the avatar on the far left.
+   flex-direction: row in RTL puts items Right -> Left.
+   So [Avatar, Content] becomes Avatar on Right, Content on Left.
+   
+   We want Avatar on Left (End).
+   So we need row-reverse in RTL for "Me" as well?
+   
+   Let's simplify:
+   .messageItem is flex row.
+   LTR: Avatar (Left) - Content (Right).
+   RTL: Avatar (Right) - Content (Left).
+   
+   For "Me":
+   LTR: We want Content - Avatar. So row-reverse.
+   RTL: We want Content - Avatar (Content on Right, Avatar on Left).
+        RTL row-reverse: Starts from Left. Item 1 (Avatar), Item 2 (Content).
+        So Avatar is Left, Content is Right.
+        This is what we want for "Me" in RTL.
+        
+   So `flex-direction: row-reverse` works for "Me" in both LTR and RTL to put the avatar on the "outside" edge.
+*/

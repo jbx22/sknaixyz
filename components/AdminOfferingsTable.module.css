@@ -1,0 +1,121 @@
+.container {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 800px;
+}
+
+.table th {
+  text-align: left;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.propertyCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.propertyTitle {
+  font-weight: 500;
+}
+
+.propertyLocation {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.progressWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  width: 120px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background-color: var(--muted);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+}
+
+.progressText {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  width: 36px;
+  text-align: right;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: var(--spacing-3) var(--spacing-4);
+  gap: var(--spacing-4);
+  border-top: 1px solid var(--border);
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.skeletonRow {
+  height: 48px;
+  width: 100%;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 768px) {
+  .pagination {
+    justify-content: center;
+  }
+}

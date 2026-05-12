@@ -1,0 +1,154 @@
+.container {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.header {
+  background: var(--primary-gradient);
+  padding: var(--spacing-6);
+  color: white;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: var(--spacing-2) 0 0;
+  opacity: 0.9;
+  font-size: 0.9375rem;
+}
+
+.statusSection {
+  padding: var(--spacing-6);
+  border-bottom: 1px solid var(--border);
+}
+
+.statusContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-4);
+  border-radius: var(--radius);
+  background-color: var(--muted);
+}
+
+.statusIcon {
+  margin-bottom: var(--spacing-3);
+}
+
+.approved {
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
+.pending {
+  background-color: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning-foreground);
+}
+
+.rejected {
+  background-color: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
+}
+
+.rejectionReason {
+  margin-top: var(--spacing-2);
+  font-size: 0.875rem;
+  color: var(--error);
+}
+
+.retryButton {
+  margin-top: var(--spacing-4);
+}
+
+.form {
+  padding: var(--spacing-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.inputError {
+  border-color: var(--error);
+}
+
+.errorMsg {
+  font-size: 0.75rem;
+  color: var(--error);
+}
+
+.actions {
+  margin-top: var(--spacing-6);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.submitButton {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .submitButton {
+    width: auto;
+    min-width: 150px;
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Skeleton styles */
+.skeletonHeader {
+  height: 120px;
+  width: 100%;
+}
+
+.skeletonForm {
+  padding: var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.skeletonInput {
+  height: 40px;
+  width: 100%;
+}

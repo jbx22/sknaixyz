@@ -1,0 +1,215 @@
+.container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-6) var(--spacing-4);
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-8);
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.welcome {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 var(--spacing-2) 0;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--muted-foreground);
+  margin: 0;
+  font-size: 1.125rem;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.section {
+  margin-bottom: var(--spacing-10);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.viewAllLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.viewAllLink:hover {
+  color: var(--primary);
+}
+
+.requestsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.requestCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color 0.2s ease;
+}
+
+.requestCard:hover {
+  border-color: var(--primary);
+}
+
+.requestInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.requestTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--foreground);
+}
+
+.requestDate {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.emptyRequests {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6);
+  background-color: var(--card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  text-align: center;
+  color: var(--muted-foreground);
+  gap: var(--spacing-2);
+}
+
+.requestSkeleton {
+  padding: var(--spacing-4);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.requestSkeletonTitle {
+  width: 50%;
+  height: 1.25rem;
+}
+
+.requestSkeletonBadge {
+  width: 20%;
+  height: 1.5rem;
+  border-radius: var(--radius-full);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-6);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  background-color: var(--card);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  text-align: center;
+  color: var(--muted-foreground);
+  gap: var(--spacing-4);
+}
+
+.emptyIcon {
+  color: var(--muted-foreground);
+  opacity: 0.5;
+}
+
+.skeletonCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.skeletonImage {
+  height: 200px;
+  border-radius: var(--radius);
+}
+
+.skeletonText {
+  height: 1.5rem;
+  width: 80%;
+}
+
+.skeletonTextShort {
+  height: 1rem;
+  width: 60%;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .addButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

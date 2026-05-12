@@ -1,0 +1,27 @@
+{
+  "name": "SKNAI - سكني",
+  "short_name": "سكني",
+  "description": "SKNAI: The most modern AI-powered real-estate platform in Saudi Arabia. سكني: أحدث منصة عقارية مدعومة بالذكاء الاصطناعي في المملكة العربية السعودية.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007cff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

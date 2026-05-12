@@ -1,0 +1,80 @@
+.container {
+  height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
+  overflow: hidden;
+  overflow-x: hidden;
+  background-color: var(--muted);
+  box-sizing: border-box;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.addModeOverlay {
+  position: absolute;
+  top: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-content);
+  pointer-events: none;
+}
+
+.addModeInstruction {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.locationButton {
+  position: absolute;
+  bottom: 12rem; /* Above add button and bottom nav */
+  right: var(--spacing-4);
+  z-index: var(--z-content);
+  box-shadow: var(--shadow-lg);
+  border-radius: 50%;
+}
+
+.addButton {
+  position: absolute;
+  bottom: 5rem; /* Above bottom nav */
+  right: var(--spacing-4);
+  z-index: var(--z-content);
+  box-shadow: var(--shadow-lg);
+  border-radius: 50%;
+  transition: 
+    transform var(--animation-duration-fast) ease,
+    background-color var(--animation-duration-fast) ease;
+}
+
+.addButton:active {
+  transform: scale(0.95);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+

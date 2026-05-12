@@ -1,0 +1,92 @@
+.container {
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: var(--spacing-3);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav-sticky);
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.searchBar {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.inputWrapper {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--spacing-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.searchInput {
+  padding-left: 2.5rem;
+}
+
+.collapsibleContent {
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--border);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-3);
+}
+
+@media (min-width: 640px) {
+  .filtersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing-4);
+  gap: var(--spacing-2);
+}
+
+.clearButton {
+  color: var(--muted-foreground);
+}
+
+.applyButton {
+  flex: 1;
+}

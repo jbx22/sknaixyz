@@ -1,0 +1,203 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  width: 140px;
+}
+
+.tableWrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  background-color: var(--card);
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 1000px;
+}
+
+.table th {
+  text-align: start;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-top: 1px solid var(--border);
+  color: var(--foreground);
+  vertical-align: top;
+}
+
+.idCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.subId {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.userId {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.amountCell {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.paymentMethod {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 0.8125rem;
+}
+
+.paymentMethod svg {
+  color: var(--muted-foreground);
+  flex-shrink: 0;
+}
+
+.transactionId {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.txCode {
+  font-family: var(--font-family-monospace);
+  font-size: 0.75rem;
+  padding: var(--spacing-1) var(--spacing-2);
+  background-color: var(--muted);
+  border-radius: var(--radius-sm);
+  color: var(--foreground);
+}
+
+.copyBtn {
+  opacity: 0.6;
+  transition: opacity var(--animation-duration-fast) ease;
+}
+
+.copyBtn:hover {
+  opacity: 1;
+}
+
+.noData {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.dates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  font-size: 0.75rem;
+}
+
+.dateRow {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.dateLabel {
+  color: var(--muted-foreground);
+  min-width: 70px;
+  flex-shrink: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-12) var(--spacing-4);
+  color: var(--muted-foreground);
+  font-size: 1rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+.rowSkeleton {
+  height: 60px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.dateBtn {
+  width: 100%;
+  justify-content: flex-start;
+  font-weight: normal;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: 0.8125rem;
+  }
+
+  .filters {
+    gap: var(--spacing-2);
+  }
+
+  .filterSelect {
+    width: 120px;
+  }
+}
+
+@media (max-width: 640px) {
+  .tableWrapper {
+    border-radius: var(--radius-sm);
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+}

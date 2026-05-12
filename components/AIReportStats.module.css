@@ -1,0 +1,141 @@
+.mainStats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .mainStats {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.statCard {
+  background-color: var(--secondary);
+  padding: var(--spacing-4);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  transition: transform var(--animation-duration-fast) ease;
+}
+
+.highlightCard {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary) 5%, var(--secondary)),
+    var(--secondary)
+  );
+  border: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
+  box-shadow: var(--shadow);
+}
+
+.highlightCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.statIcon {
+  color: var(--primary);
+}
+
+.ratingValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.ratingBadge {
+  margin-top: var(--spacing-1);
+}
+
+.priceValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.priceMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.confidence {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.quickStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-4);
+  padding: var(--spacing-5);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--secondary) 50%, var(--background)),
+    var(--secondary)
+  );
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin-top: var(--spacing-6);
+}
+
+.quickStat {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+}
+
+.quickStat svg {
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: var(--spacing-1);
+}
+
+.quickStat > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  flex: 1;
+}
+
+.quickStatLabel {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.quickStatValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.miniProgress {
+  margin-top: var(--spacing-1);
+}
+
+.miniBadge {
+  margin-top: var(--spacing-1);
+  font-size: 0.625rem;
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+@media print {
+  .mainStats {
+    page-break-inside: avoid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

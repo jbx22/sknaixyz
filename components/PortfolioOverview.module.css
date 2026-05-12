@@ -1,0 +1,179 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-6);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.viewAllLink {
+  font-size: 0.875rem;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .statsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.statCard {
+  background-color: var(--muted);
+  border-radius: var(--radius);
+  padding: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.statIcon {
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-sm);
+}
+
+.statContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.statValue {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.success {
+  color: var(--success);
+}
+
+.holdingsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.holdingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: background-color 0.2s;
+}
+
+.holdingItem:hover {
+  background-color: var(--muted);
+}
+
+.holdingInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.holdingName {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.holdingLocation {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.holdingStats {
+  display: flex;
+  gap: var(--spacing-4);
+  text-align: right;
+}
+
+.holdingStat {
+  display: flex;
+  flex-direction: column;
+}
+
+.miniLabel {
+  font-size: 0.625rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+
+.miniValue {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Empty State */
+.emptyState {
+  align-items: center;
+  text-align: center;
+  padding: var(--spacing-8);
+}
+
+.emptyIcon {
+  color: var(--muted-foreground);
+  margin-bottom: var(--spacing-4);
+  background-color: var(--muted);
+  padding: var(--spacing-4);
+  border-radius: 50%;
+}
+
+.emptyState h3 {
+  margin: 0 0 var(--spacing-2);
+}
+
+.emptyState p {
+  color: var(--muted-foreground);
+  margin: 0 0 var(--spacing-6);
+  max-width: 300px;
+}
+
+/* Skeleton */
+.headerSkeleton {
+  height: 2rem;
+  width: 150px;
+}
+
+.statsSkeleton {
+  height: 80px;
+}
+
+.listSkeleton {
+  height: 200px;
+}

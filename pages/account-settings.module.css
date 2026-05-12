@@ -1,0 +1,153 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--spacing-8) var(--spacing-4);
+  min-height: 80vh;
+}
+
+.title {
+  font-family: var(--font-family-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-8);
+}
+
+.section {
+  margin-bottom: var(--spacing-8);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-4);
+}
+
+.icon {
+  color: var(--primary);
+}
+
+.card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2) 0;
+}
+
+.infoLabel {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.infoValue {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.smallIcon {
+  color: var(--muted-foreground);
+}
+
+.roleBadge {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  text-transform: capitalize;
+}
+
+.divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: var(--spacing-4) 0;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.actionInfo {
+  flex: 1;
+}
+
+.actionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-bottom: var(--spacing-1);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.actionDesc {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+.dangerText {
+  color: var(--error);
+}
+
+.pendingBadge {
+  background-color: var(--warning);
+  color: var(--warning-foreground);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.dialogTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--error);
+}
+
+.warningIcon {
+  color: var(--error);
+}
+
+/* Skeletons */
+.titleSkeleton {
+  width: 200px;
+  height: 2.5rem;
+  margin-bottom: var(--spacing-8);
+}
+
+.rowSkeleton {
+  width: 100%;
+  height: 3rem;
+  margin-bottom: var(--spacing-4);
+}
+
+@media (max-width: 640px) {
+  .actionRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .actionRow button {
+    width: 100%;
+  }
+}

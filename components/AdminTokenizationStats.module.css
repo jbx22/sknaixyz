@@ -1,0 +1,96 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.skeletonCard {
+  height: 120px;
+  border-radius: var(--radius);
+}
+
+.card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-5);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.label {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  font-family: var(--font-family-heading);
+}
+
+.iconWrapper {
+  padding: var(--spacing-3);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Color variants */
+.blue .iconWrapper {
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+}
+
+.green .iconWrapper {
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+  color: var(--success);
+}
+
+.purple .iconWrapper {
+  background-color: color-mix(in srgb, #8b5cf6 10%, transparent);
+  color: #8b5cf6;
+}
+
+.orange .iconWrapper {
+  background-color: color-mix(in srgb, var(--warning) 10%, transparent);
+  color: var(--warning-foreground);
+}
+
+.cyan .iconWrapper {
+  background-color: color-mix(in srgb, #06b6d4 10%, transparent);
+  color: #06b6d4;
+}
+
+.red .iconWrapper {
+  background-color: color-mix(in srgb, var(--error) 10%, transparent);
+  color: var(--error);
+}

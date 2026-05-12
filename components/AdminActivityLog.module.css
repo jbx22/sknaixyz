@@ -1,0 +1,150 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.filters {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.filterSelect {
+  width: 200px;
+}
+
+.tableWrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  background-color: var(--card);
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 700px; /* Ensure table doesn't squash too much */
+}
+
+.table th {
+  text-align: start;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-top: 1px solid var(--border);
+  color: var(--foreground);
+  vertical-align: top;
+}
+
+.timeCell {
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.detailsCell {
+  max-width: 300px;
+}
+
+.detailsPre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: var(--font-family-monospace);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  max-height: 80px;
+  overflow-y: auto;
+  background-color: var(--muted);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+.pageInfo {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.rowSkeleton {
+  height: 40px;
+}
+
+.targetLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.targetLink:hover {
+  text-decoration: underline;
+}
+
+.targetText {
+  color: var(--foreground);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.targetId {
+  margin-inline-start: 6px;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-family: var(--font-family-monospace);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8) !important;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .detailsCell {
+    min-width: 200px;
+  }
+}

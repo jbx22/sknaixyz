@@ -1,0 +1,55 @@
+[
+  {
+    "id": "7bc0b52b-5716-414b-a9be-a1f5563b6046",
+    "adminId": "super-01",
+    "adminName": "المدير العام",
+    "role": "superadmin",
+    "action": "فحص تشغيلي يدوي",
+    "target": "النظام",
+    "severity": "info",
+    "details": "أضاف المدير العام سجل اختبار لمراقبة السجل.",
+    "at": "2026-05-09T18:02:55.876Z"
+  },
+  {
+    "id": "ab7b6b80-aaf0-4c72-898c-9a59a7ee5189",
+    "adminId": "super-01",
+    "adminName": "المدير العام",
+    "role": "superadmin",
+    "action": "تسجيل دخول المدير العام",
+    "target": "auth",
+    "severity": "success",
+    "details": "طريقة الدخول: password",
+    "at": "2026-05-09T18:02:32.527Z"
+  },
+  {
+    "id": "2960adf1-72e1-401a-837a-9d1cd58ea770",
+    "adminId": "super-01",
+    "adminName": "المدير العام",
+    "role": "superadmin",
+    "action": "فشل تسجيل دخول",
+    "target": "auth",
+    "severity": "warn",
+    "details": "jabosaag@gmail.com",
+    "at": "2026-05-09T18:02:17.242Z"
+  },
+  {
+    "id": "b8451d7d-197a-4bef-9524-b73c367bb028",
+    "adminId": "super-01",
+    "adminName": "المدير العام",
+    "action": "تهيئة منصة الإدارة",
+    "target": "SKNAI",
+    "severity": "info",
+    "at": "2026-05-09T18:01:58.184Z",
+    "details": "تم إنشاء لوحة المدير العام وسجل التدقيق."
+  },
+  {
+    "id": "f344aafa-4a39-4c31-911c-3e4e22827a76",
+    "adminId": "admin-01",
+    "adminName": "مشرف الامتثال",
+    "action": "مراجعة امتثال تجريبية",
+    "target": "قوائم العقارات",
+    "severity": "success",
+    "at": "2026-05-09T17:01:58.184Z",
+    "details": "تم فحص حالة الطلبات المعلقة والتقارير."
+  }
+]

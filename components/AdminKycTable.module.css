@@ -1,0 +1,153 @@
+.container {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.filters {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.filterGroup {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 800px;
+}
+
+.table th {
+  text-align: left;
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+.table td {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.userCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.approveBtn {
+  color: var(--success);
+}
+
+.approveBtn:hover {
+  background-color: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.rejectBtn {
+  color: var(--error);
+}
+
+.rejectBtn:hover {
+  background-color: color-mix(in srgb, var(--error) 10%, transparent);
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+  background-color: var(--muted);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-sm);
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.detailItem label {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.detailItem span {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.loadingWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.skeletonRow {
+  height: 48px;
+  width: 100%;
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-2);
+  }
+  
+  .filterGroup {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+}

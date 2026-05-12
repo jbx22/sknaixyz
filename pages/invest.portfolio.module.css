@@ -1,0 +1,185 @@
+.page {
+  min-height: 100vh;
+  background-color: var(--background);
+  padding: var(--spacing-8) var(--spacing-4);
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.overview {
+  width: 100%;
+}
+
+.contentSection {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.tabsList {
+  padding: var(--spacing-2);
+  background-color: var(--muted);
+}
+
+.tabContent {
+  padding: var(--spacing-6);
+  min-height: 300px;
+}
+
+.placeholderChart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  background-color: var(--muted);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+}
+
+.chartMessage {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.holdingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.chartSection {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chartWrapper {
+  width: 100%;
+  max-width: 500px;
+  height: 300px;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-4) 0;
+  width: 100%;
+  text-align: left;
+}
+
+.holdingsTableSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.assetCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.assetTitle {
+  font-weight: 500;
+}
+
+.assetLocation {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.valueCell {
+  font-weight: 600;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.chartSkeleton {
+  height: 300px;
+  width: 100%;
+  border-radius: var(--radius);
+}
+
+.tableSkeleton {
+  height: 200px;
+  width: 100%;
+  border-radius: var(--radius);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12);
+  color: var(--muted-foreground);
+  gap: var(--spacing-4);
+  text-align: center;
+  background-color: var(--muted);
+  border-radius: var(--radius);
+}
+
+.tableContainer {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+:global([dir="rtl"]) .table th {
+  text-align: right;
+}
+
+.table td {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.incomeValue {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.rowSkeleton {
+  height: 2rem;
+  width: 100%;
+}
+
+.emptyCell {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--muted-foreground);
+}

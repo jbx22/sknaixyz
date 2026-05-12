@@ -1,0 +1,186 @@
+.container {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.header {
+  padding: var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+  background-color: var(--muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.tabContent {
+  padding: var(--spacing-4);
+  min-height: 300px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.listingCard {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.listingCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.listingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+}
+
+.listingTitle {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.listingDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  font-size: 0.875rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.label {
+  color: var(--muted-foreground);
+}
+
+.value {
+  font-weight: 500;
+}
+
+.buyButton {
+  margin-top: auto;
+  width: 100%;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  color: var(--muted-foreground);
+  gap: var(--spacing-4);
+  text-align: center;
+}
+
+.skeletonCard {
+  height: 200px;
+  border-radius: var(--radius);
+}
+
+/* Sell Form */
+.sellForm {
+  max-width: 400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.formGroup label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.select {
+  height: 2.5rem;
+  padding: 0 var(--spacing-3);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  font-family: inherit;
+}
+
+.helperText {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.summary {
+  background-color: var(--muted);
+  padding: var(--spacing-3);
+  border-radius: var(--radius);
+  margin-top: var(--spacing-2);
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+}
+
+.submitSellButton {
+  margin-top: var(--spacing-2);
+}
+
+/* Dialog */
+.dialogBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) 0;
+}
+
+.infoRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9375rem;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.125rem;
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

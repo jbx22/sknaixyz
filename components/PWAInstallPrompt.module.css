@@ -1,0 +1,135 @@
+.container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4);
+  /* Using the requested gradient colors */
+  background: linear-gradient(90deg, #00d4ff 0%, #007cff 100%);
+  color: white;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+  animation: slideUp 0.3s ease-out;
+  gap: var(--spacing-4);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2);
+  flex-shrink: 0;
+}
+
+.icon {
+  color: white;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.2;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.installButton {
+  /* Override secondary button styles to look good on the blue gradient */
+  background-color: white !important;
+  color: #007cff !important;
+  border: none !important;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.installButton:hover {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  padding: var(--spacing-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--spacing-4);
+    padding-bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom));
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+  }
+
+  .content {
+    margin-bottom: var(--spacing-2);
+  }
+
+  .actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .installButton {
+    flex: 1;
+  }
+  
+  .closeButton {
+    margin-inline-start: var(--spacing-2);
+  }
+}

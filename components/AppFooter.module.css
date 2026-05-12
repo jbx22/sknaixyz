@@ -1,0 +1,245 @@
+.footer {
+  background-color: var(--surface);
+  border-top: 1px solid var(--border);
+  margin-top: var(--spacing-16);
+  position: relative;
+  /* Default padding */
+  padding-bottom: var(--spacing-8);
+  width: 100%;
+}
+
+.withBottomPadding {
+  /* Add padding-bottom to account for BottomNav on mobile */
+  padding-bottom: calc(var(--spacing-8) + 80px);
+}
+
+.gradientLine {
+  width: 100%;
+  height: 3px;
+  background: var(--primary-gradient);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--spacing-12) var(--spacing-6);
+  box-sizing: border-box;
+}
+
+/* Main Grid Layout */
+.mainGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-12);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+/* Brand Section */
+.brandWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.brandDescription {
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-2);
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  color: var(--foreground);
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: color var(--animation-duration-fast);
+}
+
+.contactItem:hover {
+  color: var(--primary);
+}
+
+.contactIcon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* Link Columns */
+.columnHeader {
+  font-family: var(--font-family-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.linkList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.link {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  transition: color var(--animation-duration-fast);
+  display: inline-block;
+}
+
+.link:hover {
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+/* Social & Newsletter */
+.socialIcons {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  transition: all var(--animation-duration-fast) ease;
+  text-decoration: none;
+}
+
+.socialLink:hover {
+  background: var(--primary-gradient);
+  color: var(--primary-foreground);
+  transform: translateY(-2px);
+}
+
+.newsletter {
+  margin-top: var(--spacing-2);
+  padding: var(--spacing-4);
+  background-color: var(--muted);
+  border-radius: var(--radius-sm);
+}
+
+.newsletterText {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Bottom Bar */
+.divider {
+  height: 1px;
+  background-color: var(--border);
+  margin-bottom: var(--spacing-8);
+  opacity: 0.6;
+}
+
+.bottomBar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.madeInBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) var(--spacing-3);
+  background-color: var(--secondary);
+  border-radius: var(--radius-full);
+  color: var(--secondary-foreground);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.heartIcon {
+  color: var(--accent);
+}
+
+.bottomLinks {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.bottomLink {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition: color var(--animation-duration-fast);
+}
+
+.bottomLink:hover {
+  color: var(--foreground);
+}
+
+.bottomSeparator {
+  color: var(--border);
+}
+
+/* RTL Adjustments */
+:global([dir="rtl"]) .link:hover {
+  transform: translateX(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-10) var(--spacing-6);
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: var(--spacing-8) var(--spacing-4);
+  }
+
+  .mainGrid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-10);
+  }
+
+  .bottomBar {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-6);
+  }
+
+  .bottomLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

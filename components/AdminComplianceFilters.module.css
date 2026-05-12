@@ -1,0 +1,99 @@
+.filtersContainer {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  align-items: end;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  position: absolute;
+  left: var(--spacing-3);
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+:global([dir="rtl"]) .icon {
+  left: auto;
+  right: var(--spacing-3);
+}
+
+.input, .select {
+  width: 100%;
+  height: 2.5rem;
+  padding: 0 var(--spacing-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-family-base);
+  font-size: 0.875rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.inputWrapper .input {
+  padding-left: var(--spacing-9);
+}
+
+:global([dir="rtl"]) .inputWrapper .input {
+  padding-left: var(--spacing-3);
+  padding-right: var(--spacing-9);
+}
+
+.input:focus, .select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--border);
+  padding-top: var(--spacing-3);
+}
+
+.clearButton {
+  color: var(--muted-foreground);
+}
+
+.clearButton:hover {
+  color: var(--destructive);
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filtersContainer {
+    gap: var(--spacing-3);
+  }
+}

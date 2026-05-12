@@ -1,0 +1,53 @@
+.demoPanel {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-3);
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: var(--spacing-3);
+  text-align: center;
+  color: var(--foreground);
+}
+
+.header span {
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-2);
+}
+
+.demoButton {
+  width: 100%;
+  min-height: 3.25rem;
+  justify-content: flex-start;
+  gap: var(--spacing-2);
+  text-align: start;
+}
+
+.demoButton span,
+.demoButton small {
+  display: block;
+}
+
+.demoButton small {
+  color: var(--muted-foreground);
+  font-family: var(--font-family-monospace);
+  font-size: 0.68rem;
+  margin-inline-start: auto;
+}
+
+@media (min-width: 520px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,0 +1,86 @@
+-- SKN32 PostgreSQL schema for Vercel/Neon/Postgres deployments.
+-- Supabase is not required. Run this once against your Postgres database before deploying.
+
+create type user_role as enum ('admin','superadmin','user');
+create type user_status as enum ('active','deactivated','suspended');
+create type subscription_tier as enum ('basic','free','premium');
+create type payment_status as enum ('completed','failed','pending','refunded');
+create type session_type as enum ('auth','temp_oauth');
+create type property_type as enum ('apartment','commercial','land','townhouse','villa');
+create type property_status as enum ('available','rented','sold');
+create type ai_report_status as enum ('completed','failed','pending');
+create type deletion_request_status as enum ('cancelled','completed','pending');
+create type kyc_status as enum ('approved','expired','pending','rejected');
+create type investor_suitability as enum ('institutional','qualified','retail');
+create type spv_status as enum ('active','dissolved','draft');
+create type offering_status as enum ('closed','draft','open','settled');
+create type tokenization_request_status as enum ('approved','pending','rejected','under_review');
+create type token_transfer_type as enum ('distribution','primary_purchase','secondary_buy','secondary_sell');
+create type wallet_transaction_status as enum ('completed','failed','pending');
+create type wallet_transaction_type as enum ('deposit','income_distribution','refund','token_purchase','token_sale','withdrawal');
+create type secondary_listing_status as enum ('active','cancelled','expired','filled');
+create type ledger_entry_type as enum ('asset_freeze','asset_tokenization','asset_unfreeze','compliance_check','emergency_action','global_freeze','global_unfreeze','income_distribution','kyc_verification','regulatory_override','reversal','spv_creation','token_issuance','token_transfer');
+create type ledger_entry_status as enum ('confirmed','failed','pending','reversed');
+create type control_key_type as enum ('emergency_shutdown','global_distribution_freeze','global_issuance_freeze','global_trading_freeze');
+
+create table users (
+  id bigserial primary key,
+  email text not null unique,
+  display_name text not null,
+  avatar_url text,
+  phone text,
+  role user_role not null default 'user',
+  status user_status not null default 'active',
+  subscription_tier subscription_tier not null default 'free',
+  email_verified boolean not null default false,
+  email_verified_at timestamptz,
+  ai_reports_used integer not null default 0,
+  ai_reports_reset_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table user_passwords (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, password_hash text not null, created_at timestamptz default now());
+create table sessions (id text primary key, user_id bigint not null references users(id) on delete cascade, session_type session_type default 'auth', created_at timestamptz default now(), last_accessed timestamptz default now(), expires_at timestamptz not null);
+create table login_attempts (id bigserial primary key, email text not null, attempted_at timestamptz default now(), success boolean default false);
+create table oauth_accounts (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, provider text not null, provider_user_id text not null, provider_email text not null, created_at timestamptz default now(), updated_at timestamptz default now());
+create table oauth_states (id bigserial primary key, provider text not null, state text not null, code_verifier text not null, redirect_url text not null, expires_at timestamptz not null, created_at timestamptz default now());
+create table email_verification_codes (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, code text not null, expires_at timestamptz not null, used_at timestamptz, created_at timestamptz default now());
+
+create table properties (
+  id bigserial primary key, user_id bigint not null references users(id) on delete cascade, title text not null, description text, price numeric not null, location_name text not null, latitude numeric not null, longitude numeric not null, area_sqm numeric not null, bedrooms integer, bathrooms numeric, property_type property_type not null, status property_status not null default 'available', images text[] default '{}', amenities text[] default '{}', contact_phone text, floor_number integer, year_built integer, zip_code text, furnished boolean default false, is_featured boolean not null default false, ai_report_status ai_report_status, ai_report_data jsonb, ai_report_error text, ai_report_generated_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now()
+);
+create table property_chats (id bigserial primary key, property_id bigint not null references properties(id) on delete cascade, user_id bigint not null references users(id) on delete cascade, message text not null, deleted_by_admin boolean default false, created_at timestamptz default now(), updated_at timestamptz default now());
+create table property_views (id bigserial primary key, property_id bigint not null references properties(id) on delete cascade, user_id bigint references users(id) on delete set null, ip_address text, user_agent text, viewed_at timestamptz default now());
+create table user_favorites (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, property_id bigint not null references properties(id) on delete cascade, created_at timestamptz default now(), unique(user_id, property_id));
+
+create table subscription_payments (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, tier subscription_tier not null, amount numeric not null, currency text not null default 'SAR', payment_method text, payment_status payment_status not null default 'pending', transaction_id text, started_at timestamptz not null default now(), expires_at timestamptz not null, created_at timestamptz default now(), updated_at timestamptz default now());
+create table admin_activity_logs (id bigserial primary key, admin_id bigint not null references users(id) on delete cascade, action_type text not null, target_type text, target_id bigint, details jsonb, ip_address text, created_at timestamptz default now());
+create table compliance_logs (id bigserial primary key, user_id bigint references users(id) on delete set null, entity_type text not null, entity_id bigint, action text not null, details jsonb default '{}'::jsonb, ip_address text, created_at timestamptz default now());
+create table data_deletion_requests (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, status deletion_request_status not null default 'pending', notes text, requested_at timestamptz default now(), processed_at timestamptz);
+
+create table kyc_records (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, status kyc_status not null default 'pending', suitability investor_suitability not null default 'retail', full_name_ar text, full_name_en text, national_id text, date_of_birth timestamptz, nationality text, phone text, address text, risk_score integer, rejection_reason text, verified_at timestamptz, expires_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table investor_acknowledgements (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, acknowledgement_type text not null, version text not null default '1.0', ip_address text, acknowledged_at timestamptz default now());
+create table spvs (id bigserial primary key, name text not null, registration_number text, legal_structure text, legal_documents jsonb, status spv_status not null default 'draft', created_at timestamptz default now(), updated_at timestamptz default now());
+create table tokenized_assets (id bigserial primary key, property_id bigint not null references properties(id) on delete cascade, spv_id bigint not null references spvs(id), total_value numeric not null, total_tokens integer not null, token_price numeric not null default 100, tokens_sold integer not null default 0, offering_status offering_status not null default 'draft', annual_rental_yield numeric, title_deed_url text, valuation_report_url text, income_rights boolean not null default true, voting_rights boolean not null default false, transferable boolean not null default false, zoning_eligible boolean not null default false, lock_up_days integer not null default 90, settled_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table tokenization_requests (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, property_id bigint not null references properties(id) on delete cascade, estimated_value numeric, desired_token_price numeric, notes text, status tokenization_request_status not null default 'pending', admin_notes text, rejection_reason text, reviewed_by bigint references users(id), reviewed_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table investor_wallets (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, balance_sar numeric not null default 0, frozen_sar numeric not null default 0, total_deposited numeric not null default 0, total_withdrawn numeric not null default 0, total_invested numeric not null default 0, total_income_received numeric not null default 0, created_at timestamptz default now(), updated_at timestamptz default now());
+create table token_holdings (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, tokenized_asset_id bigint not null references tokenized_assets(id) on delete cascade, quantity integer not null default 0, average_purchase_price numeric not null default 0, total_invested numeric not null default 0, total_income_received numeric not null default 0, acquired_at timestamptz default now(), updated_at timestamptz default now());
+create table token_transfers (id bigserial primary key, tokenized_asset_id bigint not null references tokenized_assets(id) on delete cascade, from_user_id bigint references users(id), to_user_id bigint not null references users(id), quantity integer not null, price_per_token numeric not null, total_amount numeric not null, transfer_type token_transfer_type not null, created_at timestamptz default now());
+create table secondary_listings (id bigserial primary key, tokenized_asset_id bigint not null references tokenized_assets(id) on delete cascade, seller_id bigint not null references users(id), quantity integer not null, filled_quantity integer not null default 0, price_per_token numeric not null, status secondary_listing_status not null default 'active', expires_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table income_distributions (id bigserial primary key, tokenized_asset_id bigint not null references tokenized_assets(id) on delete cascade, total_amount numeric not null, amount_per_token numeric not null, period_start timestamptz not null, period_end timestamptz not null, distribution_date timestamptz not null, description text, created_at timestamptz default now());
+create table wallet_transactions (id bigserial primary key, wallet_id bigint not null references investor_wallets(id) on delete cascade, user_id bigint not null references users(id) on delete cascade, type wallet_transaction_type not null, status wallet_transaction_status not null default 'pending', amount numeric not null, description text, reference_id text, metadata jsonb default '{}'::jsonb, completed_at timestamptz, created_at timestamptz default now());
+
+create table ledger_entries (id bigserial primary key, sequence_number bigint not null, entry_type ledger_entry_type not null, status ledger_entry_status not null default 'pending', executed_by bigint not null references users(id), from_user_id bigint references users(id), to_user_id bigint references users(id), asset_id bigint, spv_id bigint, token_amount integer, price_per_token numeric, sar_amount numeric, metadata jsonb not null default '{}'::jsonb, compliance_checks jsonb not null default '{}'::jsonb, contract_rule_set text not null default 'v1', legal_reference text, previous_hash text not null default '', entry_hash text not null, reversed_entry_id bigint references ledger_entries(id), reversal_reason text, ip_address text, created_at timestamptz default now());
+create table asset_controls (id bigserial primary key, asset_id bigint not null, is_frozen boolean not null default false, transfers_paused boolean not null default false, distributions_paused boolean not null default false, issuance_paused boolean not null default false, regulatory_hold boolean not null default false, regulatory_reference text, freeze_reason text, frozen_by bigint references users(id), frozen_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table global_controls (id bigserial primary key, control_key control_key_type not null, is_active boolean not null default false, reason text, activated_by bigint references users(id), activated_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table smart_contract_rules (id bigserial primary key, asset_id bigint not null, rule_version text not null default 'v1', require_kyc boolean not null default true, require_suitability_check boolean not null default true, require_settlement_confirmation boolean not null default true, can_freeze_individual_holdings boolean not null default true, can_force_transfer boolean not null default false, max_token_supply integer not null, tokens_reserved integer not null default 0, min_investment_sar numeric not null default 0, max_investment_sar numeric, max_investors integer, min_holding_period_days integer not null default 90, allowed_suitabilities text[] not null default '{}', allowed_jurisdictions text[] not null default '{}', distribution_frequency text not null default 'quarterly', auto_distribute boolean not null default false, withholding_tax_rate numeric not null default 0, created_by bigint not null references users(id), created_at timestamptz default now(), updated_at timestamptz default now());
+
+create index idx_users_email on users(email);
+create index idx_sessions_user on sessions(user_id);
+create index idx_properties_user on properties(user_id);
+create index idx_properties_location on properties(latitude, longitude);
+create index idx_subscription_payments_user on subscription_payments(user_id);
+create index idx_tokenized_assets_property on tokenized_assets(property_id);
+create index idx_token_holdings_user on token_holdings(user_id);
+create index idx_ledger_sequence on ledger_entries(sequence_number);

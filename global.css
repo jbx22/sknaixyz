@@ -1,0 +1,195 @@
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap);
+@import url(https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap);
+
+
+
+
+
+
+
+
+
+:root {
+  /* Content layers */
+  --z-content-low: 10; /* Minor elevated content */
+  --z-content: 20; /* Standard elevated content */
+  --z-content-high: 30; /* Important content that needs prominence */
+
+  /* Navigation layers */
+  --z-nav-low: 100; /* Secondary navigation components */
+  --z-nav: 200; /* Primary navigation bars */
+  --z-nav-sticky: 300; /* Sticky navigation elements */
+
+  /* Overlay layers */
+  --z-overlay: 400;
+
+  --z-spotlight: 1000; /* Tutorial spotlights/guided help */
+
+  /* System layers */
+  --z-critical: 2000; /* Critical system notifications */
+
+  /* spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-7: 1.75rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+}
+
+:root {
+  /* Light Mode (Default) - Vibrant Modern Theme */
+  --background: #FFFFFF;
+  --foreground: #1E293B; /* Slate 800 for high contrast text, softened from pure black */
+
+  --surface: #FFFFFF;
+  --surface-foreground: #1E293B;
+  
+  --sidebar: #F8FAFC;
+  --sidebar-foreground: #1E293B;
+
+  --card: #FFFFFF;
+  --card-foreground: #1E293B;
+
+  --popup: #FFFFFF;
+  --popup-foreground: #1E293B;
+
+  /* Primary Blue: Bright Dodger Blue #1E90FF */
+  --primary: #1E90FF; 
+  --primary-foreground: #FFFFFF;
+  
+  /* Gradient: Red -> Bright Blue -> Deep Sky Blue */
+  --primary-gradient: linear-gradient(135deg, #B22234, #00BFFF, #1E90FF);
+
+  --secondary: #F0F9FF; /* Very light sky blue for secondary backgrounds */
+  --secondary-foreground: #0077CC;
+
+  /* Accent Red: Old Glory Red #B22234 */
+  --accent: #B22234;
+  --accent-light: #EF4444; /* Brighter red for highlights */
+  --accent-foreground: #FFFFFF;
+
+  /* Replaced Purple with Bright Blue Accent */
+  --purple-accent: #00BFFF; /* Deep Sky Blue */
+
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+
+  --success: hsl(142 76% 36%);
+  --success-foreground: hsl(0 0% 100%);
+
+  --error: #B22234; /* Using Old Glory Red for errors */
+  --error-foreground: #FFFFFF;
+
+  --warning: hsl(45 93% 47%);
+  --warning-foreground: #1E293B;
+
+  --info: #1E90FF; /* Using primary bright blue for info */
+  --info-foreground: #FFFFFF;
+  --info-hover: #167bd1;
+  --info-active: #1160a3;
+
+  --border: #E2E8F0;
+
+  /* Font Families */
+  --font-family-base: 'IBM Plex Sans Arabic', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-heading: 'IBM Plex Sans Arabic', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-family-monospace: 'IBM Plex Mono', monospace;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* Shadows - Adjusted for clearer definition with blue tint */
+  --shadow: 0 1px 3px 0 rgb(30 144 255 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(30 144 255 / 0.1), 0 2px 4px -2px rgb(30 144 255 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(30 144 255 / 0.1), 0 4px 6px -4px rgb(30 144 255 / 0.1);
+  --shadow-focus: 0 0 0 4px rgba(30, 144, 255, 0.3);
+  
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-blur: blur(12px);
+
+  /* Animation */
+  --animation-duration-fast: 150ms;
+  --animation-duration-normal: 300ms;
+  --animation-duration-slow: 500ms;
+
+  /* Chart Colors - Updated */
+  --chart-color-1: #1E90FF; /* Dodger Blue */
+  --chart-color-2: #B22234; /* Old Glory Red */
+  --chart-color-3: #00BFFF; /* Deep Sky Blue */
+  --chart-color-4: #EF4444; /* Bright Red */
+  --chart-color-5: #64748B; /* Slate */
+}
+
+.dark {
+  /* Dark Mode - Adjusted for Vibrant Theme */
+  --background: #020617; /* Very dark blue, almost black */
+  --foreground: #F8FAFC;
+
+  --surface: #0F172A; /* Slate 900 */
+  --surface-foreground: #F8FAFC;
+  
+  --sidebar: #0F172A;
+  --sidebar-foreground: #F8FAFC;
+
+  --card: #0F172A;
+  --card-foreground: #F8FAFC;
+
+  --popup: #0F172A;
+  --popup-foreground: #F8FAFC;
+
+  /* Primary: Bright Blue for dark mode readability */
+  --primary: #00BFFF; 
+  --primary-foreground: #FFFFFF;
+  
+  /* Gradient: Lighter Red -> Bright Blue -> Dodger Blue */
+  --primary-gradient: linear-gradient(135deg, #E04F5F, #00BFFF, #1E90FF);
+
+  --secondary: #1E293B;
+  --secondary-foreground: #F8FAFC;
+
+  /* Accent Red */
+  --accent: #E04F5F; /* Lighter red for dark mode */
+  --accent-light: #F87171; /* Even lighter red for highlights */
+  --accent-foreground: #FFFFFF;
+
+  --purple-accent: #38BDF8; /* Light Sky Blue instead of purple */
+
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8;
+
+  --success: hsl(142 70% 45%);
+  --success-foreground: hsl(0 0% 100%);
+
+  --error: #E04F5F;
+  --error-foreground: #FFFFFF;
+
+  --warning: hsl(45 93% 47%);
+  --warning-foreground: #000000;
+
+  --info: #00BFFF;
+  --info-foreground: #FFFFFF;
+
+  --border: #1E293B;
+  
+  /* Glassmorphism specific dark */
+  --glass-bg: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(15, 23, 42, 0.5);
+  
+  /* Shadows - Lighter shadows or glows for dark mode */
+  --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+}

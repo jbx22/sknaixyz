@@ -1,0 +1,199 @@
+.sidebar {
+  width: 260px;
+  background-color: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav-sticky); /* Increased z-index */
+  transition: transform var(--animation-duration-normal) ease;
+}
+
+/* RTL support */
+:global([dir="rtl"]) .sidebar {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+.header {
+  padding: var(--spacing-6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  min-width: 0; /* Allow children to shrink if needed */
+}
+
+@media (max-width: 380px) {
+  .header {
+    padding: var(--spacing-4) var(--spacing-3);
+  }
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  min-width: 0; /* Allow overflow prevention */
+  flex: 1; /* Take available space */
+}
+
+@media (max-width: 380px) {
+  .logoContainer {
+    gap: var(--spacing-2);
+  }
+}
+
+.adminBadge {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap; /* Prevent badge from wrapping */
+}
+
+@media (max-width: 380px) {
+  .adminBadge {
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+.nav {
+  padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  overflow-y: auto;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all var(--animation-duration-fast) ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.link:hover {
+  background-color: var(--secondary);
+  color: var(--foreground);
+}
+
+.active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.active:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.specialLink {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.specialLink:hover {
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--accent) 40%, transparent);
+  transform: translateY(-1px);
+}
+
+.specialLink.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+  color: var(--primary-foreground);
+}
+
+.mobileToggle {
+  display: none;
+  padding: var(--spacing-4);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+
+.closeBtn {
+  display: none;
+}
+
+.overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    z-index: var(--z-spotlight);
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    width: 280px;
+    box-shadow: var(--shadow-lg);
+    pointer-events: auto;
+  }
+
+  :global([dir="rtl"]) .sidebar {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .closeBtn {
+    display: flex;
+  }
+
+  .mobileToggle {
+    display: block;
+  }
+
+  .overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    z-index: var(--z-overlay);
+    pointer-events: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .sidebar {
+    width: 260px; /* Slightly narrower for very small screens */
+  }
+
+  .nav {
+    padding: var(--spacing-3) var(--spacing-2);
+    gap: var(--spacing-1);
+  }
+
+  .link {
+    padding: var(--spacing-2) var(--spacing-3);
+    gap: var(--spacing-2);
+    font-size: 0.9375rem;
+  }
+
+  .link > svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+  }
+}

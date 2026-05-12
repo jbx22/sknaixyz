@@ -1,0 +1,308 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: var(--spacing-12);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: var(--font-family-heading);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.tabsList {
+  justify-content: flex-start;
+  gap: var(--spacing-2);
+  /* Make tabs scrollable on mobile */
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 2px; /* Prevent scrollbar hiding content */
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabIcon {
+  margin-right: var(--spacing-2);
+}
+
+:global([dir="rtl"]) .tabIcon {
+  margin-right: 0;
+  margin-left: var(--spacing-2);
+}
+
+.tabContent {
+  animation: fadeIn var(--animation-duration-normal) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  margin-bottom: var(--spacing-8);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-4);
+  color: var(--foreground);
+}
+
+.card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Admin Management Grid */
+.grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: var(--spacing-6);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.createCard, .listCard {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.formRow {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.selectFix {
+  width: 100%;
+  height: 2.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0 var(--spacing-3);
+  margin-top: var(--spacing-2);
+}
+
+.submitBtn {
+  margin-top: var(--spacing-2);
+  width: 100%;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 600px; /* Ensure table doesn't squash too much */
+}
+
+.table th {
+  text-align: start;
+  padding: var(--spacing-3);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.warningIcon { color: var(--warning); }
+.successIcon { color: var(--success); }
+.dangerIcon { color: var(--error); }
+
+.skeletonRow {
+  height: 48px;
+  width: 100%;
+}
+
+.roleStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+}
+
+.roleStatCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing-5);
+  box-shadow: var(--shadow-sm);
+}
+
+.roleStatIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+.roleStatContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.roleStatValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+  line-height: 1;
+}
+
+.roleStatLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.protectedBadge {
+  font-size: 0.75rem;
+  padding: var(--spacing-1) var(--spacing-2);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    gap: var(--spacing-4);
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .tabsList {
+    margin-right: calc(-1 * var(--spacing-4)); /* Offset container padding */
+padding-right: var(--spacing-4);
+width: calc(100% + var(--spacing-4));
+  }
+  
+  :global([dir="rtl"]) .tabsList {
+margin-right: 0;
+margin-left: calc(-1 * var(--spacing-4));
+padding-right: 0;
+padding-left: var(--spacing-4);
+  }
+
+  .formRow {
+    flex-direction: column;
+  }
+
+  .roleStatsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card, .createCard, .listCard {
+    padding: var(--spacing-4);
+  }
+
+  .roleStatCard {
+    padding: var(--spacing-4);
+  }
+}

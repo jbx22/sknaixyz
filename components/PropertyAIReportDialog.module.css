@@ -1,0 +1,220 @@
+.dialogContent {
+  width: 90vw;
+  max-width: 50rem;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: var(--spacing-2);
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12) 0;
+  gap: var(--spacing-4);
+  color: var(--muted-foreground);
+  text-align: center;
+}
+
+.spinner {
+  color: var(--primary);
+  animation: spin 1s linear infinite;
+}
+
+.skeletonSpace {
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  align-items: center;
+  opacity: 0.5;
+}
+
+.skeletonLine {
+  height: 0.75rem;
+  background-color: var(--muted);
+  border-radius: var(--radius-sm);
+}
+
+/* Error State */
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12) 0;
+  gap: var(--spacing-4);
+  color: var(--error);
+}
+
+/* Limit / Auth State */
+.limitState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8) var(--spacing-4);
+  gap: var(--spacing-4);
+  text-align: center;
+  margin: auto 0;
+  height: 100%;
+}
+
+.iconCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.limitTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.limitDescription {
+  font-size: 1rem;
+  color: var(--muted-foreground);
+  max-width: 24rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.limitActions {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+/* Report Content Layout */
+.reportContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  padding-top: var(--spacing-2);
+}
+
+.upgradeNotice {
+  margin-top: var(--spacing-4);
+  padding: var(--spacing-4);
+  background-color: var(--secondary);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  text-align: center;
+  color: var(--secondary-foreground);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.section {
+  margin-top: var(--spacing-6);
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-3);
+  color: var(--foreground);
+}
+
+.analysisText {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+  font-size: 0.9375rem;
+}
+
+.analysisText p {
+  margin-bottom: var(--spacing-3);
+}
+
+/* Print Only Elements */
+.printHeader {
+  display: none;
+}
+
+.printFooter {
+  display: none;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Print Styles */
+@media print {
+  .dialogContent {
+    max-width: 100% !important;
+    max-height: none !important;
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .body {
+    overflow: visible !important;
+    padding-right: 0 !important;
+  }
+
+  .reportContent {
+    padding: 0 !important;
+  }
+
+  .printHeader {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-4);
+    padding-bottom: var(--spacing-6);
+    margin-bottom: var(--spacing-6);
+    border-bottom: 2px solid var(--border);
+    page-break-after: avoid;
+  }
+
+  .printTitle h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0 0 var(--spacing-1) 0;
+  }
+
+  .printTitle p {
+    font-size: 1rem;
+    color: var(--muted-foreground);
+    margin: 0;
+  }
+
+  .printFooter {
+    display: block;
+    margin-top: var(--spacing-8);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    page-break-inside: avoid;
+  }
+
+  .section {
+    page-break-inside: avoid;
+  }
+}

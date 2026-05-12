@@ -1,0 +1,181 @@
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  background: linear-gradient(
+    to bottom,
+    var(--surface),
+    color-mix(in srgb, var(--surface) 95%, transparent)
+  );
+  border-bottom: 1px solid var(--border);
+  padding: var(--spacing-2) 0;
+  width: 100%;
+  transition:
+    background-color var(--animation-duration-normal) ease,
+    border-color var(--animation-duration-normal) ease;
+}
+
+:global(.dark) .nav {
+  background: linear-gradient(
+    to bottom,
+    var(--surface),
+    color-mix(in srgb, var(--surface) 95%, transparent)
+  );
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.startSection {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  width: 100%;
+  justify-content: space-between; /* Distribute space on mobile */
+}
+
+/* Wrapper for Logo to allow resizing/hiding parts if absolutely necessary */
+.logoWrapper {
+  flex-shrink: 1; /* Allow shrinking if needed */
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  margin-right: auto; /* Push everything else to the right */
+}
+
+/* Wrapper for secondary actions (lang, theme) */
+.actionsWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--border);
+  margin: 0 var(--spacing-1);
+  display: none;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0 var(--spacing-1);
+  cursor: pointer;
+  color: var(--muted-foreground);
+  font-family: var(--font-family-base);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: all var(--animation-duration-fast) ease;
+  height: 2.5rem;
+  min-width: 2rem;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.actionButton:hover {
+  background-color: var(--secondary);
+  color: var(--primary);
+}
+
+.buttonText {
+  display: none;
+  font-weight: 500;
+}
+
+.themeSwitch {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.authWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-inline-start: var(--spacing-1);
+  flex-shrink: 0;
+}
+
+.dashboardLink {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.dashboardLink:hover {
+  color: var(--foreground);
+}
+
+.endSection {
+  display: none; /* Hide on mobile to prioritize login button visibility */
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.badge {
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+/* Tablet and Desktop adjustments */
+@media (min-width: 640px) {
+  .nav {
+    padding: var(--spacing-3) 0;
+  }
+
+  .container {
+    padding: 0 var(--spacing-4);
+  }
+
+  .startSection {
+    width: auto;
+    justify-content: flex-start;
+    gap: var(--spacing-3);
+  }
+
+  .logoWrapper {
+    flex-shrink: 0;
+    margin-right: 0;
+  }
+
+  .separator {
+    display: block;
+  }
+
+  .buttonText {
+    display: inline;
+  }
+
+  .actionButton {
+    padding: 0 var(--spacing-3);
+    min-width: 2.5rem;
+  }
+
+  .endSection {
+    display: flex;
+  }
+}
+
+/* Very small screens adjustments (e.g. iPhone SE, Fold) */
+@media (max-width: 380px) {
+  .authWrapper {
+    gap: var(--spacing-1);
+  }
+  
+  .container {
+    padding: 0 var(--spacing-1);
+  }
+}

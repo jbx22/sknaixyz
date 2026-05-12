@@ -1,0 +1,133 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.loading {
+  padding: var(--spacing-6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--muted-foreground);
+}
+
+.subscriptionStatus {
+  background-color: var(--secondary);
+  padding: var(--spacing-4);
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.limitReached {
+  background-color: color-mix(in srgb, var(--error) 5%, transparent);
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.tierInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.usageText {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.limitWarning {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--error);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.limitOk {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--success);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.upgradePrompt {
+  margin-top: var(--spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  align-items: flex-start;
+}
+
+.upgradePrompt p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--foreground);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+}
+
+.fieldset {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.fieldset:disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-2);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border);
+}
+
+.hiddenButton {
+  display: none;
+}
+
+.crownBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+  
+  .statusHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
