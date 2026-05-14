@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useAdminStats } from "../helpers/useAdminStats";
+import { useAdminStats, useInvestorStats, useOwnerBrokerStats, useRoleAdminStats, useSuperAdminStats } from "../helpers/useAdminStats";
 import { useLanguage } from "../helpers/useLanguage";
 import { ADMIN_STRINGS } from "../helpers/adminTranslations";
 import { Skeleton } from "./Skeleton";
-import { Users, Building2, CreditCard, Activity, ClipboardCheck, Coins, ShieldCheck, FileSearch } from "lucide-react";
+import { Users, Building2, CreditCard, Activity, ClipboardCheck, Coins, ShieldCheck, FileSearch, TrendingUp, Eye, Heart, Package, DollarSign, CheckCircle, AlertTriangle, Server, Database } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { readApplications } from "../helpers/subscriptionCompliance";
 import { readAdminUsageLogs, readManagedAdmins } from "../helpers/adminGovernance";
@@ -21,6 +21,11 @@ function localArrayCount(key: string) {
 
 export const AdminStats = () => {
   const { data, isLoading } = useAdminStats();
+  const investorStats = useInvestorStats();
+  const ownerBrokerStats = useOwnerBrokerStats();
+  const roleAdminStats = useRoleAdminStats();
+  const superAdminStats = useSuperAdminStats();
+  
   const { language } = useLanguage();
   const t = ADMIN_STRINGS[language];
   const ar = language === "ar";
@@ -50,6 +55,35 @@ export const AdminStats = () => {
     };
   }, [data]);
 
+  // Role-specific stats cards
+  const investorStatsCards = [
+    { title: t.stats.propertiesViewed, value: investorStats.data.propertiesViewed.toLocaleString(), icon: <Eye className={styles.icon} />, color: "var(--primary)" },
+    { title: t.stats.favorites, value: investorStats.data.favorites.toLocaleString(), icon: <Heart className={styles.icon} />, color: "var(--success)" },
+    { title: t.stats.investmentsMade, value: investorStats.data.investmentsMade.toLocaleString(), icon: <TrendingUp className={styles.icon} />, color: "var(--accent)" },
+    { title: t.stats.portfolioValue, value: `${(investorStats.data.portfolioValue / 1000000).toFixed(1)}M SAR`, icon: <Package className={styles.icon} />, color: "var(--warning)" },
+  ];
+
+  const ownerBrokerStatsCards = [
+    { title: t.stats.propertiesListed, value: ownerBrokerStats.data.propertiesListed.toLocaleString(), icon: <Building2 className={styles.icon} />, color: "var(--primary)" },
+    { title: t.stats.activeListings, value: ownerBrokerStats.data.activeListings.toLocaleString(), icon: <Activity className={styles.icon} />, color: "var(--success)" },
+    { title: t.stats.inquiries, value: ownerBrokerStats.data.inquiries.toLocaleString(), icon: <Users className={styles.icon} />, color: "var(--accent)" },
+    { title: t.stats.tokenizationRequests, value: ownerBrokerStats.data.tokenizationRequests.toLocaleString(), icon: <Coins className={styles.icon} />, color: "var(--warning)" },
+  ];
+
+  const adminStatsCards = [
+    { title: t.stats.totalUsers, value: roleAdminStats.data.totalUsers.toLocaleString(), icon: <Users className={styles.icon} />, color: "var(--primary)" },
+    { title: t.stats.pendingApprovals, value: roleAdminStats.data.pendingApprovals.toLocaleString(), icon: <ClipboardCheck className={styles.icon} />, color: "var(--warning)" },
+    { title: t.stats.activeProperties, value: roleAdminStats.data.activeProperties.toLocaleString(), icon: <Building2 className={styles.icon} />, color: "var(--success)" },
+    { title: t.stats.complianceAlerts, value: roleAdminStats.data.complianceAlerts.toLocaleString(), icon: <AlertTriangle className={styles.icon} />, color: "var(--danger)" },
+  ];
+
+  const superAdminStatsCards = [
+    { title: t.stats.allPlatformStats, value: superAdminStats.data.allPlatformStats.toLocaleString(), icon: <Database className={styles.icon} />, color: "var(--primary)" },
+    { title: t.stats.revenue, value: `${(superAdminStats.data.revenue / 1000000).toFixed(1)}M SAR`, icon: <DollarSign className={styles.icon} />, color: "var(--success)" },
+    { title: t.stats.complianceOverview, value: superAdminStats.data.complianceOverview.toLocaleString(), icon: <CheckCircle className={styles.icon} />, color: "var(--accent)" },
+    { title: t.stats.systemHealth, value: `${superAdminStats.data.systemHealth}%`, icon: <Server className={styles.icon} />, color: "var(--warning)" },
+  ];
+
   if (isLoading && !data) {
     return <div className={styles.grid}>{[1, 2, 3, 4].map((i) => <Skeleton key={i} className={styles.skeletonCard} />)}</div>;
   }
@@ -70,7 +104,37 @@ export const AdminStats = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.grid}>{statsCards.map((stat, index) => <Link key={index} to={stat.path} className={styles.card}><div className={styles.cardHeader}><span className={styles.cardTitle}>{stat.title}</span><div className={styles.iconWrapper} style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>{stat.icon}</div></div><div className={styles.cardValue}>{stat.value}</div></Link>)}</div>
+      {/* Main overview stats */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{ar ? "الملخص العام" : "Platform Overview"}</h2>
+        <div className={styles.grid}>{statsCards.map((stat, index) => <Link key={index} to={stat.path} className={styles.card}><div className={styles.cardHeader}><span className={styles.cardTitle}>{stat.title}</span><div className={styles.iconWrapper} style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>{stat.icon}</div></div><div className={styles.cardValue}>{stat.value}</div></Link>)}</div>
+      </div>
+      
+      {/* Investor Stats */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{ar ? "إحصائيات المستثمرين" : "Investor Stats"}</h2>
+        <div className={styles.grid}>{investorStatsCards.map((stat, index) => <div key={index} className={styles.card}><div className={styles.cardHeader}><span className={styles.cardTitle}>{stat.title}</span><div className={styles.iconWrapper} style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>{stat.icon}</div></div><div className={styles.cardValue}>{stat.value}</div></div>)}</div>
+      </div>
+      
+      {/* Owner/Broker Stats */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{ar ? "إحصائيات الملاك والوسطاء" : "Owner/Broker Stats"}</h2>
+        <div className={styles.grid}>{ownerBrokerStatsCards.map((stat, index) => <div key={index} className={styles.card}><div className={styles.cardHeader}><span className={styles.cardTitle}>{stat.title}</span><div className={styles.iconWrapper} style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>{stat.icon}</div></div><div className={styles.cardValue}>{stat.value}</div></div>)}</div>
+      </div>
+      
+      {/* Admin Stats */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{ar ? "إحصائيات الإدارة" : "Admin Stats"}</h2>
+        <div className={styles.grid}>{adminStatsCards.map((stat, index) => <div key={index} className={styles.card}><div className={styles.cardHeader}><span className={styles.cardTitle}>{stat.title}</span><div className={styles.iconWrapper} style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>{stat.icon}</div></div><div className={styles.cardValue}>{stat.value}</div></div>)}</div>
+      </div>
+      
+      {/* Super Admin Stats */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>{ar ? "إحصائيات المشرفين الرئيسيين" : "Super Admin Stats"}</h2>
+        <div className={styles.grid}>{superAdminStatsCards.map((stat, index) => <div key={index} className={styles.card}><div className={styles.cardHeader}><span className={styles.cardTitle}>{stat.title}</span><div className={styles.iconWrapper} style={{ backgroundColor: `${stat.color}20`, color: stat.color }}>{stat.icon}</div></div><div className={styles.cardValue}>{stat.value}</div></div>)}</div>
+      </div>
+      
+      {/* Chart */}
       <div className={styles.chartContainer}>
         <h3 className={styles.chartTitle}>{t.stats.activeSubscriptions}</h3>
         <div className={styles.chartWrapper}>

@@ -21,7 +21,7 @@ export default function MapPage() {
   // Default to Riyadh
   const defaultCenter = { lat: 24.7136, lng: 46.6753 };
   const { language } = useLanguage();
-  const { location, requestLocation, isLoading: isLocating } = useCurrentLocation();
+  const { location, requestLocation, isLoading: isLocating } = useCurrentLocation(false);
   const [center, setCenter] = useState(defaultCenter);
   const [isAddMode, setIsAddMode] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{

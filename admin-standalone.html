@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal - SKNAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --background: #ffffff;
+            --background-muted: #f9fafb;
+            --foreground: #111827;
+            --foreground-muted: #6b7280;
+            --border: #e5e7eb;
+            --popup: #ffffff;
+            --popup-foreground: #111827;
+            --sidebar-width: 280px;
+            --header-height: 70px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--background-muted);
+            color: var(--foreground);
+            line-height: 1.6;
+        }
+        
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--background);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            padding: 1rem 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+        
+        .nav-section-title {
+            padding: 0 1.5rem 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--foreground-muted);
+            letter-spacing: 0.05em;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--foreground-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            gap: 0.75rem;
+        }
+        
+        .nav-item:hover {
+            background: var(--background-muted);
+            color: var(--primary);
+        }
+        
+        .nav-item.active {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            border-right: 3px solid var(--primary);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            height: var(--header-height);
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--foreground);
+            cursor: pointer;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--foreground-muted);
+        }
+        
+        .breadcrumb-separator {
+            color: var(--foreground-muted);
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--background-muted);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        /* Content Area */
+        .content {
+            padding: 2rem;
+            flex: 1;
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-subtitle {
+            color: var(--foreground-muted);
+            margin-top: 0.25rem;
+        }
+        
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+        
+        .stat-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--foreground-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .stat-change.positive {
+            color: var(--success);
+        }
+        
+        .stat-change.negative {
+            color: var(--danger);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--foreground-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        /* Tables */
+        .table-container {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .table-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--foreground-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        tr:hover {
+            background: var(--background-muted);
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+        
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .status-badge.expired {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        /* Action buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-secondary {
+            background: var(--background-muted);
+            color: var(--foreground);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        /* Charts */
+        .chart-container {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .chart-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .chart-canvas {
+            width: 100%;
+            height: 300px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.2s;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        
+        /* Loading states */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .toast.success {
+            border-color: var(--success);
+        }
+        
+        .toast.error {
+            border-color: var(--danger);
+        }
+        
+        .toast.warning {
+            border-color: var(--warning);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: var(--background);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--foreground-muted);
+        }
+        
+        /* Form styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            background: var(--background);
+            cursor: pointer;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">S</div>
+                    <span>SKNAI</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <a href="#" class="nav-item active">
+                        <span class="nav-icon">📊</span>
+                        Dashboard
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">👥</span>
+                        Users
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🏠</span>
+                        Properties
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">💰</span>
+                        Subscriptions
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Admin</div>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📋</span>
+                        Compliance
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔍</span>
+                        Audit Logs
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">📝</span>
+                        Applications
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">💱</span>
+                        Tokenization
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Account</div>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">👤</span>
+                        Profile
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🔔</span>
+                        Notifications
+                    </a>
+                    <a href="#" class="nav-item">
+                        <span class="nav-icon">🚪</span>
+                        Logout
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">☰</button>
+                    <div class="breadcrumb">
+                        <span>Home</span>
+                        <span class="breadcrumb-separator">/</span>
+                        <span>Dashboard</span>
+                    </div>
+                    <h1 class="page-title">Admin Dashboard</h1>
+                </div>
+                
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="themeToggle">🌙</button>
+                        <div class="user-menu">
+                            <div class="user-avatar">AD</div>
+                            <div>
+                                <div style="font-weight: 500;">Admin User</div>
+                                <div style="font-size: 0.75rem; color: var(--foreground-muted);">admin@sknai.xyz</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content -->
+            <div class="content">
+                <!-- Dashboard Stats -->
+                <div class="page-header">
+                    <h2>Platform Overview</h2>
+                    <p class="page-subtitle">Monitor platform health, user activity, and compliance status</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Total Users</div>
+                                <div class="stat-value">1,245</div>
+                                <div class="stat-change positive">
+                                    ↑ <span>+12.3%</span> from last month
+                                </div>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--primary);">
+                                👥
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Active Properties</div>
+                                <div class="stat-value">342</div>
+                                <div class="stat-change positive">
+                                    ↑ <span>+8.7%</span> from last month
+                                </div>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                                🏠
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Pending Approvals</div>
+                                <div class="stat-value">18</div>
+                                <div class="stat-change negative">
+                                    <span>Needs attention</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                                ⏰
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Compliance Alerts</div>
+                                <div class="stat-value">3</div>
+                                <div class="stat-change warning">
+                                    <span>Monitor</span>
+                                </div>
+                            </div>
+                            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                                🛡️
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active" data-tab="users">Users</button>
+                    <button class="tab" data-tab="properties">Properties</button>
+                    <button class="tab" data-tab="compliance">Compliance</button>
+                    <button class="tab" data-tab="audit">Audit Logs</button>
+                </div>
+                
+                <!-- Users Tab -->
+                <div id="users-tab" class="tab-content">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div>
+                                <h3 class="table-title">User Management</h3>
+                                <div class="table-filters">
+                                    <input type="text" class="form-input" placeholder="Search users..." style="flex: 1; max-width: 300px;">
+                                    <select class="form-select" style="width: 150px;">
+                                        <option>All Roles</option>
+                                        <option>Admin</option>
+                                        <option>User</option>
+                                        <option>Broker</option>
+                                    </select>
+                                    <button class="btn btn-primary">Add User</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Joined</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div class="user-avatar" style="width: 24px; height: 24px; font-size: 0.75rem;">JD</div>
+                                                John Doe
+                                            </div>
+                                        </td>
+                                        <td>john@example.com</td>
+                                        <td><span class="status-badge active">Admin</span></td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                        <td>2024-01-15</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-secondary btn-sm">Impersonate</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div class="user-avatar" style="width: 24px; height: 24px; font-size: 0.75rem;">JS</div>
+                                                Jane Smith
+                                            </div>
+                                        </td>
+                                        <td>jane@example.com</td>
+                                        <td><span class="status-badge active">User</span></td>
+                                        <td><span class="status-badge pending">Pending</span></td>
+                                        <td>2024-02-20</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-primary btn-sm">Approve</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div class="user-avatar" style="width: 24px; height: 24px; font-size: 0.75rem;">RB</div>
+                                                Robert Brown
+                                            </div>
+                                        </td>
+                                        <td>robert@example.com</td>
+                                        <td><span class="status-badge active">Broker</span></td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                        <td>2024-01-08</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-danger btn-sm">Suspend</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div class="user-avatar" style="width: 24px; height: 24px; font-size: 0.75rem;">MW</div>
+                                                Maria White
+                                            </div>
+                                        </td>
+                                        <td>maria@example.com</td>
+                                        <td><span class="status-badge active">User</span></td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                        <td>2024-03-01</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-secondary btn-sm">Impersonate</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Properties Tab -->
+                <div id="properties-tab" class="tab-content" style="display: none;">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div>
+                                <h3 class="table-title">Property Management</h3>
+                                <div class="table-filters">
+                                    <input type="text" class="form-input" placeholder="Search properties..." style="flex: 1; max-width: 300px;">
+                                    <select class="form-select" style="width: 150px;">
+                                        <option>All Types</option>
+                                        <option>Residential</option>
+                                        <option>Commercial</option>
+                                        <option>Hospitality</option>
+                                    </select>
+                                    <select class="form-select" style="width: 150px;">
+                                        <option>All Status</option>
+                                        <option>Active</option>
+                                        <option>Pending</option>
+                                        <option>Expired</option>
+                                    </select>
+                                    <button class="btn btn-primary">Add Property</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Location</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 40px; height: 40px; background: var(--background-muted); border-radius: 6px;"></div>
+                                                <div>
+                                                    <div style="font-weight: 500;">Luxury Villa</div>
+                                                    <div style="font-size: 0.75rem; color: var(--foreground-muted);">Riyadh</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>Riyadh</div>
+                                            <div style="font-size: 0.75rem; color: var(--foreground-muted);">Al Olaya District</div>
+                                        </td>
+                                        <td>Residential</td>
+                                        <td><span class="status-badge active">Active</span></td>
+                                        <td>5,500,000 SAR</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-secondary btn-sm">View</button>
+                                            <button class="btn btn-danger btn-sm">Delete</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <div style="width: 40px; height: 40px; background: var(--background-muted); border-radius: 6px;"></div>
+                                                <div>
+                                                    <div style="font-weight: 500;">Commercial Office</div>
+                                                    <div style="font-size: 0.75rem; color: var(--foreground-muted);">Jeddah</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>Jeddah</div>
+                                            <div style="font-size: 0.75rem; color: var(--foreground-muted);">Tahliah Street</div>
+                                        </td>
+                                        <td>Commercial</td>
+                                        <td><span class="status-badge pending">Pending</span></td>
+                                        <td>2,800,000 SAR</td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Edit</button>
+                                            <button class="btn btn-primary btn-sm">Approve</button>
+                                            <button class="btn btn-danger btn-sm">Reject</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compliance Tab -->
+                <div id="compliance-tab" class="tab-content" style="display: none;">
+                    <div class="card">
+                        <h3 class="card-title">REGA Forms Status</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                            <div style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="font-weight: 500; margin-bottom: 0.5rem;">KYC Forms</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">142/145</div>
+                                <div style="font-size: 0.75rem; color: var(--foreground-muted);">Completed</div>
+                            </div>
+                            <div style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="font-weight: 500; margin-bottom: 0.5rem;">Risk Acknowledgments</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);">138/145</div>
+                                <div style="font-size: 0.75rem; color: var(--foreground-muted);">Pending</div>
+                            </div>
+                            <div style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="font-weight: 500; margin-bottom: 0.5rem;">Subscription Terms</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);">140/145</div>
+                                <div style="font-size: 0.75rem; color: var(--foreground-muted);">Completed</div>
+                            </div>
+                            <div style="padding: 1rem; border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="font-weight: 500; margin-bottom: 0.5rem;">Property Listings</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);">12/18</div>
+                                <div style="font-size: 0.75rem; color: var(--foreground-muted);">Under Review</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div>
+                                <h3 class="table-title">Recent Compliance Issues</h3>
+                                <p class="page-subtitle">Monitor and resolve compliance violations</p>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Issue</th>
+                                        <th>User</th>
+                                        <th>Severity</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Missing KYC documentation</td>
+                                        <td>John Doe</td>
+                                        <td><span class="status-badge pending">Medium</span></td>
+                                        <td>2024-05-12</td>
+                                        <td><span class="status-badge pending">Investigating</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Review</button>
+                                            <button class="btn btn-primary btn-sm">Resolve</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Property listing verification failed</td>
+                                        <td>Jane Smith</td>
+                                        <td><span class="status-badge danger">High</span></td>
+                                        <td>2024-05-11</td>
+                                        <td><span class="status-badge pending">Open</span></td>
+                                        <td>
+                                            <button class="btn btn-secondary btn-sm">Review</button>
+                                            <button class="btn btn-danger btn-sm">Suspend</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Audit Logs Tab -->
+                <div id="audit-tab" class="tab-content" style="display: none;">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <div>
+                                <h3 class="table-title">Recent Activity</h3>
+                                <p class="page-subtitle">Track all administrative actions and system events</p>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Target</th>
+                                        <th>IP Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2024-05-14 20:30:15</td>
+                                        <td>Admin User</td>
+                                        <td>Approved property listing</td>
+                                        <td>Luxury Villa - Riyadh</td>
+                                        <td>192.168.1.100</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-05-14 19:45:22</td>
+                                        <td>Admin User</td>
+                                        <td>Suspended user account</td>
+                                        <td>User #1234</td>
+                                        <td>192.168.1.100</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-05-14 18:22:10</td>
+                                        <td>Admin User</td>
+                                        <td>Updated system settings</td>
+                                        <td>Platform configuration</td>
+                                        <td>192.168.1.100</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-05-14 17:15:33</td>
+                                        <td>Admin User</td>
+                                        <td>Generated compliance report</td>
+                                        <td>Monthly audit</td>
+                                        <td>192.168.1.100</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Activity Chart -->
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <div>
+                            <h3 class="chart-title">User Activity Trend</h3>
+                            <p class="page-subtitle">Daily active users over the past 7 days</p>
+                        </div>
+                        <div class="chart-actions">
+                            <button class="btn btn-secondary">Last 7D</button>
+                            <button class="btn btn-secondary">Last 30D</button>
+                            <button class="btn btn-primary">Export</button>
+                        </div>
+                    </div>
+                    <div class="chart-canvas">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New User</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" required>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                        <option value="broker">Broker</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" required>
+                        <option value="active">Active</option>
+                        <option value="pending">Pending</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        menuToggle?.addEventListener('click', () => {
+            sidebar?.classList.toggle('mobile-open');
+        });
+        
+        // Tab switching
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active content
+                tabContents.forEach(content => {
+                    content.style.display = content.id === targetTab + '-tab' ? 'block' : 'none';
+                });
+            });
+        });
+        
+        // Modal functionality
+        const modal = document.getElementById('userModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelModal = document.getElementById('cancelModal');
+        
+        function openModal() {
+            modal?.classList.add('active');
+        }
+        
+        function closeModalFunc() {
+            modal?.classList.remove('active');
+        }
+        
+        closeModal?.addEventListener('click', closeModalFunc);
+        cancelModal?.addEventListener('click', closeModalFunc);
+        
+        // Toast notifications
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            if (!toastContainer) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            
+            toastContainer.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        // Button event listeners
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const action = btn.textContent;
+                
+                if (action === 'Add User') {
+                    openModal();
+                    showToast('User creation modal opened', 'success');
+                } else if (action === 'Approve') {
+                    showToast(`${btn.closest('tr')?.querySelector('td:nth-child(2)')?.textContent} approved successfully`, 'success');
+                } else if (action === 'Suspend') {
+                    showToast(`${btn.closest('tr')?.querySelector('td:nth-child(2)')?.textContent} suspended`, 'warning');
+                } else if (action === 'Delete') {
+                    if (confirm('Are you sure you want to delete this item?')) {
+                        showToast('Item deleted successfully', 'success');
+                    }
+                } else if (action.includes('Edit')) {
+                    showToast('Edit functionality would open here', 'success');
+                } else if (action.includes('View')) {
+                    showToast('View details functionality would open here', 'success');
+                } else if (action.includes('Impersonate')) {
+                    showToast(`Impersonating ${btn.closest('tr')?.querySelector('td:nth-child(2)')?.textContent}`, 'success');
+                }
+            });
+        });
+        
+        // Form submission
+        document.querySelector('form')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            showToast('User created successfully', 'success');
+            closeModalFunc();
+        });
+        
+        // Simulate real-time updates
+        function updateStats() {
+            // In a real implementation, this would fetch fresh data from the API
+            console.log('Updating dashboard stats...');
+        }
+        
+        // Update stats every 30 seconds
+        setInterval(updateStats, 30000);
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (sidebar?.classList.contains('mobile-open') && 
+                !sidebar.contains(e.target) && 
+                !menuToggle?.contains(e.target)) {
+                sidebar.classList.remove('mobile-open');
+            }
+        });
+        
+        // Simple chart placeholder
+        const ctx = document.getElementById('activityChart');
+        if (ctx) {
+            // Chart.js would be loaded here in a real implementation
+            ctx.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--foreground-muted);">Activity Chart Placeholder</div>';
+        }
+    </script>
+</body>
+</html>

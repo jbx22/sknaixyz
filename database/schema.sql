@@ -84,3 +84,119 @@ create index idx_subscription_payments_user on subscription_payments(user_id);
 create index idx_tokenized_assets_property on tokenized_assets(property_id);
 create index idx_token_holdings_user on token_holdings(user_id);
 create index idx_ledger_sequence on ledger_entries(sequence_number);
+
+-- REGA compliance and workflow audit tables
+create type rega_form_status as enum ('draft', 'completed', 'submitted', 'approved', 'rejected');
+create type rega_form_type as enum ('kyc', 'risk_acknowledgment', 'subscription_terms', 'property_listing');
+create type workflow_status as enum ('draft', 'pending_admin_review', 'changes_requested', 'approved', 'rejected', 'suspended', 'listed', 'settled');
+create type asset_user_type as enum ('owner', 'broker', 'developer', 'investor');
+create type workflow_type as enum ('fractional', 'tokenization', 'secondary');
+
+create table rega_forms (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  form_type rega_form_type not null,
+  form_data jsonb not null,
+  status rega_form_status not null default 'draft',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table property_listings (
+  id bigserial primary key,
+  title text not null,
+  city text not null,
+  district text not null,
+  latitude numeric not null,
+  longitude numeric not null,
+  price numeric not null,
+  type property_type not null,
+  status property_status not null default 'available',
+  bedrooms integer,
+  area_sqm numeric not null,
+  ai_score numeric,
+  description_en text,
+  description_ar text,
+  listed_by bigint references users(id),
+  rer_reference text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table workflow_audit (
+  id bigserial primary key,
+  workflow workflow_type not null,
+  target_id text not null,
+  actor text not null,
+  action text not null,
+  details jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
+create index idx_rega_forms_user on rega_forms(user_id, form_type, status);
+create index idx_property_listings_city on property_listings(city, status);
+create index idx_property_listings_location on property_listings(latitude, longitude);
+create index idx_workflow_audit_workflow on workflow_audit(workflow, created_at);
+create index idx_workflow_audit_actor on workflow_audit(actor);
+
+-- Fractional ownership requests
+create type fractional_request_status as enum ('pending', 'under_review', 'approved', 'rejected', 'active', 'completed');
+
+create table fractional_requests (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  property_id bigint references properties(id) on delete set null,
+  property_title text not null,
+  city text not null default 'Riyadh',
+  estimated_value numeric,
+  fractional_percent numeric(5,2),
+  target_raise numeric,
+  minimum_ticket numeric default 1000,
+  income_model text,
+  use_of_funds text,
+  exit_plan text,
+  risk_summary text,
+  documents text[] default '{}',
+  rega_checklist jsonb default '{}'::jsonb,
+  status fractional_request_status not null default 'pending',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- Fractional investments (user buys into a fractional request)
+create type fractional_investment_status as enum ('pending', 'active', 'completed', 'withdrawn');
+
+create table fractional_investments (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  fractional_request_id bigint not null references fractional_requests(id) on delete cascade,
+  amount_invested numeric(15,2) not null,
+  fraction_acquired numeric(5,4) not null,
+  status fractional_investment_status not null default 'active',
+  created_at timestamptz default now()
+);
+
+-- Token transactions (buy/sell in secondary market)
+create type token_tx_type as enum ('buy', 'sell', 'transfer');
+create type token_tx_status as enum ('pending', 'completed', 'failed', 'cancelled');
+
+create table token_transactions (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  tokenization_request_id bigint references tokenization_requests(id) on delete set null,
+  tokenized_asset_id bigint references tokenized_assets(id) on delete set null,
+  transaction_type token_tx_type not null,
+  quantity integer not null,
+  price_per_token numeric(15,2) not null,
+  total_amount numeric(15,2) not null,
+  status token_tx_status not null default 'pending',
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
+create index idx_fractional_requests_user on fractional_requests(user_id, status);
+create index idx_fractional_requests_property on fractional_requests(property_id);
+create index idx_fractional_investments_request on fractional_investments(fractional_request_id);
+create index idx_fractional_investments_user on fractional_investments(user_id);
+create index idx_token_transactions_user on token_transactions(user_id, status);
+create index idx_token_transactions_asset on token_transactions(tokenized_asset_id);

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map as MapIcon, Plus, Coins } from "lucide-react";
+import { Home, Map as MapIcon, Plus, Coins, Layers } from "lucide-react";
 import { useLanguage } from "../helpers/useLanguage";
 import styles from "./BottomNav.module.css";
 
@@ -12,7 +12,7 @@ export const BottomNav: React.FC = () => {
   const isPropertiesActive = currentPath === "/properties" || currentPath.startsWith("/properties/");
   const isMapActive = currentPath === "/map";
   const isAddPropertyActive = currentPath === "/add-property";
-  const isInvestActive = currentPath === "/invest" || currentPath.startsWith("/invest/");
+  const isInvestActive = currentPath === "/invest" || currentPath.startsWith("/invest/") || currentPath === "/fractional-ownership" || currentPath === "/tokenization" || currentPath === "/secondary-market";
 
   return (
     <nav className={styles.nav} role="navigation" aria-label={language === "ar" ? "القائمة السفلية" : "Bottom navigation"}>
@@ -39,6 +39,18 @@ export const BottomNav: React.FC = () => {
           <span className={styles.label}>
             <span className={styles.labelEn} aria-hidden="true">Invest</span>
             <span className={styles.labelAr} aria-hidden="true">استثمار</span>
+          </span>
+        </Link>
+        <Link
+          to="/fractional-ownership"
+          className={`${styles.link} ${currentPath === "/fractional-ownership" ? styles.active : ""}`}
+          aria-current={currentPath === "/fractional-ownership" ? "page" : undefined}
+          aria-label={language === "ar" ? "تملك جزئي" : "Fractional"}
+        >
+          <Layers size={24} aria-hidden="true" />
+          <span className={styles.label}>
+            <span className={styles.labelEn} aria-hidden="true">Fractional</span>
+            <span className={styles.labelAr} aria-hidden="true">جزئي</span>
           </span>
         </Link>
         <Link

@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Portal - SKNAI</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#7c3aed;--primary-hover:#6d28d9;--primary-light:rgba(124,58,237,0.1);
+            --success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#3b82f6;
+            --background:#ffffff;--bg-muted:#f9fafb;--fg:#111827;--fg-muted:#6b7280;
+            --border:#e5e7eb;--sidebar-w:280px;--header-h:64px;
+            --radius:10px;--shadow:0 1px 3px rgba(0,0,0,.08);
+        }
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg-muted);color:var(--fg);line-height:1.6}
+        .layout{display:flex;min-height:100vh}
+
+        /* LOGIN */
+        .login-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);display:flex;align-items:center;justify-content:center;z-index:9999}
+        .login-box{background:#fff;border-radius:16px;padding:3rem;width:420px;max-width:95vw;box-shadow:0 25px 50px rgba(0,0,0,.3)}
+        .login-logo{text-align:center;margin-bottom:2rem}
+        .login-logo .icon{width:56px;height:56px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));border-radius:12px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.25rem}
+        .login-logo h1{margin-top:1rem;font-size:1.5rem;color:var(--primary)}
+        .login-logo p{color:var(--fg-muted);font-size:.875rem;margin-top:.25rem}
+        .form-group{margin-bottom:1.25rem}
+        .form-group label{display:block;font-size:.875rem;font-weight:500;margin-bottom:.375rem}
+        .form-group input{width:100%;padding:.75rem 1rem;border:1px solid var(--border);border-radius:var(--radius);font-size:1rem;transition:border .2s}
+        .form-group input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.5rem;border:none;border-radius:var(--radius);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s}
+        .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-hover)}
+        .btn-success{background:var(--success);color:#fff}.btn-success:hover{opacity:.9}
+        .btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{opacity:.9}
+        .btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{opacity:.9}
+        .btn-outline{background:transparent;border:1px solid var(--border);color:var(--fg)}.btn-outline:hover{background:var(--bg-muted)}
+        .btn-sm{padding:.375rem .75rem;font-size:.8rem}
+        .btn-block{width:100%}
+        .login-btn{margin-top:.5rem}
+        .login-hint{text-align:center;margin-top:1rem;font-size:.8rem;color:var(--fg-muted)}
+        .login-hint code{background:var(--bg-muted);padding:2px 6px;border-radius:4px}
+
+        /* SIDEBAR */
+        .sidebar{width:var(--sidebar-w);background:#fff;border-right:1px solid var(--border);position:fixed;height:100vh;overflow-y:auto;z-index:100;display:none}
+        .sidebar-hdr{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+        .logo{display:flex;align-items:center;gap:.75rem;font-size:1.15rem;font-weight:700;color:var(--primary)}
+        .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem}
+        .nav-menu{padding:.75rem 0}
+        .nav-sec{margin-bottom:1.5rem}
+        .nav-sec-title{padding:0 1.5rem .5rem;font-size:.7rem;font-weight:600;text-transform:uppercase;color:var(--fg-muted);letter-spacing:.05em}
+        .nav-item{display:flex;align-items:center;padding:.625rem 1.5rem;color:var(--fg-muted);text-decoration:none;transition:all .2s;gap:.75rem;cursor:pointer;font-size:.9rem;border:none;background:none;width:100%;text-align:left}
+        .nav-item:hover{background:var(--bg-muted);color:var(--primary)}
+        .nav-item.active{background:var(--primary-light);color:var(--primary);border-right:3px solid var(--primary);font-weight:600}
+        .nav-icon{width:20px;text-align:center;font-size:1rem}
+        .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:.7rem;padding:1px 7px;border-radius:10px;font-weight:600}
+
+        /* MAIN */
+        .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+        .header{height:var(--header-h);background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:50}
+        .header-left{display:flex;align-items:center;gap:1rem}
+        .page-title{font-size:1.25rem;font-weight:600}
+        .header-right{display:flex;align-items:center;gap:.75rem}
+        .lang-toggle{padding:.375rem .75rem;border:1px solid var(--border);border-radius:var(--radius);background:#fff;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--fg)}
+        .lang-toggle:hover{background:var(--bg-muted)}
+        .user-pill{display:flex;align-items:center;gap:.5rem;padding:.375rem .75rem;background:var(--bg-muted);border-radius:20px;font-size:.85rem;font-weight:500}
+        .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700}
+        .content{padding:1.5rem 2rem;flex:1}
+
+        /* CARDS & GRID */
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:1.5rem}
+        .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;box-shadow:var(--shadow)}
+        .card:hover{box-shadow:0 4px 12px rgba(0,0,0,.08)}
+        .card-title{font-size:.8rem;font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.75rem}
+        .card-value{font-size:1.75rem;font-weight:700;margin-bottom:.25rem}
+        .card-sub{font-size:.8rem;color:var(--fg-muted)}
+        .card-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+        .card-row{display:flex;justify-content:space-between;align-items:flex-start}
+        .positive{color:var(--success)}.negative{color:var(--danger)}
+
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+        .section{margin-bottom:1.5rem}
+        .section-title{font-size:1rem;font-weight:600;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+
+        /* TABLES */
+        .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--border);border-radius:12px}
+        table{width:100%;border-collapse:collapse;font-size:.875rem}
+        thead{background:var(--bg-muted)}
+        th{padding:.75rem 1rem;text-align:left;font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-muted);border-bottom:1px solid var(--border)}
+        td{padding:.75rem 1rem;border-bottom:1px solid var(--border)}
+        tbody tr:hover{background:var(--bg-muted)}
+        tbody tr:last-child td{border-bottom:none}
+        .actions{display:flex;gap:.375rem;flex-wrap:wrap}
+
+        /* BADGES */
+        .badge{display:inline-flex;padding:.2rem .6rem;border-radius:6px;font-size:.75rem;font-weight:600}
+        .badge-blue{background:#dbeafe;color:#1e40af}.badge-green{background:#d1fae5;color:#065f46}
+        .badge-orange{background:#ffedd5;color:#9a3412}.badge-red{background:#fee2e2;color:#991b1b}
+        .badge-purple{background:#ede9fe;color:#5b21b6}.badge-gray{background:#f3f4f6;color:#374151}
+        .badge-yellow{background:#fef3c7;color:#92400e}
+
+        /* FORMS */
+        .filter-bar{display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+        .filter-bar input,.filter-bar select{padding:.5rem .75rem;border:1px solid var(--border);border-radius:var(--radius);font-size:.85rem}
+        .filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:var(--primary)}
+
+        /* TOGGLE */
+        .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0;border-bottom:1px solid var(--border)}
+        .toggle-row:last-child{border:none}
+        .toggle-info h4{font-size:.9rem;font-weight:500}
+        .toggle-info p{font-size:.8rem;color:var(--fg-muted)}
+        .toggle{position:relative;width:48px;height:26px;flex-shrink:0}
+        .toggle input{opacity:0;width:0;height:0}
+        .toggle .slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:13px;transition:.3s}
+        .toggle .slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+        .toggle input:checked+.slider{background:var(--primary)}
+        .toggle input:checked+.slider:before{transform:translateX(22px)}
+
+        /* TOAST */
+        .toast-container{position:fixed;top:1rem;right:1rem;z-index:10000;display:flex;flex-direction:column;gap:.5rem}
+        .toast{padding:.875rem 1.25rem;border-radius:var(--radius);color:#fff;font-size:.875rem;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:slideIn .3s ease;max-width:360px}
+        .toast-success{background:var(--success)}.toast-error{background:var(--danger)}.toast-warning{background:var(--warning)}.toast-info{background:var(--info)}
+        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+        /* GEO */
+        .geo-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+        .geo-card{text-align:center;padding:1.25rem}
+        .geo-card .city{font-size:1.1rem;font-weight:600;margin-bottom:.25rem}
+        .geo-card .count{font-size:2rem;font-weight:700;color:var(--primary)}
+
+        /* COMPLIANCE BARS */
+        .progress-bar{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:.5rem}
+        .progress-fill{height:100%;border-radius:4px;transition:width .5s}
+
+        /* RESPONSIVE */
+        @media(max-width:1024px){.grid-2{grid-template-columns:1fr}.geo-cards{grid-template-columns:1fr 1fr}}
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%);transition:transform .3s}
+            .sidebar.open{transform:translateX(0)}
+            .main{margin-left:0}
+            .stats-grid{grid-template-columns:1fr 1fr}
+            .content{padding:1rem}
+        }
+
+        /* RTL */
+        [dir="rtl"] .sidebar{right:0;left:auto;border-right:none;border-left:1px solid var(--border)}
+        [dir="rtl"] .nav-item.active{border-right:none;border-left:3px solid var(--primary)}
+        [dir="rtl"] .main{margin-left:0;margin-right:var(--sidebar-w)}
+        [dir="rtl"] .sidebar{transform:translateX(100%)}
+        [dir="rtl"] .sidebar.open{transform:translateX(0)}
+
+        .page-section{display:none}
+        .page-section.active{display:block}
+        .empty-state{text-align:center;padding:3rem;color:var(--fg-muted)}
+        .empty-state .icon{font-size:3rem;margin-bottom:1rem}
+        .footer{text-align:center;padding:1rem;font-size:.75rem;color:var(--fg-muted);border-top:1px solid var(--border);background:#fff}
+    </style>
+</head>
+<body>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toasts"></div>
+
+<!-- LOGIN -->
+<div class="login-overlay" id="loginScreen">
+    <div class="login-box">
+        <div class="login-logo">
+            <div class="icon">S</div>
+            <h1 id="loginTitle">SKNAI Super Admin</h1>
+            <p id="loginSubtitle">Platform Management Console</p>
+        </div>
+        <div class="form-group">
+            <label id="labelEmail">Email</label>
+            <input type="email" id="loginEmail" placeholder="superadmin@sknai.xyz" autocomplete="email">
+        </div>
+        <div class="form-group">
+            <label id="labelPass">Password</label>
+            <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn btn-primary btn-block login-btn" id="loginBtn" onclick="doLogin()">
+            <span id="loginBtnText">Sign In</span>
+        </button>
+        <div class="login-hint" id="loginHint">Demo: <code>demo.superadmin@sknai.test</code> / <code>demo123</code></div>
+    </div>
+</div>
+
+<!-- APP -->
+<div class="layout" id="appLayout" style="display:none">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-hdr">
+            <div class="logo">
+                <div class="logo-icon">S</div>
+                <span>SKNAI.XYZ</span>
+            </div>
+        </div>
+        <nav class="nav-menu">
+            <div class="nav-sec">
+                <div class="nav-sec-title" data-i18n="navMain">Main</div>
+                <button class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
+                    <span class="nav-icon">📊</span> <span data-i18n="navDash">Dashboard</span>
+                </button>
+                <button class="nav-item" onclick="showPage('users')" data-page="users">
+                    <span class="nav-icon">👥</span> <span data-i18n="navUsers">User Management</span>
+                    <span class="nav-badge">247</span>
+                </button>
+                <button class="nav-item" onclick="showPage('properties')" data-page="properties">
+                    <span class="nav-icon">🏠</span> <span data-i18n="navProps">Properties</span>
+                    <span class="nav-badge">38</span>
+                </button>
+                <button class="nav-item" onclick="showPage('subscriptions')" data-page="subscriptions">
+                    <span class="nav-icon">📋</span> <span data-i18n="navSubs">Subscriptions</span>
+                    <span class="nav-badge" style="background:var(--warning)">12</span>
+                </button>
+            </div>
+            <div class="nav-sec">
+                <div class="nav-sec-title" data-i18n="navGov">Governance</div>
+                <button class="nav-item" onclick="showPage('compliance')" data-page="compliance">
+                    <span class="nav-icon">✅</span> <span data-i18n="navComp">Compliance REGA/RER</span>
+                </button>
+                <button class="nav-item" onclick="showPage('tokenization')" data-page="tokenization">
+                    <span class="nav-icon">🪙</span> <span data-i18n="navToken">Tokenization</span>
+                </button>
+            </div>
+            <div class="nav-sec">
+                <div class="nav-sec-title" data-i18n="navSys">System</div>
+                <button class="nav-item" onclick="showPage('config')" data-page="config">
+                    <span class="nav-icon">⚙️</span> <span data-i18n="navConf">Configuration</span>
+                </button>
+                <button class="nav-item" onclick="showPage('emergency')" data-page="emergency">
+                    <span class="nav-icon">🚨</span> <span data-i18n="navEmerg">Emergency</span>
+                </button>
+                <button class="nav-item" onclick="showPage('audit')" data-page="audit">
+                    <span class="nav-icon">📝</span> <span data-i18n="navAudit">Audit Logs</span>
+                </button>
+            </div>
+            <div class="nav-sec" style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)">
+                <button class="nav-item" onclick="doLogout()" style="color:var(--danger)">
+                    <span class="nav-icon">🚪</span> <span data-i18n="navLogout">Sign Out</span>
+                </button>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <header class="header">
+            <div class="header-left">
+                <button class="btn btn-sm btn-outline" onclick="document.getElementById('sidebar').classList.toggle('open')" style="display:none" id="menuBtn">☰</button>
+                <h2 class="page-title" id="pageTitle">Dashboard</h2>
+            </div>
+            <div class="header-right">
+                <button class="lang-toggle" onclick="toggleLang()">AR | EN</button>
+                <div class="user-pill">
+                    <div class="user-avatar">SA</div>
+                    <span id="userName">Super Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- ===== DASHBOARD ===== -->
+            <div class="page-section active" id="page-dashboard">
+                <div class="stats-grid">
+                    <div class="card">
+                        <div class="card-row"><div><div class="card-title" data-i18n="statUsers">Total Users</div><div class="card-value">247</div><div class="card-sub positive">▲ 12% <span data-i18n="thisMonth">this month</span></div></div><div class="card-icon" style="background:var(--primary-light);color:var(--primary)">👥</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-row"><div><div class="card-title" data-i18n="statProps">Active Properties</div><div class="card-value">38</div><div class="card-sub positive">▲ 8 new <span data-i18n="thisWeek">this week</span></div></div><div class="card-icon" style="background:#d1fae5;color:var(--success)">🏠</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-row"><div><div class="card-title" data-i18n="statRevenue">Platform Revenue</div><div class="card-value">1.2M <small>SAR</small></div><div class="card-sub positive">▲ 24% vs last quarter</div></div><div class="card-icon" style="background:#fef3c7;color:var(--warning)">💰</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-row"><div><div class="card-title" data-i18n="statCompliance">Compliance Rate</div><div class="card-value">94%</div><div class="card-sub positive">▲ 3% improvement</div></div><div class="card-icon" style="background:#dbeafe;color:var(--info)">✅</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-row"><div><div class="card-title" data-i18n="statTokens">Tokenized Assets</div><div class="card-value">12</div><div class="card-sub">SAR 8.5M total value</div></div><div class="card-icon" style="background:#ede9fe;color:var(--primary)">🪙</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-row"><div><div class="card-title" data-i18n="statSubs">Active Subscriptions</div><div class="card-value">189</div><div class="card-sub">76.5% conversion</div></div><div class="card-icon" style="background:#ffedd5;color:#9a3412">📋</div></div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="section-title"><span data-i18n="recentActivity">Recent Activity</span></div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th data-i18n="colTime">Time</th><th data-i18n="colActor">Actor</th><th data-i18n="colAction">Action</th></tr></thead>
+                                <tbody id="recentActTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="section-title"><span data-i18n="geoDist">Geographic Distribution</span></div>
+                        <div class="geo-cards">
+                            <div class="geo-card"><div class="city">Riyadh</div><div class="count">18</div><div class="card-sub">properties</div></div>
+                            <div class="geo-card"><div class="city">Jeddah</div><div class="count">12</div><div class="card-sub">properties</div></div>
+                            <div class="geo-card"><div class="city">Dammam</div><div class="count">8</div><div class="card-sub">properties</div></div>
+                        </div>
+                        <div style="margin-top:1.5rem">
+                            <div class="section-title" style="font-size:.9rem"><span data-i18n="userByRole">Users by Role</span></div>
+                            <div style="display:flex;flex-direction:column;gap:.5rem" id="roleBars"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== USERS ===== -->
+            <div class="page-section" id="page-users">
+                <div class="section-title"><span data-i18n="userMgmt">User Management</span></div>
+                <div class="filter-bar">
+                    <input type="text" id="userSearch" placeholder="Search name or email..." oninput="filterUsers()" style="min-width:250px">
+                    <select id="userRoleFilter" onchange="filterUsers()"><option value="">All Roles</option><option value="user">User</option><option value="admin">Admin</option><option value="superadmin">Super Admin</option></select>
+                    <select id="userStatusFilter" onchange="filterUsers()"><option value="">All Status</option><option value="active">Active</option><option value="suspended">Suspended</option><option value="pending">Pending</option></select>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Tier</th><th>Status</th><th data-i18n="colJoined">Joined</th><th>Actions</th></tr></thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== PROPERTIES ===== -->
+            <div class="page-section" id="page-properties">
+                <div class="section-title">
+                    <span data-i18n="propMgmt">Property Management</span>
+                    <div class="actions">
+                        <select id="propStatusFilter" onchange="filterProps()"><option value="">All Status</option><option value="active">Active</option><option value="pending">Pending</option><option value="rejected">Rejected</option><option value="archived">Archived</option></select>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Property</th><th>City</th><th>Type</th><th>Price (SAR)</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="propsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== SUBSCRIPTIONS ===== -->
+            <div class="page-section" id="page-subscriptions">
+                <div class="section-title"><span data-i18n="subApprovals">Subscription Approvals</span></div>
+                <div class="filter-bar">
+                    <select id="subStatusFilter" onchange="filterSubs()"><option value="">All</option><option value="pending_admin_review">Pending Review</option><option value="approved_active">Approved</option><option value="rejected">Rejected</option><option value="changes_requested">Changes Requested</option></select>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Applicant</th><th>Type</th><th>Plan</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead>
+                        <tbody id="subsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== COMPLIANCE ===== -->
+            <div class="page-section" id="page-compliance">
+                <div class="section-title"><span data-i18n="regaCompliance">REGA / RER Compliance</span></div>
+                <div class="stats-grid">
+                    <div class="card"><div class="card-title">KYC Completion</div><div class="card-value">89%</div><div class="progress-bar"><div class="progress-fill" style="width:89%;background:var(--success)"></div></div><div class="card-sub">220 of 247 users</div></div>
+                    <div class="card"><div class="card-title">REGA Forms Filed</div><div class="card-value">156</div><div class="card-sub positive">▲ 23 this month</div></div>
+                    <div class="card"><div class="card-title">RER Registration</div><div class="card-value">94%</div><div class="progress-bar"><div class="progress-fill" style="width:94%;background:var(--primary)"></div></div><div class="card-sub">36 of 38 properties</div></div>
+                    <div class="card"><div class="card-title">Risk Acknowledgments</div><div class="card-value">201</div><div class="card-sub">81.4% completion</div></div>
+                </div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="section-title">Form Status Tracker</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Form Type</th><th>Total</th><th>Completed</th><th>Pending</th><th>Rate</th></tr></thead>
+                                <tbody>
+                                    <tr><td>KYC Form</td><td>247</td><td>220</td><td>27</td><td><span class="badge badge-green">89%</span></td></tr>
+                                    <tr><td>Risk Acknowledgment</td><td>247</td><td>201</td><td>46</td><td><span class="badge badge-yellow">81%</span></td></tr>
+                                    <tr><td>Terms Acceptance</td><td>247</td><td>238</td><td>9</td><td><span class="badge badge-green">96%</span></td></tr>
+                                    <tr><td>Property Listing (RER)</td><td>38</td><td>36</td><td>2</td><td><span class="badge badge-green">95%</span></td></tr>
+                                    <tr><td>FAL License</td><td>38</td><td>34</td><td>4</td><td><span class="badge badge-orange">89%</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="section-title">Compliance Alerts</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Alert</th><th>Severity</th><th>Items</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Expired FAL licenses</td><td><span class="badge badge-red">Critical</span></td><td>4</td></tr>
+                                    <tr><td>Incomplete KYC (>30 days)</td><td><span class="badge badge-orange">Warning</span></td><td>11</td></tr>
+                                    <tr><td>Pending risk acknowledgments</td><td><span class="badge badge-yellow">Medium</span></td><td>46</td></tr>
+                                    <tr><td>RER registration missing</td><td><span class="badge badge-red">Critical</span></td><td>2</td></tr>
+                                    <tr><td>PEP flagged users</td><td><span class="badge badge-orange">Warning</span></td><td>3</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== TOKENIZATION ===== -->
+            <div class="page-section" id="page-tokenization">
+                <div class="section-title"><span data-i18n="tokenGov">Tokenization Governance</span></div>
+                <div class="stats-grid">
+                    <div class="card"><div class="card-title">Tokenized Properties</div><div class="card-value">12</div><div class="card-sub">SAR 8.5M total</div></div>
+                    <div class="card"><div class="card-title">Active Tokens</div><div class="card-value">2,450</div><div class="card-sub positive">▲ 340 this month</div></div>
+                    <div class="card"><div class="card-title">Smart Contracts</div><div class="card-value">12</div><div class="card-sub"><span class="badge badge-green">All verified</span></div></div>
+                    <div class="card"><div class="card-title">Investor Cap Utilization</div><div class="card-value">78%</div><div class="progress-bar"><div class="progress-fill" style="width:78%;background:var(--primary)"></div></div><div class="card-sub">312 of 400 max investors</div></div>
+                </div>
+                <div class="card">
+                    <div class="section-title">Tokenized Properties</div>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Property</th><th>Symbol</th><th>Total Tokens</th><th>Price (SAR)</th><th>Investors</th><th>Smart Contract</th><th>Status</th></tr></thead>
+                            <tbody id="tokenTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CONFIG ===== -->
+            <div class="page-section" id="page-config">
+                <div class="section-title"><span data-i18n="sysConfig">System Configuration</span></div>
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="section-title">Platform Settings</div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Maintenance Mode</h4><p>Disable all user access temporarily</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgMaintenance" onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Demo Accounts</h4><p>Enable demo login buttons (dev only)</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgDemo" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Open Registration</h4><p>Allow new user sign-ups</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgRegOpen" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Auto-Approve Subscriptions</h4><p>Skip admin review for premium tier</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgAutoApprove" onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>REGA Compliance Required</h4><p>Enforce REGA form completion before listing</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgRegaReq" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Secondary Market Enabled</h4><p>Allow token trading between investors</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgSecondary" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="section-title">Feature Flags</div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>AI Property Valuation</h4><p>Enable AI-powered price suggestions</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgAI" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Map View</h4><p>Show properties on interactive map</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgMap" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Push Notifications</h4><p>Send browser push notifications</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgPush" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Email Notifications</h4><p>Transaction and compliance emails</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgEmail" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                        <div class="toggle-row">
+                            <div class="toggle-info"><h4>Arabic RTL Support</h4><p>Full Arabic language interface</p></div>
+                            <label class="toggle"><input type="checkbox" id="cfgArabic" checked onchange="updateConfig()"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== EMERGENCY ===== -->
+            <div class="page-section" id="page-emergency">
+                <div class="section-title" style="color:var(--danger)">🚨 Emergency Controls</div>
+                <div class="stats-grid">
+                    <div class="card" style="border-left:4px solid var(--danger)">
+                        <div class="card-title">Toggle Maintenance Mode</div>
+                        <p style="font-size:.875rem;color:var(--fg-muted);margin:.75rem 0">Immediately block all user access. Users will see a maintenance page.</p>
+                        <button class="btn btn-danger" onclick="if(confirm('Enable maintenance mode? All users will be locked out.')){toast('Maintenance mode enabled','warning');addAudit('System','Enabled maintenance mode')}">Enable Maintenance</button>
+                        <button class="btn btn-success" style="margin-left:.5rem" onclick="toast('Maintenance mode disabled','success');addAudit('System','Disabled maintenance mode')">Disable Maintenance</button>
+                    </div>
+                    <div class="card" style="border-left:4px solid var(--warning)">
+                        <div class="card-title">Mass User Suspension</div>
+                        <p style="font-size:.875rem;color:var(--fg-muted);margin:.75rem 0">Suspend all non-admin users. Admins retain access.</p>
+                        <button class="btn btn-warning" onclick="if(confirm('SUSPEND ALL non-admin users? This is irreversible without manual action.')){toast('All non-admin users suspended','warning');addAudit('System','Mass user suspension')}">Suspend All Users</button>
+                    </div>
+                    <div class="card" style="border-left:4px solid var(--info)">
+                        <div class="card-title">Export Platform Data</div>
+                        <p style="font-size:.875rem;color:var(--fg-muted);margin:.75rem 0">Download complete platform data as JSON (users, properties, transactions, compliance).</p>
+                        <button class="btn btn-outline" onclick="exportData()">📥 Download JSON Export</button>
+                    </div>
+                    <div class="card" style="border-left:4px solid var(--fg-muted)">
+                        <div class="card-title">Clear System Cache</div>
+                        <p style="font-size:.875rem;color:var(--fg-muted);margin:.75rem 0">Clear all cached data. Users may experience slower loads temporarily.</p>
+                        <button class="btn btn-outline" onclick="toast('System cache cleared','info');addAudit('System','Cache cleared')">🗑️ Clear Cache</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== AUDIT ===== -->
+            <div class="page-section" id="page-audit">
+                <div class="section-title"><span data-i18n="auditTrail">Audit Trail</span></div>
+                <div class="filter-bar">
+                    <select id="auditActionFilter" onchange="filterAudit()"><option value="">All Actions</option><option value="login">Login</option><option value="approve">Approval</option><option value="reject">Rejection</option><option value="config">Config Change</option><option value="system">System</option></select>
+                    <input type="date" id="auditDateFrom" onchange="filterAudit()">
+                    <input type="date" id="auditDateTo" onchange="filterAudit()">
+                    <button class="btn btn-sm btn-outline" onclick="filterAudit()">Refresh</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Timestamp</th><th>Actor</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+                        <tbody id="auditTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">© 2025 SKNAI.XYZ — Super Admin Portal v3.2 | <span data-i18n="footerText">Real Estate Buy · Rent · Sell</span></footer>
+    </main>
+</div>
+
+<script>
+// ========== i18n ==========
+const i18n = {
+    ar: {
+        loginTitle:'إدارة SKNAI الفائقة',loginSubtitle:'وحدة إدارة المنصة',
+        labelEmail:'البريد الإلكتروني',labelPass:'كلمة المرور',loginBtnText:'تسجيل الدخول',
+        navMain:'الرئيسية',navDash:'لوحة التحكم',navUsers:'إدارة المستخدمين',navProps:'العقارات',
+        navSubs:'الاشتراكات',navGov:'الحوكمة',navComp:'الامتثال REGA/RER',navToken:'التوكنية',
+        navSys:'النظام',navConf:'الإعدادات',navEmerg:'الطوارئ',navAudit:'سجل التدقيق',navLogout:'تسجيل الخروج',
+        statUsers:'إجمالي المستخدمين',statProps:'العقارات النشطة',statRevenue:'إيرادات المنصة',
+        statCompliance:'معدل الامتثال',statTokens:'أصول موكنة',statSubs:'الاشتراكات النشطة',
+        thisMonth:'هذا الشهر',thisWeek:'هذا الأسبوع',
+        recentActivity:'النشاط الأخير',geoDist:'التوزيع الجغرافي',userByRole:'المستخدمون حسب الدور',
+        colTime:'الوقت',colActor:'المستخدم',colAction:'الإجراء',colJoined:'تاريخ الانضمام',
+        userMgmt:'إدارة المستخدمين',propMgmt:'إدارة العقارات',subApprovals:'الموافقات على الاشتراكات',
+        regaCompliance:'امتثال REGA/RER',tokenGov:'حوكمة التوكنية',sysConfig:'إعدادات النظام',
+        auditTrail:'سجل التدقيق',footerText:'شراء · تأجير · بيع العقارات',
+        pageTitles:{dashboard:'لوحة التحكم',users:'إدارة المستخدمين',properties:'العقارات',subscriptions:'الاشتراكات',compliance:'الامتثال',tokenization:'التوكنية',config:'الإعدادات',emergency:'الطوارئ',audit:'سجل التدقيق'}
+    },
+    en: {
+        loginTitle:'SKNAI Super Admin',loginSubtitle:'Platform Management Console',
+        labelEmail:'Email',labelPass:'Password',loginBtnText:'Sign In',
+        navMain:'Main',navDash:'Dashboard',navUsers:'User Management',navProps:'Properties',
+        navSubs:'Subscriptions',navGov:'Governance',navComp:'Compliance REGA/RER',navToken:'Tokenization',
+        navSys:'System',navConf:'Configuration',navEmerg:'Emergency',navAudit:'Audit Logs',navLogout:'Sign Out',
+        statUsers:'Total Users',statProps:'Active Properties',statRevenue:'Platform Revenue',
+        statCompliance:'Compliance Rate',statTokens:'Tokenized Assets',statSubs:'Active Subscriptions',
+        thisMonth:'this month',thisWeek:'this week',
+        recentActivity:'Recent Activity',geoDist:'Geographic Distribution',userByRole:'Users by Role',
+        colTime:'Time',colActor:'Actor',colAction:'Action',colJoined:'Joined',
+        userMgmt:'User Management',propMgmt:'Property Management',subApprovals:'Subscription Approvals',
+        regaCompliance:'REGA / RER Compliance',tokenGov:'Tokenization Governance',sysConfig:'System Configuration',
+        auditTrail:'Audit Trail',footerText:'Real Estate Buy · Rent · Sell',
+        pageTitles:{dashboard:'Dashboard',users:'User Management',properties:'Properties',subscriptions:'Subscriptions',compliance:'Compliance',tokenization:'Tokenization',config:'Configuration',emergency:'Emergency Controls',audit:'Audit Logs'}
+    }
+};
+let lang = 'en';
+function toggleLang(){
+    lang = lang==='en'?'ar':'en';
+    document.documentElement.dir = lang==='ar'?'rtl':'ltr';
+    document.documentElement.lang = lang;
+    const t = i18n[lang];
+    for(const [k,v] of Object.entries(t)){
+        if(typeof v==='string'){
+            document.querySelectorAll(`[data-i18n="${k}"]`).forEach(el=>el.textContent=v);
+        }
+    }
+    const pg = document.querySelector('.nav-item.active')?.dataset.page || 'dashboard';
+    if(t.pageTitles) document.getElementById('pageTitle').textContent = t.pageTitles[pg] || pg;
+}
+
+// ========== TOAST ==========
+function toast(msg, type='info'){
+    const c = document.getElementById('toasts');
+    const d = document.createElement('div');
+    d.className = `toast toast-${type}`;
+    d.textContent = msg;
+    c.appendChild(d);
+    setTimeout(()=>d.remove(),4000);
+}
+
+// ========== LOGIN ==========
+function doLogin(){
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if(!email||!pass){toast('Please enter email and password','error');return}
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('appLayout').style.display='flex';
+    document.getElementById('sidebar').style.display='block';
+    addAudit(email,'login','Super Admin','Logged in via portal');
+    toast('Welcome back, Super Admin','success');
+}
+function doLogout(){
+    if(!confirm('Sign out?')) return;
+    addAudit(document.getElementById('userName').textContent,'login','System','Logged out');
+    document.getElementById('loginScreen').style.display='flex';
+    document.getElementById('appLayout').style.display='none';
+    document.getElementById('sidebar').style.display='none';
+}
+
+// ========== NAV ==========
+function showPage(page){
+    document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('page-'+page).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+    const t = i18n[lang]?.pageTitles;
+    document.getElementById('pageTitle').textContent = t?.[page] || page;
+    document.getElementById('sidebar').classList.remove('open');
+}
+
+// ========== MOCK DATA ==========
+const mockUsers = [
+    {name:'Demo Investor',email:'demo.investor@sknai.test',role:'user',tier:'premium',status:'active',joined:'2025-03-15'},
+    {name:'Demo Owner',email:'demo.owner@sknai.test',role:'user',tier:'premium',status:'active',joined:'2025-02-20'},
+    {name:'Demo Broker',email:'demo.broker@sknai.test',role:'user',tier:'premium',status:'active',joined:'2025-01-10'},
+    {name:'Demo Developer',email:'demo.developer@sknai.test',role:'user',tier:'premium',status:'active',joined:'2025-04-05'},
+    {name:'Demo Admin',email:'demo.admin@sknai.test',role:'admin',tier:'premium',status:'active',joined:'2024-12-01'},
+    {name:'Ahmed Al-Rashid',email:'ahmed@example.com',role:'user',tier:'basic',status:'active',joined:'2025-05-01'},
+    {name:'Sara Mohammed',email:'sara@example.com',role:'user',tier:'free',status:'pending',joined:'2025-05-10'},
+    {name:'Khalid Omar',email:'khalid@example.com',role:'admin',tier:'premium',status:'active',joined:'2024-11-15'},
+    {name:'Fatima Hassan',email:'fatima@example.com',role:'user',tier:'premium',status:'suspended',joined:'2025-01-22'},
+    {name:'Mohammed Al-Faisal',email:'mohammed@example.com',role:'user',tier:'basic',status:'active',joined:'2025-04-18'},
+    {name:'Noura Al-Saud',email:'noura@example.com',role:'user',tier:'free',status:'active',joined:'2025-05-08'},
+    {name:'Omar Al-Dosari',email:'omar@example.com',role:'user',tier:'premium',status:'active',joined:'2025-02-14'},
+];
+
+const mockProps = [
+    {name:'Al-Olaya Luxury Tower',city:'Riyadh',type:'Residential',price:'2,450,000',status:'active'},
+    {name:'Jeddah Corniche Villa',city:'Jeddah',type:'Residential',price:'3,800,000',status:'active'},
+    {name:'King Fahd Business Park',city:'Dammam',type:'Commercial',price:'5,200,000',status:'active'},
+    {name:'Al-Malqa Apartment Complex',city:'Riyadh',type:'Residential',price:'1,200,000',status:'pending'},
+    {name:'Red Sea Resort Hotel',city:'Jeddah',type:'Hospitality',price:'12,500,000',status:'active'},
+    {name:'Diplomatic Quarter Office',city:'Riyadh',type:'Commercial',price:'4,100,000',status:'active'},
+    {name:'Al-Khobar Warehouse',city:'Dammam',type:'Commercial',price:'890,000',status:'rejected'},
+    {name:'Yasmine Gardens',city:'Riyadh',type:'Residential',price:'1,750,000',status:'active'},
+    {name:'Al-Bawadi Mall Unit',city:'Jeddah',type:'Commercial',price:'2,800,000',status:'pending'},
+    {name:'Marina Tower Apartment',city:'Dammam',type:'Residential',price:'950,000',status:'archived'},
+];
+
+const mockSubs = [
+    {name:'Sara Mohammed',type:'investor',plan:'basic',status:'pending_admin_review',date:'2025-05-10'},
+    {name:'Noura Al-Saud',type:'investor',plan:'free',status:'pending_admin_review',date:'2025-05-08'},
+    {name:'Talal Real Estate',type:'office',plan:'premium',status:'changes_requested',date:'2025-04-25'},
+    {name:'Gulf Developers',type:'developer',plan:'premium',status:'pending_admin_review',date:'2025-05-12'},
+    {name:'Ahmed Al-Rashid',type:'investor',plan:'premium',status:'approved_active',date:'2025-03-15'},
+    {name:'Al-Olaya Properties',type:'owner',plan:'premium',status:'approved_active',date:'2025-02-20'},
+];
+
+const mockTokens = [
+    {name:'Al-Olaya Luxury Tower',symbol:'OLT',total:'2450',price:'1,000',investors:'87',contract:'0x7a2...f41',status:'active'},
+    {name:'Jeddah Corniche Villa',symbol:'JCV',total:'380',price:'10,000',investors:'52',contract:'0x3b1...a28',status:'active'},
+    {name:'Red Sea Resort Hotel',symbol:'RSR',total:'1250',price:'10,000',investors:'94',contract:'0xc9d...e13',status:'active'},
+    {name:'King Fahd Business Park',symbol:'KFB',total:'520',price:'10,000',investors:'41',contract:'0x5e2...b77',status:'active'},
+    {name:'Diplomatic Quarter Office',symbol:'DQO',total:'410',price:'10,000',investors:'38',contract:'0x1f8...c94',status:'pending'},
+];
+
+const roleColors = {user:'badge-blue',admin:'badge-orange',superadmin:'badge-purple'};
+const statusColors = {active:'badge-green',suspended:'badge-red',pending:'badge-yellow',pending_admin_review:'badge-yellow',approved_active:'badge-green',rejected:'badge-red',changes_requested:'badge-orange',archived:'badge-gray'};
+const subStatusLabels = {pending_admin_review:'Pending Review',approved_active:'Approved',rejected:'Rejected',changes_requested:'Changes Requested'};
+
+// ========== RENDER ==========
+function renderUsers(data){
+    document.getElementById('usersTable').innerHTML = data.map(u=>`<tr>
+        <td><strong>${u.name}</strong></td><td>${u.email}</td>
+        <td><span class="badge ${roleColors[u.role]||'badge-gray'}">${u.role}</span></td>
+        <td><span class="badge badge-blue">${u.tier}</span></td>
+        <td><span class="badge ${statusColors[u.status]||'badge-gray'}">${u.status}</span></td>
+        <td>${u.joined}</td>
+        <td class="actions">
+            <button class="btn btn-sm btn-outline" onclick="toast('Viewing ${u.name}','info')">View</button>
+            <button class="btn btn-sm btn-outline" onclick="toast('Editing ${u.name}','info')">Edit</button>
+            ${u.role!=='admin'&&u.role!=='superadmin'?`<button class="btn btn-sm btn-outline" onclick="toast('Impersonating ${u.name}','warning')">Impersonate</button>`:''}
+            ${u.status==='active'?`<button class="btn btn-sm btn-danger" onclick="toast('${u.name} suspended','warning')">Suspend</button>`:`<button class="btn btn-sm btn-success" onclick="toast('${u.name} activated','success')">Activate</button>`}
+        </td>
+    </tr>`).join('');
+}
+function filterUsers(){
+    const s=document.getElementById('userSearch').value.toLowerCase();
+    const r=document.getElementById('userRoleFilter').value;
+    const st=document.getElementById('userStatusFilter').value;
+    renderUsers(mockUsers.filter(u=>(u.name.toLowerCase().includes(s)||u.email.includes(s))&&(!r||u.role===r)&&(!st||u.status===st)));
+}
+
+function renderProps(data){
+    document.getElementById('propsTable').innerHTML = data.map(p=>`<tr>
+        <td><strong>${p.name}</strong></td><td>${p.city}</td><td>${p.type}</td><td>${p.price}</td>
+        <td><span class="badge ${statusColors[p.status]||'badge-gray'}">${p.status}</span></td>
+        <td class="actions">
+            ${p.status==='pending'?`<button class="btn btn-sm btn-success" onclick="toast('${p.name} approved','success')">Approve</button><button class="btn btn-sm btn-danger" onclick="toast('${p.name} rejected','error')">Reject</button>`:''}
+            ${p.status==='active'?`<button class="btn btn-sm btn-outline" onclick="toast('${p.name} featured','info')">Feature</button><button class="btn btn-sm btn-outline" onclick="toast('${p.name} archived','warning')">Archive</button>`:''}
+        </td>
+    </tr>`).join('');
+}
+function filterProps(){renderProps(mockProps.filter(p=>{const s=document.getElementById('propStatusFilter').value;return !s||p.status===s}))}
+
+function renderSubs(data){
+    document.getElementById('subsTable').innerHTML = data.map(s=>`<tr>
+        <td><strong>${s.name}</strong></td><td>${s.type}</td><td>${s.plan}</td>
+        <td><span class="badge ${statusColors[s.status]||'badge-gray'}">${subStatusLabels[s.status]||s.status}</span></td>
+        <td>${s.date}</td>
+        <td class="actions">
+            ${s.status==='pending_admin_review'?`<button class="btn btn-sm btn-success" onclick="toast('${s.name} approved','success');addAudit('Super Admin','approve','Subscription','${s.name}')">Approve</button><button class="btn btn-sm btn-danger" onclick="toast('${s.name} rejected','error');addAudit('Super Admin','reject','Subscription','${s.name}')">Reject</button>`:''}
+            ${s.status==='changes_requested'?`<button class="btn btn-sm btn-outline" onclick="toast('Reviewing ${s.name}','info')">Review</button>`:''}
+        </td>
+    </tr>`).join('');
+}
+function filterSubs(){renderSubs(mockSubs.filter(s=>{const st=document.getElementById('subStatusFilter').value;return !st||s.status===st}))}
+
+function renderTokens(){
+    document.getElementById('tokenTable').innerHTML = mockTokens.map(t=>`<tr>
+        <td><strong>${t.name}</strong></td><td><span class="badge badge-purple">${t.symbol}</span></td>
+        <td>${t.total}</td><td>${t.price}</td><td>${t.investors}</td>
+        <td><code style="font-size:.8rem">${t.contract}</code></td>
+        <td><span class="badge ${statusColors[t.status]||'badge-gray'}">${t.status}</span></td>
+    </tr>`).join('');
+}
+
+// ========== RECENT ACTIVITY ==========
+const mockActivity = [
+    {time:'2 min ago',actor:'Ahmed Al-Rashid',action:'Submitted fractional request'},
+    {time:'8 min ago',actor:'Demo Admin',action:'Approved subscription: Noura Al-Saud'},
+    {time:'15 min ago',actor:'System',action:'Auto-generated KYC form for Sara Mohammed'},
+    {time:'22 min ago',actor:'Demo Broker',action:'Listed property: Al-Malqa Apartment Complex'},
+    {time:'35 min ago',actor:'Gulf Developers',action:'Submitted tokenization request'},
+    {time:'1 hr ago',actor:'Super Admin',action:'Updated REGA compliance settings'},
+    {time:'1.5 hr ago',actor:'Fatima Hassan',action:'Completed risk acknowledgment form'},
+    {time:'2 hr ago',actor:'Demo Admin',action:'Rejected property: Al-Khobar Warehouse'},
+    {time:'3 hr ago',actor:'System',action:'PEP check completed: 3 flags'},
+    {time:'4 hr ago',actor:'Khalid Omar',action:'Approved tokenization: DQO'},
+];
+function renderActivity(){
+    document.getElementById('recentActTable').innerHTML = mockActivity.map(a=>`<tr><td style="white-space:nowrap;font-size:.8rem;color:var(--fg-muted)">${a.time}</td><td><strong>${a.actor}</strong></td><td>${a.action}</td></tr>`).join('');
+}
+
+// ========== ROLE BARS ==========
+function renderRoleBars(){
+    const roles = [{label:'Investors',count:180,color:'var(--info)'},{label:'Owners',count:32,color:'var(--success)'},{label:'Brokers',count:18,color:'var(--warning)'},{label:'Admins',count:5,color:'var(--primary)'},{label:'Developers',count:12,color:'#9333ea'}];
+    document.getElementById('roleBars').innerHTML = roles.map(r=>`<div>
+        <div style="display:flex;justify-content:space-between;font-size:.8rem"><span>${r.label}</span><strong>${r.count}</strong></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${(r.count/247*100).toFixed(0)}%;background:${r.color}"></div></div>
+    </div>`).join('');
+}
+
+// ========== AUDIT ==========
+let auditLog = [];
+function addAudit(actor,action,target,details){
+    auditLog.unshift({time:new Date().toLocaleString(),actor,action,target,details:details||''});
+    renderAudit();
+}
+function renderAudit(data){
+    const d = data || auditLog.slice(0,50);
+    document.getElementById('auditTable').innerHTML = d.length?d.map(a=>`<tr>
+        <td style="white-space:nowrap;font-size:.8rem">${a.time}</td><td>${a.actor}</td>
+        <td><span class="badge ${action==='reject'?'badge-red':action==='approve'?'badge-green':action==='system'?'badge-purple':'badge-blue'}">${a.action}</span></td>
+        <td>${a.target}</td><td style="color:var(--fg-muted)">${a.details}</td>
+    </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--fg-muted)">No audit entries yet</td></tr>';
+}
+function filterAudit(){renderAudit(auditLog)}
+
+// ========== CONFIG ==========
+function updateConfig(){toast('Configuration updated','success');addAudit('Super Admin','config','System','Configuration changed')}
+
+// ========== EXPORT ==========
+function exportData(){
+    const data = JSON.stringify({users:mockUsers,properties:mockProps,subscriptions:mockSubs,tokens:mockTokens,audit:auditLog,config:{
+        maintenance:document.getElementById('cfgMaintenance').checked,
+        demo:document.getElementById('cfgDemo').checked,
+        registration:document.getElementById('cfgRegOpen').checked,
+        autoApprove:document.getElementById('cfgAutoApprove').checked,
+        regaRequired:document.getElementById('cfgRegaReq').checked,
+        secondaryMarket:document.getElementById('cfgSecondary').checked,
+    }},null,2);
+    const blob = new Blob([data],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `sknai-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    addAudit('Super Admin','system','Export','Full platform data exported');
+    toast('Data exported successfully','success');
+}
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded',()=>{
+    renderUsers(mockUsers);
+    renderProps(mockProps);
+    renderSubs(mockSubs);
+    renderTokens();
+    renderActivity();
+    renderRoleBars();
+    // seed audit
+    const seedAudit = [
+        {time:'2025-05-14 09:00',actor:'System',action:'system',target:'Startup',details:'Super Admin portal loaded'},
+        {time:'2025-05-14 08:45',actor:'System',action:'approve',target:'Subscription',details:'Auto-approved 3 premium users'},
+        {time:'2025-05-14 08:30',actor:'System',action:'config',target:'REGA',details:'REGA compliance check completed'},
+        {time:'2025-05-13 22:00',actor:'System',action:'system',target:'Maintenance',details:'Scheduled backup completed'},
+        {time:'2025-05-13 18:15',actor:'Demo Admin',action:'approve',target:'Property',details:'Approved Al-Malqa Apartment listing'},
+    ];
+    auditLog = seedAudit;
+    renderAudit();
+    // Enter key on login
+    document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+    document.getElementById('loginEmail').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('loginPass').focus()});
+    // responsive menu
+    const mq = window.matchMedia('(max-width:768px)');
+    function checkMQ(e){document.getElementById('menuBtn').style.display=e.matches?'block':'none'}
+    mq.addEventListener('change',checkMQ);checkMQ(mq);
+});
+</script>
+</body>
+</html>

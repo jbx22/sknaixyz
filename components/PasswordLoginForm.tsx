@@ -18,6 +18,8 @@ import {
   postLogin,
 } from "../endpoints/auth/login_with_password_POST.schema";
 import { useAuth } from "../helpers/useAuth";
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, seedDemoComplianceForUser } from "../helpers/demoAccounts";
+import { User } from "../helpers/User";
 
 export type LoginFormData = z.infer<typeof schema>;
 
@@ -46,8 +48,26 @@ export const PasswordLoginForm: React.FC<PasswordLoginFormProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await postLogin(data);
-      onLogin(result.user);
+      let user: User;
+      const normalizedEmail = data.email.toLowerCase();
+      const isDemo = import.meta.env.DEV && DEMO_ACCOUNTS.some((a) => a.email === normalizedEmail) && data.password === DEMO_PASSWORD;
+      if (isDemo) {
+        // Client-side demo login — no backend needed
+        const demo = DEMO_ACCOUNTS.find((a) => a.email === normalizedEmail)!;
+        user = {
+          id: 9000 + DEMO_ACCOUNTS.indexOf(demo),
+          email: demo.email,
+          displayName: demo.label,
+          avatarUrl: null,
+          role: demo.role as "admin" | "user" | "superadmin",
+          subscriptionTier: "premium" as const,
+        };
+      } else {
+        const result = await postLogin(data);
+        user = result.user;
+      }
+      seedDemoComplianceForUser(user);
+      onLogin(user);
       setTimeout(() => navigate("/"), 200);
     } catch (err) {
       console.error("Login error:", err);
