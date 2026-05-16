@@ -418,3 +418,70 @@ create index idx_investor_distributions_investor on investor_distributions(inves
 create index idx_investor_distributions_status on investor_distributions(distribution_status);
 create index idx_rent_audit_logs_entity on rent_audit_logs(entity_type, entity_id);
 create index idx_rent_audit_logs_created on rent_audit_logs(created_at);
+
+-- Property Access Control
+create type property_member_role as enum ('owner', 'developer', 'broker', 'investor', 'tenant');
+
+alter table properties alter column status type property_status using status::property_status;
+alter type property_status add value if not exists 'pending';
+alter type property_status add value if not exists 'maintenance';
+alter type user_role add value if not exists 'owner';
+alter type user_role add value if not exists 'developer';
+alter type user_role add value if not exists 'broker';
+
+create table property_members (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  user_id bigint not null references users(id) on delete cascade,
+  role property_member_role not null default 'owner',
+  granted_by bigint references users(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(property_id, user_id, role)
+);
+
+create index idx_property_members_property on property_members(property_id);
+create index idx_property_members_user on property_members(user_id);
+
+-- Dashboard & Notifications
+create table admin_role_assignments (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  assigned_role text not null,
+  assigned_by bigint not null references users(id),
+  scope text default 'all',
+  is_active boolean default true,
+  created_at timestamptz default now(),
+  revoked_at timestamptz,
+  revoked_by bigint references users(id)
+);
+
+create index idx_admin_role_assignments_user on admin_role_assignments(user_id);
+create index idx_admin_role_assignments_role on admin_role_assignments(assigned_role);
+
+create table user_dashboard_preferences (
+  id bigserial primary key,
+  user_id bigint not null unique references users(id) on delete cascade,
+  layout jsonb default '{}'::jsonb,
+  widgets text[] default '{"recent_properties","my_investments","rent_summary","market_activity"}',
+  theme text default 'system',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table notifications (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  title text not null,
+  message text not null,
+  type text not null default 'info',
+  is_read boolean default false,
+  action_url text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
+create index idx_notifications_user on notifications(user_id, is_read, created_at);
+
+alter table admin_activity_logs add column if not exists target_user_id bigint;
+alter table admin_activity_logs add column if not exists outcome text;

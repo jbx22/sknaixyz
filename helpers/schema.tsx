@@ -90,6 +90,13 @@ export type DistributionStatus = "completed" | "failed" | "pending" | "processin
 export type AllocationStatus = "confirmed" | "disputed" | "pending";
 
 export type PropertyMemberRole = "broker" | "developer" | "investor" | "owner" | "tenant";
+export type FractionalRequestStatus = "pending" | "approved" | "rejected" | "cancelled";
+export type FractionalInvestmentStatus = "active" | "exited" | "cancelled" | "pending";
+export type RegaFormStatus = "draft" | "completed" | "submitted" | "approved" | "rejected";
+export type RegaFormType = "kyc" | "risk_acknowledgment" | "subscription_terms" | "property_listing";
+export type TokenTxType = "buy" | "sell" | "transfer" | "distribution" | "mint" | "burn";
+export type TokenTxStatus = "pending" | "completed" | "failed" | "cancelled";
+export type WorkflowType = "fractional" | "tokenization" | "secondary";
 
 export interface PropertyMembers {
   id: Generated<number>;
@@ -316,6 +323,92 @@ export interface Notifications {
   createdAt: Generated<Timestamp>;
 }
 
+export interface FractionalRequests {
+  id: Generated<number>;
+  userId: number;
+  propertyId: number | null;
+  propertyTitle: string;
+  city: Generated<string>;
+  estimatedValue: Numeric | null;
+  fractionalPercent: Numeric | null;
+  targetRaise: Numeric | null;
+  minimumTicket: Generated<Numeric>;
+  incomeModel: string | null;
+  useOfFunds: string | null;
+  exitPlan: string | null;
+  riskSummary: string | null;
+  documents: Generated<string[]>;
+  regaChecklist: Generated<Json>;
+  status: Generated<FractionalRequestStatus>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface FractionalInvestments {
+  id: Generated<number>;
+  userId: number;
+  fractionalRequestId: number;
+  amountInvested: Numeric;
+  fractionAcquired: Numeric;
+  status: Generated<FractionalInvestmentStatus>;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface PropertyListings {
+  id: Generated<number>;
+  title: string;
+  city: string;
+  district: string;
+  latitude: Numeric;
+  longitude: Numeric;
+  price: Numeric;
+  type: PropertyType;
+  status: Generated<PropertyStatus>;
+  bedrooms: number | null;
+  areaSqm: Numeric;
+  aiScore: Numeric | null;
+  descriptionEn: string | null;
+  descriptionAr: string | null;
+  listedBy: number | null;
+  rerReference: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RegaForms {
+  id: Generated<number>;
+  userId: number;
+  formType: RegaFormType;
+  formData: Json;
+  status: Generated<RegaFormStatus>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface TokenTransactions {
+  id: Generated<number>;
+  userId: number;
+  tokenizationRequestId: number | null;
+  tokenizedAssetId: number | null;
+  transactionType: TokenTxType;
+  quantity: number;
+  pricePerToken: Numeric;
+  totalAmount: Numeric;
+  status: Generated<TokenTxStatus>;
+  metadata: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface WorkflowAudit {
+  id: Generated<number>;
+  workflow: WorkflowType;
+  targetId: string;
+  actor: string;
+  action: string;
+  details: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+}
+
 export interface AdminActivityLogs {
   actionType: string;
   adminId: number;
@@ -325,6 +418,8 @@ export interface AdminActivityLogs {
   ipAddress: string | null;
   targetId: number | null;
   targetType: string | null;
+  targetUserId: number | null;
+  outcome: string | null;
 }
 
 export interface AssetControls {
@@ -737,6 +832,7 @@ export interface DB {
   userDashboardPreferences: UserDashboardPreferences;
   oauthStates: OauthStates;
   properties: Properties;
+  propertyListings: PropertyListings;
   propertyChats: PropertyChats;
   propertyExpenses: PropertyExpenses;
   propertyMembers: PropertyMembers;
@@ -744,6 +840,8 @@ export interface DB {
   propertyUnits: PropertyUnits;
   propertyViews: PropertyViews;
   investorDistributions: InvestorDistributions;
+  fractionalRequests: FractionalRequests;
+  fractionalInvestments: FractionalInvestments;
   paymentIntents: PaymentIntents;
   paymentWebhookEvents: PaymentWebhookEvents;
   rentalContracts: RentalContracts;
@@ -762,10 +860,12 @@ export interface DB {
   tokenizationRequests: TokenizationRequests;
   tokenizedAssets: TokenizedAssets;
   tokenTransfers: TokenTransfers;
+  tokenTransactions: TokenTransactions;
   userFavorites: UserFavorites;
   userPasswords: UserPasswords;
   users: Users;
   walletTransactions: WalletTransactions;
+  workflowAudit: WorkflowAudit;
 }
 
 

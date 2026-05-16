@@ -9,6 +9,8 @@ type AdminActivityLogInput = {
   targetId: number | null;
   details: Record<string, any> | null;
   ipAddress: string | null;
+  targetUserId?: number | null;
+  outcome?: string | null;
 };
 
 /**
@@ -30,6 +32,8 @@ export async function logAdminActivity(
         targetId: input.targetId,
         details: input.details ? JSON.stringify(input.details) : null,
         ipAddress: input.ipAddress,
+        targetUserId: input.targetUserId ?? null,
+        outcome: input.outcome ?? null,
         createdAt: new Date(),
       })
       .execute();
