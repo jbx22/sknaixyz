@@ -75,6 +75,26 @@ import Page_35 from "./pages/admin.fractional-ownership.tsx";
 import PageLayout_35 from "./pages/admin.fractional-ownership.pageLayout.tsx";
 import Page_36 from "./pages/admin.secondary-market.tsx";
 import PageLayout_36 from "./pages/admin.secondary-market.pageLayout.tsx";
+import Page_37 from "./pages/admin.rent.tsx";
+import PageLayout_37 from "./pages/admin.rent.pageLayout.tsx";
+import Page_38 from "./pages/admin.rent.contracts.tsx";
+import PageLayout_38 from "./pages/admin.rent.contracts.pageLayout.tsx";
+import Page_39 from "./pages/admin.rent.invoices.tsx";
+import PageLayout_39 from "./pages/admin.rent.invoices.pageLayout.tsx";
+import Page_40 from "./pages/admin.rent.payments.tsx";
+import PageLayout_40 from "./pages/admin.rent.payments.pageLayout.tsx";
+import Page_41 from "./pages/admin.rent.tenants.tsx";
+import PageLayout_41 from "./pages/admin.rent.tenants.pageLayout.tsx";
+import Page_42 from "./pages/admin.rent.investors.tsx";
+import PageLayout_42 from "./pages/admin.rent.investors.pageLayout.tsx";
+import Page_43 from "./pages/admin.rent.reports.tsx";
+import PageLayout_43 from "./pages/admin.rent.reports.pageLayout.tsx";
+import Page_44 from "./pages/admin.rent.expenses.tsx";
+import PageLayout_44 from "./pages/admin.rent.expenses.pageLayout.tsx";
+import Page_45 from "./pages/rent.tsx";
+import PageLayout_45 from "./pages/rent.pageLayout.tsx";
+import Page_46 from "./pages/rent.portal.tsx";
+import PageLayout_46 from "./pages/rent.portal.pageLayout.tsx";
 
 if (!window.requestIdleCallback) {
   window.requestIdleCallback = (cb) => {
@@ -84,7 +104,17 @@ if (!window.requestIdleCallback) {
 
 import "./base.css";
 
-const fileNameToRoute = new Map([["./pages/ai.tsx","/ai"],["./pages/map.tsx","/map"],["./pages/about.tsx","/about"],["./pages/login.tsx","/login"],["./pages/terms.tsx","/terms"],["./pages/_index.tsx","/"],["./pages/invest.tsx","/invest"],["./pages/contact.tsx","/contact"],["./pages/privacy.tsx","/privacy"],["./pages/dashboard.tsx","/dashboard"],["./pages/invest.kyc.tsx","/invest/kyc"],["./pages/properties.tsx","/properties"],["./pages/superadmin.tsx","/superadmin"],["./pages/admin.users.tsx","/admin/users"],["./pages/add-property.tsx","/add-property"],["./pages/subscription.tsx","/subscription"],["./pages/invest.wallet.tsx","/invest/wallet"],["./pages/admin.activity.tsx","/admin/activity"],["./pages/admin.dashboard.tsx","/admin/dashboard"],["./pages/invest.offering.tsx","/invest/offering"],["./pages/account-settings.tsx","/account-settings"],["./pages/admin.compliance.tsx","/admin/compliance"],["./pages/admin.properties.tsx","/admin/properties"],["./pages/invest.portfolio.tsx","/invest/portfolio"],["./pages/admin.tokenization.tsx","/admin/tokenization"],["./pages/admin.subscriptions.tsx","/admin/subscriptions"],["./pages/admin.tokenization-kyc.tsx","/admin/tokenization-kyc"],["./pages/admin.tokenization-income.tsx","/admin/tokenization-income"],["./pages/dashboards.tsx","/dashboards"],["./pages/fractional-ownership.tsx","/fractional-ownership"],["./pages/tokenization.tsx","/tokenization"],["./pages/subscription.apply.tsx","/subscription/apply"],["./pages/subscription.status.tsx","/subscription/status"],["./pages/admin.subscription-approvals.tsx","/admin/subscription-approvals"],["./pages/secondary-market.tsx","/secondary-market"],["./pages/admin.fractional-ownership.tsx","/admin/fractional-ownership"],["./pages/admin.secondary-market.tsx","/admin/secondary-market"]]);
+const fileNameToRoute = new Map([["./pages/ai.tsx","/ai"],["./pages/map.tsx","/map"],["./pages/about.tsx","/about"],["./pages/login.tsx","/login"],["./pages/terms.tsx","/terms"],["./pages/_index.tsx","/"],["./pages/invest.tsx","/invest"],["./pages/contact.tsx","/contact"],["./pages/privacy.tsx","/privacy"],["./pages/dashboard.tsx","/dashboard"],["./pages/invest.kyc.tsx","/invest/kyc"],["./pages/properties.tsx","/properties"],["./pages/superadmin.tsx","/superadmin"],["./pages/admin.users.tsx","/admin/users"],["./pages/add-property.tsx","/add-property"],["./pages/subscription.tsx","/subscription"],["./pages/invest.wallet.tsx","/invest/wallet"],["./pages/admin.activity.tsx","/admin/activity"],["./pages/admin.dashboard.tsx","/admin/dashboard"],["./pages/invest.offering.tsx","/invest/offering"],["./pages/account-settings.tsx","/account-settings"],["./pages/admin.compliance.tsx","/admin/compliance"],["./pages/admin.properties.tsx","/admin/properties"],["./pages/invest.portfolio.tsx","/invest/portfolio"],["./pages/admin.tokenization.tsx","/admin/tokenization"],["./pages/admin.subscriptions.tsx","/admin/subscriptions"],["./pages/admin.tokenization-kyc.tsx","/admin/tokenization-kyc"],["./pages/admin.tokenization-income.tsx","/admin/tokenization-income"],["./pages/dashboards.tsx","/dashboards"],["./pages/fractional-ownership.tsx","/fractional-ownership"],["./pages/tokenization.tsx","/tokenization"],["./pages/subscription.apply.tsx","/subscription/apply"],["./pages/subscription.status.tsx","/subscription/status"],["./pages/admin.subscription-approvals.tsx","/admin/subscription-approvals"],["./pages/secondary-market.tsx","/secondary-market"],["./pages/admin.fractional-ownership.tsx","/admin/fractional-ownership"],["./pages/admin.secondary-market.tsx","/admin/secondary-market"],
+["./pages/admin.rent.tsx","/admin/rent"],
+["./pages/admin.rent.contracts.tsx","/admin/rent/contracts"],
+["./pages/admin.rent.invoices.tsx","/admin/rent/invoices"],
+["./pages/admin.rent.payments.tsx","/admin/rent/payments"],
+["./pages/admin.rent.tenants.tsx","/admin/rent/tenants"],
+["./pages/admin.rent.investors.tsx","/admin/rent/investors"],
+["./pages/admin.rent.reports.tsx","/admin/rent/reports"],
+["./pages/admin.rent.expenses.tsx","/admin/rent/expenses"],
+["./pages/rent.tsx","/rent"],
+["./pages/rent.portal.tsx","/rent/portal"]]);
 const fileNameToComponent = new Map([
     ["./pages/ai.tsx", Page_0],
 ["./pages/map.tsx", Page_1],
@@ -123,6 +153,16 @@ const fileNameToComponent = new Map([
 ["./pages/secondary-market.tsx", Page_34],
 ["./pages/admin.fractional-ownership.tsx", Page_35],
 ["./pages/admin.secondary-market.tsx", Page_36],
+["./pages/admin.rent.tsx", Page_37],
+["./pages/admin.rent.contracts.tsx", Page_38],
+["./pages/admin.rent.invoices.tsx", Page_39],
+["./pages/admin.rent.payments.tsx", Page_40],
+["./pages/admin.rent.tenants.tsx", Page_41],
+["./pages/admin.rent.investors.tsx", Page_42],
+["./pages/admin.rent.reports.tsx", Page_43],
+["./pages/admin.rent.expenses.tsx", Page_44],
+["./pages/rent.tsx", Page_45],
+["./pages/rent.portal.tsx", Page_46],
   ]);
 
 function makePageRoute(filename: string) {
@@ -260,6 +300,16 @@ export function App() {
 "./pages/secondary-market.tsx": PageLayout_34,
 "./pages/admin.fractional-ownership.tsx": PageLayout_35,
 "./pages/admin.secondary-market.tsx": PageLayout_36,
+"./pages/admin.rent.tsx": PageLayout_37,
+"./pages/admin.rent.contracts.tsx": PageLayout_38,
+"./pages/admin.rent.invoices.tsx": PageLayout_39,
+"./pages/admin.rent.payments.tsx": PageLayout_40,
+"./pages/admin.rent.tenants.tsx": PageLayout_41,
+"./pages/admin.rent.investors.tsx": PageLayout_42,
+"./pages/admin.rent.reports.tsx": PageLayout_43,
+"./pages/admin.rent.expenses.tsx": PageLayout_44,
+"./pages/rent.tsx": PageLayout_45,
+"./pages/rent.portal.tsx": PageLayout_46,
 }), fileNameToRoute, makePageRoute })} 
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Map as MapIcon, Plus, Coins, Layers } from "lucide-react";
+import { Home, Map as MapIcon, Plus, Coins, Layers, KeyRound } from "lucide-react";
 import { useLanguage } from "../helpers/useLanguage";
 import styles from "./BottomNav.module.css";
 
@@ -51,6 +51,18 @@ export const BottomNav: React.FC = () => {
           <span className={styles.label}>
             <span className={styles.labelEn} aria-hidden="true">Fractional</span>
             <span className={styles.labelAr} aria-hidden="true">جزئي</span>
+          </span>
+        </Link>
+        <Link
+          to="/rent"
+          className={`${styles.link} ${currentPath === "/rent" || currentPath.startsWith("/rent/") ? styles.active : ""}`}
+          aria-current={currentPath === "/rent" || currentPath.startsWith("/rent/") ? "page" : undefined}
+          aria-label={language === "ar" ? "إيجار" : "Rent"}
+        >
+          <KeyRound size={24} aria-hidden="true" />
+          <span className={styles.label}>
+            <span className={styles.labelEn} aria-hidden="true">Rent</span>
+            <span className={styles.labelAr} aria-hidden="true">إيجار</span>
           </span>
         </Link>
         <Link

@@ -1,0 +1,14 @@
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius, 8px);
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--foreground, #374151);
+}
+.icon { flex-shrink: 0; font-size: 16px; }
+.text { margin: 0; line-height: 1.5; }

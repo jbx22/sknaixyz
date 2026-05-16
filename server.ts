@@ -1053,6 +1053,446 @@ app.post('_api/admin/tokenization/income/distribute',async c => {
     return c.text("Error loading endpoint code " + e.message,  500)
   }
 })
+// ============================================================
+// Smart Rent Management Module Endpoints
+// ============================================================
+app.get('_api/rent/units/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/units/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/units/create',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/units/create_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/contracts/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/contracts/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/contracts/create',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/contracts/create_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/contracts/update',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/contracts/update_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/invoices/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/invoices/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/invoices/generate',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/invoices/generate_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/invoices/mark-paid',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/invoices/mark-paid_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/payments/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/payments/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/payments/record',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/payments/record_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/payment/create-link',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/payment/create-link_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/payment/webhook',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/payment/webhook_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/expenses/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/expenses/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/expenses/create',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/expenses/create_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/ownership/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/ownership/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/ownership/create',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/ownership/create_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/allocations/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/allocations/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/allocations/calculate',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/allocations/calculate_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/distributions/list',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/distributions/list_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.post('_api/rent/distributions/create',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/distributions/create_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/reports/summary',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/reports/summary_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/reports/property-income',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/reports/property-income_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/reports/export-csv',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/reports/export-csv_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/tenant/invoices',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/tenant/invoices_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/tenant/contracts',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/tenant/contracts_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/tenant/payments',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/tenant/payments_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/investor/allocations',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/investor/allocations_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/investor/distributions',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/investor/distributions_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+app.get('_api/rent/investor/properties',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/investor/properties_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+
+app.get('_api/rent/public/units',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/public/units_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+
+app.post('_api/rent/tenant/apply',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/tenant/apply_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+
 app.use("/*", serveStatic({ root: "./static" }));
 app.use('/*', serveStatic({ root: './dist' }))
 app.get("*", async (c, next) => {

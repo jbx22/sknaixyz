@@ -200,3 +200,221 @@ create index idx_fractional_investments_request on fractional_investments(fracti
 create index idx_fractional_investments_user on fractional_investments(user_id);
 create index idx_token_transactions_user on token_transactions(user_id, status);
 create index idx_token_transactions_asset on token_transactions(tokenized_asset_id);
+
+-- Smart Rent Management Module
+create type rent_contract_status as enum ('draft', 'active', 'expired', 'terminated', 'renewed');
+create type rent_invoice_status as enum ('pending', 'paid', 'overdue', 'cancelled', 'partial');;
+create type rent_payment_method as enum ('bank_transfer', 'cash', 'check', 'online', 'payment_link', 'other');
+create type rent_payment_status as enum ('pending', 'completed', 'failed', 'refunded');
+create type payment_intent_status as enum ('created', 'processing', 'succeeded', 'failed', 'cancelled');
+create type payment_provider_name as enum ('mock', 'tap', 'moyasar', 'hyperpay');
+create type webhook_event_status as enum ('received', 'processed', 'failed');
+create type expense_category as enum ('maintenance', 'insurance', 'taxes', 'management_fee', 'utilities', 'repair', 'marketing', 'legal', 'other');
+create type distribution_status as enum ('pending', 'processing', 'completed', 'failed');
+create type allocation_status as enum ('pending', 'confirmed', 'disputed');
+
+create table property_units (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  unit_number text not null,
+  floor_number integer,
+  area_sqm numeric,
+  bedrooms integer,
+  bathrooms numeric,
+  monthly_rent numeric not null default 0,
+  status property_status not null default 'available',
+  description text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table rental_contracts (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  unit_id bigint references property_units(id) on delete set null,
+  tenant_user_id bigint not null references users(id) on delete cascade,
+  landlord_user_id bigint not null references users(id) on delete cascade,
+  monthly_rent numeric not null,
+  security_deposit numeric not null default 0,
+  start_date timestamptz not null,
+  end_date timestamptz not null,
+  contract_status rent_contract_status not null default 'draft',
+  payment_due_day integer not null default 1,
+  auto_generate_invoice boolean not null default true,
+  notes text,
+  contract_document_url text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table rent_invoices (
+  id bigserial primary key,
+  contract_id bigint not null references rental_contracts(id) on delete cascade,
+  property_id bigint not null references properties(id) on delete cascade,
+  tenant_user_id bigint not null references users(id) on delete cascade,
+  amount numeric not null,
+  due_date timestamptz not null,
+  period_start timestamptz not null,
+  period_end timestamptz not null,
+  invoice_status rent_invoice_status not null default 'pending',
+  paid_amount numeric not null default 0,
+  paid_at timestamptz,
+  notes text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table rent_payments (
+  id bigserial primary key,
+  invoice_id bigint not null references rent_invoices(id) on delete cascade,
+  contract_id bigint not null references rental_contracts(id) on delete cascade,
+  property_id bigint not null references properties(id) on delete cascade,
+  tenant_user_id bigint not null references users(id) on delete cascade,
+  amount numeric not null,
+  payment_method rent_payment_method not null default 'bank_transfer',
+  payment_status rent_payment_status not null default 'pending',
+  transaction_reference text,
+  payment_date timestamptz,
+  notes text,
+  recorded_by bigint references users(id),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table payment_intents (
+  id bigserial primary key,
+  invoice_id bigint not null references rent_invoices(id) on delete cascade,
+  provider payment_provider_name not null default 'mock',
+  provider_intent_id text,
+  amount numeric not null,
+  currency text not null default 'SAR',
+  payment_url text,
+  intent_status payment_intent_status not null default 'created',
+  metadata jsonb default '{}'::jsonb,
+  expires_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table payment_webhook_events (
+  id bigserial primary key,
+  provider payment_provider_name not null,
+  event_type text not null,
+  provider_event_id text,
+  payload jsonb not null default '{}'::jsonb,
+  processed boolean not null default false,
+  processing_error text,
+  created_at timestamptz default now()
+);
+
+create table rent_receipts (
+  id bigserial primary key,
+  payment_id bigint not null references rent_payments(id) on delete cascade,
+  invoice_id bigint not null references rent_invoices(id) on delete cascade,
+  tenant_user_id bigint not null references users(id) on delete cascade,
+  amount numeric not null,
+  receipt_number text not null unique,
+  receipt_url text,
+  issued_at timestamptz default now()
+);
+
+create table rent_reminders (
+  id bigserial primary key,
+  invoice_id bigint not null references rent_invoices(id) on delete cascade,
+  contract_id bigint not null references rental_contracts(id) on delete cascade,
+  reminder_type text not null default 'due_soon',
+  sent_at timestamptz default now(),
+  delivery_status text not null default 'sent'
+);
+
+create table property_ownership_shares (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  user_id bigint not null references users(id) on delete cascade,
+  ownership_percentage numeric(5,2) not null,
+  investment_amount numeric not null default 0,
+  acquired_at timestamptz default now(),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table property_expenses (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  category expense_category not null default 'other',
+  amount numeric not null,
+  description text,
+  expense_date timestamptz not null,
+  recorded_by bigint references users(id),
+  receipt_url text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table rental_income_allocations (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  owner_user_id bigint not null references users(id) on delete cascade,
+  period_start timestamptz not null,
+  period_end timestamptz not null,
+  total_income numeric not null,
+  total_expenses numeric not null default 0,
+  net_income numeric not null,
+  ownership_share_id bigint references property_ownership_shares(id) on delete set null,
+  allocated_amount numeric not null,
+  allocation_status allocation_status not null default 'pending',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table investor_distributions (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade,
+  allocation_id bigint not null references rental_income_allocations(id) on delete cascade,
+  investor_user_id bigint not null references users(id) on delete cascade,
+  amount numeric not null,
+  distribution_status distribution_status not null default 'pending',
+  distribution_date timestamptz,
+  transaction_reference text,
+  notes text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table rent_audit_logs (
+  id bigserial primary key,
+  action text not null,
+  entity_type text not null,
+  entity_id bigint not null,
+  user_id bigint references users(id) on delete set null,
+  details jsonb default '{}'::jsonb,
+  ip_address text,
+  created_at timestamptz default now()
+);
+
+create index idx_property_units_property on property_units(property_id);
+create index idx_rental_contracts_property on rental_contracts(property_id);
+create index idx_rental_contracts_tenant on rental_contracts(tenant_user_id);
+create index idx_rental_contracts_status on rental_contracts(contract_status);
+create index idx_rent_invoices_contract on rent_invoices(contract_id);
+create index idx_rent_invoices_tenant on rent_invoices(tenant_user_id);
+create index idx_rent_invoices_status on rent_invoices(invoice_status);
+create index idx_rent_invoices_due_date on rent_invoices(due_date);
+create index idx_rent_payments_invoice on rent_payments(invoice_id);
+create index idx_rent_payments_contract on rent_payments(contract_id);
+create index idx_rent_payments_status on rent_payments(payment_status);
+create index idx_payment_intents_invoice on payment_intents(invoice_id);
+create index idx_payment_webhook_events_provider on payment_webhook_events(provider, processed);
+create index idx_rent_receipts_payment on rent_receipts(payment_id);
+create index idx_rent_receipts_tenant on rent_receipts(tenant_user_id);
+create index idx_property_ownership_property on property_ownership_shares(property_id);
+create index idx_property_ownership_user on property_ownership_shares(user_id);
+create index idx_property_expenses_property on property_expenses(property_id);
+create index idx_property_expenses_category on property_expenses(category);
+create index idx_rental_income_allocations_property on rental_income_allocations(property_id);
+create index idx_rental_income_allocations_owner on rental_income_allocations(owner_user_id);
+create index idx_investor_distributions_property on investor_distributions(property_id);
+create index idx_investor_distributions_investor on investor_distributions(investor_user_id);
+create index idx_investor_distributions_status on investor_distributions(distribution_status);
+create index idx_rent_audit_logs_entity on rent_audit_logs(entity_type, entity_id);
+create index idx_rent_audit_logs_created on rent_audit_logs(created_at);

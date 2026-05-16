@@ -49,6 +49,14 @@ export const AdminSidebar = () => {
     { path: "/admin/tokenization-kyc", label: language === 'ar' ? 'مراجعة KYC' : 'KYC Reviews', icon: <ShieldCheck size={20} /> },
     { path: "/admin/tokenization-income", label: language === 'ar' ? 'توزيع الأرباح' : 'Income Distribution', icon: <CircleDollarSign size={20} /> },
     { path: "/admin/compliance", label: language === 'ar' ? 'سجل الامتثال' : 'Compliance Logs', icon: <FileSearch size={20} /> },
+    { path: "/admin/rent", label: (language === 'ar' ? 'إدارة الإيجار' : 'Rent Management'), icon: <CircleDollarSign size={20} /> },
+    { path: "/admin/rent/contracts", label: language === 'ar' ? 'العقود' : 'Contracts', icon: <ClipboardCheck size={20} /> },
+    { path: "/admin/rent/invoices", label: language === 'ar' ? 'الفواتير' : 'Invoices', icon: <Coins size={20} /> },
+    { path: "/admin/rent/payments", label: language === 'ar' ? 'المدفوعات' : 'Payments', icon: <CreditCard size={20} /> },
+    { path: "/admin/rent/tenants", label: language === 'ar' ? 'المستأجرون' : 'Tenants', icon: <Users size={20} /> },
+    { path: "/admin/rent/investors", label: language === 'ar' ? 'المستثمرون' : 'Investors', icon: <Percent size={20} /> },
+    { path: "/admin/rent/reports", label: language === 'ar' ? 'التقارير' : 'Reports', icon: <Activity size={20} /> },
+    { path: "/admin/rent/expenses", label: language === 'ar' ? 'المصروفات' : 'Expenses', icon: <FileSearch size={20} /> },
   ];
 
   const toggleSidebar = () => setIsOpen(!isOpen);

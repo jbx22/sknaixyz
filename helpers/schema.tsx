@@ -69,6 +69,207 @@ export type WalletTransactionStatus = "completed" | "failed" | "pending";
 
 export type WalletTransactionType = "deposit" | "income_distribution" | "refund" | "token_purchase" | "token_sale" | "withdrawal";
 
+export type RentContractStatus = "active" | "draft" | "expired" | "renewed" | "terminated";
+
+export type RentInvoiceStatus = "cancelled" | "overdue" | "paid" | "partial" | "pending";
+
+export type RentPaymentMethod = "bank_transfer" | "cash" | "check" | "online" | "other" | "payment_link";
+
+export type RentPaymentStatus = "completed" | "failed" | "pending" | "refunded";
+
+export type PaymentIntentStatus = "cancelled" | "created" | "failed" | "processing" | "succeeded";
+
+export type PaymentProviderName = "hyperpay" | "mock" | "moyasar" | "tap";
+
+export type WebhookEventStatus = "failed" | "processed" | "received";
+
+export type ExpenseCategory = "insurance" | "legal" | "maintenance" | "management_fee" | "marketing" | "other" | "repair" | "taxes" | "utilities";
+
+export type DistributionStatus = "completed" | "failed" | "pending" | "processing";
+
+export type AllocationStatus = "confirmed" | "disputed" | "pending";
+
+export interface PropertyUnits {
+  areaSqm: Numeric | null;
+  bedrooms: number | null;
+  bathrooms: Numeric | null;
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  floorNumber: number | null;
+  id: Generated<number>;
+  monthlyRent: Generated<Numeric>;
+  propertyId: number;
+  status: Generated<PropertyStatus>;
+  unitNumber: string;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RentalContracts {
+  autoGenerateInvoice: Generated<boolean>;
+  contractDocumentUrl: string | null;
+  contractStatus: Generated<RentContractStatus>;
+  createdAt: Generated<Timestamp>;
+  endDate: Timestamp;
+  id: Generated<number>;
+  landlordUserId: number;
+  monthlyRent: Numeric;
+  notes: string | null;
+  paymentDueDay: Generated<number>;
+  propertyId: number;
+  securityDeposit: Generated<Numeric>;
+  startDate: Timestamp;
+  tenantUserId: number;
+  unitId: number | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RentInvoices {
+  amount: Numeric;
+  contractId: number;
+  createdAt: Generated<Timestamp>;
+  dueDate: Timestamp;
+  id: Generated<number>;
+  invoiceStatus: Generated<RentInvoiceStatus>;
+  notes: string | null;
+  paidAmount: Generated<Numeric>;
+  paidAt: Timestamp | null;
+  periodEnd: Timestamp;
+  periodStart: Timestamp;
+  propertyId: number;
+  tenantUserId: number;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RentPayments {
+  amount: Numeric;
+  contractId: number;
+  createdAt: Generated<Timestamp>;
+  id: Generated<number>;
+  invoiceId: number;
+  notes: string | null;
+  paymentDate: Timestamp | null;
+  paymentMethod: Generated<RentPaymentMethod>;
+  paymentStatus: Generated<RentPaymentStatus>;
+  propertyId: number;
+  recordedBy: number | null;
+  tenantUserId: number;
+  transactionReference: string | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface PaymentIntents {
+  amount: Numeric;
+  createdAt: Generated<Timestamp>;
+  currency: Generated<string>;
+  expiresAt: Timestamp | null;
+  id: Generated<number>;
+  intentStatus: Generated<PaymentIntentStatus>;
+  invoiceId: number;
+  metadata: Generated<Json>;
+  provider: Generated<PaymentProviderName>;
+  providerIntentId: string | null;
+  paymentUrl: string | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface PaymentWebhookEvents {
+  createdAt: Generated<Timestamp>;
+  eventType: string;
+  id: Generated<number>;
+  payload: Generated<Json>;
+  processed: Generated<boolean>;
+  processingError: string | null;
+  provider: PaymentProviderName;
+  providerEventId: string | null;
+}
+
+export interface RentReceipts {
+  amount: Numeric;
+  createdAt: Generated<Timestamp>;
+  id: Generated<number>;
+  invoiceId: number;
+  issuedAt: Generated<Timestamp>;
+  paymentId: number;
+  receiptNumber: string;
+  receiptUrl: string | null;
+  tenantUserId: number;
+}
+
+export interface RentReminders {
+  contractId: number;
+  createdAt: Generated<Timestamp>;
+  deliveryStatus: Generated<string>;
+  id: Generated<number>;
+  invoiceId: number;
+  reminderType: Generated<string>;
+  sentAt: Generated<Timestamp>;
+}
+
+export interface PropertyOwnershipShares {
+  acquiredAt: Generated<Timestamp>;
+  createdAt: Generated<Timestamp>;
+  id: Generated<number>;
+  investmentAmount: Generated<Numeric>;
+  ownershipPercentage: Numeric;
+  propertyId: number;
+  updatedAt: Generated<Timestamp>;
+  userId: number;
+}
+
+export interface PropertyExpenses {
+  amount: Numeric;
+  category: Generated<ExpenseCategory>;
+  createdAt: Generated<Timestamp>;
+  description: string | null;
+  expenseDate: Timestamp;
+  id: Generated<number>;
+  propertyId: number;
+  receiptUrl: string | null;
+  recordedBy: number | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RentalIncomeAllocations {
+  allocatedAmount: Numeric;
+  allocationStatus: Generated<AllocationStatus>;
+  createdAt: Generated<Timestamp>;
+  id: Generated<number>;
+  netIncome: Numeric;
+  ownerUserId: number;
+  ownershipShareId: number | null;
+  periodEnd: Timestamp;
+  periodStart: Timestamp;
+  propertyId: number;
+  totalExpenses: Generated<Numeric>;
+  totalIncome: Numeric;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface InvestorDistributions {
+  allocationId: number;
+  amount: Numeric;
+  createdAt: Generated<Timestamp>;
+  distributionDate: Timestamp | null;
+  distributionStatus: Generated<DistributionStatus>;
+  id: Generated<number>;
+  investorUserId: number;
+  notes: string | null;
+  propertyId: number;
+  transactionReference: string | null;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface RentAuditLogs {
+  action: string;
+  createdAt: Generated<Timestamp>;
+  details: Generated<Json>;
+  entityId: number;
+  entityType: string;
+  id: Generated<number>;
+  ipAddress: string | null;
+  userId: number | null;
+}
+
 export interface AdminActivityLogs {
   actionType: string;
   adminId: number;
@@ -488,7 +689,20 @@ export interface DB {
   oauthStates: OauthStates;
   properties: Properties;
   propertyChats: PropertyChats;
+  propertyExpenses: PropertyExpenses;
+  propertyOwnershipShares: PropertyOwnershipShares;
+  propertyUnits: PropertyUnits;
   propertyViews: PropertyViews;
+  investorDistributions: InvestorDistributions;
+  paymentIntents: PaymentIntents;
+  paymentWebhookEvents: PaymentWebhookEvents;
+  rentalContracts: RentalContracts;
+  rentalIncomeAllocations: RentalIncomeAllocations;
+  rentAuditLogs: RentAuditLogs;
+  rentInvoices: RentInvoices;
+  rentPayments: RentPayments;
+  rentReceipts: RentReceipts;
+  rentReminders: RentReminders;
   secondaryListings: SecondaryListings;
   sessions: Sessions;
   smartContractRules: SmartContractRules;
@@ -527,4 +741,13 @@ export const TokenizationRequestStatusArrayValues: [TokenizationRequestStatus, .
 export const LedgerEntryTypeArrayValues: [LedgerEntryType, ...LedgerEntryType[]] = ["asset_freeze","asset_tokenization","asset_unfreeze","compliance_check","emergency_action","global_freeze","global_unfreeze","income_distribution","kyc_verification","regulatory_override","reversal","spv_creation","token_issuance","token_transfer"];
 export const LedgerEntryStatusArrayValues: [LedgerEntryStatus, ...LedgerEntryStatus[]] = ["confirmed","failed","pending","reversed"];
 export const ControlKeyTypeArrayValues: [ControlKeyType, ...ControlKeyType[]] = ["emergency_shutdown","global_distribution_freeze","global_issuance_freeze","global_trading_freeze"];
+export const RentContractStatusArrayValues: [RentContractStatus, ...RentContractStatus[]] = ["active","draft","expired","renewed","terminated"];
+export const RentInvoiceStatusArrayValues: [RentInvoiceStatus, ...RentInvoiceStatus[]] = ["cancelled","overdue","paid","partial","pending"];
+export const RentPaymentMethodArrayValues: [RentPaymentMethod, ...RentPaymentMethod[]] = ["bank_transfer","cash","check","online","other","payment_link"];
+export const RentPaymentStatusArrayValues: [RentPaymentStatus, ...RentPaymentStatus[]] = ["completed","failed","pending","refunded"];
+export const PaymentIntentStatusArrayValues: [PaymentIntentStatus, ...PaymentIntentStatus[]] = ["cancelled","created","failed","processing","succeeded"];
+export const PaymentProviderNameArrayValues: [PaymentProviderName, ...PaymentProviderName[]] = ["mock","tap","moyasar","hyperpay"];
+export const ExpenseCategoryArrayValues: [ExpenseCategory, ...ExpenseCategory[]] = ["insurance","legal","maintenance","management_fee","marketing","other","repair","taxes","utilities"];
+export const DistributionStatusArrayValues: [DistributionStatus, ...DistributionStatus[]] = ["completed","failed","pending","processing"];
+export const AllocationStatusArrayValues: [AllocationStatus, ...AllocationStatus[]] = ["confirmed","disputed","pending"];
 // Note: kysely maps the table/column/enum names from snake_case to camelCase and PascalCase. When running SQL statements, make sure to use snake_case, but TypeScript code should use camelCase or PascalCase.
