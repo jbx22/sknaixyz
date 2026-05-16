@@ -43,7 +43,7 @@ export type OfferingStatus = "closed" | "draft" | "open" | "settled";
 
 export type PaymentStatus = "completed" | "failed" | "pending" | "refunded";
 
-export type PropertyStatus = "available" | "rented" | "sold";
+export type PropertyStatus = "available" | "maintenance" | "pending" | "rented" | "sold";
 
 export type PropertyType = "apartment" | "commercial" | "land" | "townhouse" | "villa";
 
@@ -61,7 +61,7 @@ export type TokenizationRequestStatus = "approved" | "pending" | "rejected" | "u
 
 export type TokenTransferType = "distribution" | "primary_purchase" | "secondary_buy" | "secondary_sell";
 
-export type UserRole = "admin" | "superadmin" | "user";
+export type UserRole = "admin" | "broker" | "developer" | "owner" | "superadmin" | "user";
 
 export type UserStatus = "active" | "deactivated" | "suspended";
 
@@ -88,6 +88,18 @@ export type ExpenseCategory = "insurance" | "legal" | "maintenance" | "managemen
 export type DistributionStatus = "completed" | "failed" | "pending" | "processing";
 
 export type AllocationStatus = "confirmed" | "disputed" | "pending";
+
+export type PropertyMemberRole = "broker" | "developer" | "investor" | "owner" | "tenant";
+
+export interface PropertyMembers {
+  id: Generated<number>;
+  propertyId: number;
+  userId: number;
+  role: Generated<PropertyMemberRole>;
+  grantedBy: number | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
 
 export interface PropertyUnits {
   areaSqm: Numeric | null;
@@ -690,6 +702,7 @@ export interface DB {
   properties: Properties;
   propertyChats: PropertyChats;
   propertyExpenses: PropertyExpenses;
+  propertyMembers: PropertyMembers;
   propertyOwnershipShares: PropertyOwnershipShares;
   propertyUnits: PropertyUnits;
   propertyViews: PropertyViews;
@@ -720,9 +733,9 @@ export interface DB {
 
 
 // Use these for zod schema enums or other purposes, since the kysely enums are just types
-export const UserRoleArrayValues: [UserRole, ...UserRole[]] = ["admin","superadmin","user"];
+export const UserRoleArrayValues: [UserRole, ...UserRole[]] = ["admin","broker","developer","owner","superadmin","user"];
 export const PropertyTypeArrayValues: [PropertyType, ...PropertyType[]] = ["apartment","commercial","land","townhouse","villa"];
-export const PropertyStatusArrayValues: [PropertyStatus, ...PropertyStatus[]] = ["available","rented","sold"];
+export const PropertyStatusArrayValues: [PropertyStatus, ...PropertyStatus[]] = ["available","maintenance","pending","rented","sold"];
 export const SubscriptionTierArrayValues: [SubscriptionTier, ...SubscriptionTier[]] = ["basic","free","premium"];
 export const PaymentStatusArrayValues: [PaymentStatus, ...PaymentStatus[]] = ["completed","failed","pending","refunded"];
 export const SessionTypeArrayValues: [SessionType, ...SessionType[]] = ["auth","temp_oauth"];

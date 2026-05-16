@@ -71,6 +71,18 @@ export async function handle(request: Request) {
       }
     );
 
+    // Auto-assign property owner membership
+    await db.insertInto("propertyMembers")
+      .values({
+        propertyId: result.id,
+        userId: currentUserId,
+        role: "owner",
+        grantedBy: currentUserId,
+      })
+      .onConflict((oc) => oc.columns(["propertyId", "userId", "role"]).doNothing())
+      .execute()
+      .catch(() => {}); // Ignore conflict errors
+
     return new Response(
       superjson.stringify({ property: result } satisfies OutputType)
     );

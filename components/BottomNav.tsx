@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, Map as MapIcon, Plus, Coins, Layers, KeyRound } from "lucide-react";
 import { useLanguage } from "../helpers/useLanguage";
+import { useAuth } from "../helpers/useAuth";
 import styles from "./BottomNav.module.css";
 
 export const BottomNav: React.FC = () => {
@@ -13,6 +14,10 @@ export const BottomNav: React.FC = () => {
   const isMapActive = currentPath === "/map";
   const isAddPropertyActive = currentPath === "/add-property";
   const isInvestActive = currentPath === "/invest" || currentPath.startsWith("/invest/") || currentPath === "/fractional-ownership" || currentPath === "/tokenization" || currentPath === "/secondary-market";
+
+  const { authState } = useAuth();
+  const isLoggedIn = authState.type === "authenticated";
+  const isRentActive = currentPath === "/rent" || currentPath.startsWith("/rent/");
 
   return (
     <nav className={styles.nav} role="navigation" aria-label={language === "ar" ? "القائمة السفلية" : "Bottom navigation"}>
@@ -54,9 +59,9 @@ export const BottomNav: React.FC = () => {
           </span>
         </Link>
         <Link
-          to="/rent"
-          className={`${styles.link} ${currentPath === "/rent" || currentPath.startsWith("/rent/") ? styles.active : ""}`}
-          aria-current={currentPath === "/rent" || currentPath.startsWith("/rent/") ? "page" : undefined}
+          to={isLoggedIn ? "/rent/manage" : "/rent"}
+          className={`${styles.link} ${isRentActive ? styles.active : ""}`}
+          aria-current={isRentActive ? "page" : undefined}
           aria-label={language === "ar" ? "إيجار" : "Rent"}
         >
           <KeyRound size={24} aria-hidden="true" />

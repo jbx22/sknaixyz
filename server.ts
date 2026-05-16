@@ -1493,6 +1493,36 @@ app.post('_api/rent/tenant/apply',async c => {
   }
 })
 
+app.post('_api/rent/members/add',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/members/add_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+
+app.get('_api/rent/my-properties',async c => {
+  try {
+    const { handle } = await import("./endpoints/rent/members/my-properties_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message, 500);
+  }
+})
+
 app.use("/*", serveStatic({ root: "./static" }));
 app.use('/*', serveStatic({ root: './dist' }))
 app.get("*", async (c, next) => {

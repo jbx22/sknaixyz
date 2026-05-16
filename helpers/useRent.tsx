@@ -29,6 +29,8 @@ import { getInvestorDistributions } from "../endpoints/rent/investor/distributio
 import { getInvestorProperties } from "../endpoints/rent/investor/properties_GET.schema";
 import { getAvailableUnits } from "../endpoints/rent/public/units_GET.schema";
 import { applyForRent } from "../endpoints/rent/tenant/apply_POST.schema";
+import { addPropertyMember } from "../endpoints/rent/members/add_POST.schema";
+import { getMyProperties } from "../endpoints/rent/members/my-properties_GET.schema";
 
 export function useRentUnits(params: Parameters<typeof getRentUnits>[0]) {
   return useQuery({ queryKey: ["rent-units", params], queryFn: () => getRentUnits(params) });
@@ -129,5 +131,15 @@ export function useApplyForRent() {
   return useMutation({
     mutationFn: applyForRent,
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["available-units"] }); qc.invalidateQueries({ queryKey: ["tenant-contracts"] }); },
+  });
+}
+export function useMyProperties() {
+  return useQuery({ queryKey: ["my-properties"], queryFn: () => getMyProperties({}) });
+}
+export function useAddPropertyMember() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: addPropertyMember,
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["my-properties"] }); },
   });
 }
