@@ -1523,6 +1523,42 @@ app.get('_api/rent/my-properties',async c => {
   }
 })
 
+app.get('_api/admin/work-history',async c => {
+  try { const { handle } = await import("./endpoints/admin/work-history_GET.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.get('_api/admin/role-assignments',async c => {
+  try { const { handle } = await import("./endpoints/admin/role-assignments/list_GET.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.post('_api/admin/role-assignments/assign',async c => {
+  try { const { handle } = await import("./endpoints/admin/role-assignments/assign_POST.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.post('_api/admin/role-assignments/revoke',async c => {
+  try { const { handle } = await import("./endpoints/admin/role-assignments/revoke_POST.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.get('_api/notifications',async c => {
+  try { const { handle } = await import("./endpoints/notifications/list_GET.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.post('_api/notifications/mark-read',async c => {
+  try { const { handle } = await import("./endpoints/notifications/mark-read_POST.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.get('_api/dashboard/stats',async c => {
+  try { const { handle } = await import("./endpoints/dashboard/stats_GET.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.post('_api/admin/users/suspend',async c => {
+  try { const { handle } = await import("./endpoints/admin/users/suspend_POST.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.post('_api/admin/users/activate',async c => {
+  try { const { handle } = await import("./endpoints/admin/users/activate_POST.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
 app.use("/*", serveStatic({ root: "./static" }));
 app.use('/*', serveStatic({ root: './dist' }))
 app.get("*", async (c, next) => {

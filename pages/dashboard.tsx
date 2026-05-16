@@ -12,6 +12,7 @@ import { PropertyCard } from "../components/PropertyCard";
 import { PortfolioOverview } from "../components/PortfolioOverview";
 import { InvestorHub } from "../components/InvestorHub";
 import { usePropertiesQuery } from "../helpers/usePropertiesQuery";
+import { RentDashboardWidget } from "../components/RentDashboardWidget";
 import { Button } from "../components/Button";
 import { Badge } from "../components/Badge";
 import { Skeleton } from "../components/Skeleton";
@@ -96,6 +97,11 @@ export default function DashboardPage() {
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>{t.quickStats}</h2>
         <UserStats />
+      </section>
+
+      {/* Rent Summary */}
+      <section className={styles.section}>
+        <RentDashboardWidget />
       </section>
 
       {/* Investments Section */}

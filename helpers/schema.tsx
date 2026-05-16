@@ -282,6 +282,40 @@ export interface RentAuditLogs {
   userId: number | null;
 }
 
+export interface AdminRoleAssignments {
+  id: Generated<number>;
+  userId: number;
+  assignedRole: string;
+  assignedBy: number;
+  scope: Generated<string>;
+  isActive: Generated<boolean>;
+  createdAt: Generated<Timestamp>;
+  revokedAt: Timestamp | null;
+  revokedBy: number | null;
+}
+
+export interface UserDashboardPreferences {
+  id: Generated<number>;
+  userId: number;
+  layout: Generated<Json>;
+  widgets: Generated<string[]>;
+  theme: Generated<string>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface Notifications {
+  id: Generated<number>;
+  userId: number;
+  title: string;
+  message: string;
+  type: Generated<string>;
+  isRead: Generated<boolean>;
+  actionUrl: string | null;
+  metadata: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+}
+
 export interface AdminActivityLogs {
   actionType: string;
   adminId: number;
@@ -686,6 +720,7 @@ export interface WalletTransactions {
 
 export interface DB {
   adminActivityLogs: AdminActivityLogs;
+  adminRoleAssignments: AdminRoleAssignments;
   assetControls: AssetControls;
   complianceLogs: ComplianceLogs;
   dataDeletionRequests: DataDeletionRequests;
@@ -698,6 +733,8 @@ export interface DB {
   ledgerEntries: LedgerEntries;
   loginAttempts: LoginAttempts;
   oauthAccounts: OauthAccounts;
+  notifications: Notifications;
+  userDashboardPreferences: UserDashboardPreferences;
   oauthStates: OauthStates;
   properties: Properties;
   propertyChats: PropertyChats;

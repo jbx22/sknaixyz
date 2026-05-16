@@ -1,0 +1,14 @@
+.widget { background: var(--card, #fff); border: 1px solid var(--border, #e5e7eb); border-radius: var(--radius, 12px); padding: 20px; margin-bottom: 20px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.title { font-size: 16px; font-weight: 600; color: var(--foreground, #111); display: flex; align-items: center; gap: 8px; margin: 0; }
+.link { font-size: 13px; color: var(--primary, #3b82f6); text-decoration: none; font-weight: 500; }
+.link:hover { text-decoration: underline; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.card { background: var(--background, #f9fafb); border-radius: var(--radius, 8px); padding: 14px; text-align: center; }
+.cardIcon { color: var(--foreground, #6b7280); margin-bottom: 4px; }
+.cardValue { font-size: 22px; font-weight: 700; color: var(--foreground, #111); }
+.cardLabel { font-size: 11px; color: var(--foreground, #6b7280); margin-top: 2px; }
+.alert { background: #fef3c7; border: 1px solid #f59e0b; border-radius: var(--radius, 8px); padding: 10px 14px; font-size: 13px; color: #92400e; }
+.empty { text-align: center; padding: 20px 0; color: var(--foreground, #9ca3af); }
+.browseBtn { display: inline-block; margin-top: 8px; padding: 8px 16px; background: var(--foreground, #111); color: var(--card, #fff); border-radius: var(--radius, 8px); text-decoration: none; font-size: 13px; font-weight: 500; }
+@media (max-width: 640px) { .cards { grid-template-columns: repeat(2, 1fr); } }
