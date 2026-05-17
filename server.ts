@@ -1575,6 +1575,14 @@ app.get('_api/subscriptions/check-feature',async c => {
   try { const { handle } = await import("./endpoints/subscriptions/check-feature_GET.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
 })
 
+app.get('_api/admin/pricing',async c => {
+  try { const { handle } = await import("./endpoints/admin/pricing_GET.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
+app.post('_api/admin/pricing',async c => {
+  try { const { handle } = await import("./endpoints/admin/pricing_POST.js"); let request = c.req.raw; const response = await handle(request); if (!(response instanceof Response) && response.constructor.name !== "Response") { return c.text("Invalid response format." + response.constructor.name, 500); } return response; } catch (e) { console.error(e); return c.text("Error loading endpoint code " + e.message, 500); }
+})
+
 app.use("/*", serveStatic({ root: "./static" }));
 app.use('/*', serveStatic({ root: './dist' }))
 app.get("*", async (c, next) => {

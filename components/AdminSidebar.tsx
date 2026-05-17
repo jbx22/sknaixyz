@@ -59,6 +59,7 @@ export const AdminSidebar = () => {
     { path: "/admin/rent/reports", label: language === 'ar' ? 'التقارير' : 'Reports', icon: <Activity size={20} /> },
     { path: "/admin/rent/expenses", label: language === 'ar' ? 'المصروفات' : 'Expenses', icon: <FileSearch size={20} /> },
     { path: "/pricing", label: language === 'ar' ? 'الأسعار والباقات' : 'Pricing & Plans', icon: <Tag size={20} /> },
+    { path: "/admin/pricing", label: language === 'ar' ? 'إدارة التسعير' : 'Manage Pricing', icon: <CircleDollarSign size={20} /> },
   ];
 
   const toggleSidebar = () => setIsOpen(!isOpen);

@@ -1,0 +1,96 @@
+.page { max-width: 1200px; margin: 0 auto; padding: 20px 16px 60px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.loading { text-align: center; padding: 60px; color: #999; }
+.toast { position: fixed; top: 20px; right: 20px; background: #10b981; color: #fff; padding: 12px 24px; border-radius: 10px; font-weight: 600; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+/* Header */
+.header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+.header h1 { font-size: 24px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px; }
+.subtitle { color: #888; margin: 4px 0 0; font-size: 14px; }
+.headerActions { display: flex; gap: 8px; flex-wrap: wrap; }
+.betaToggle { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 2px solid; transition: all 0.2s; }
+.betaOn { background: #dcfce7; color: #16a34a; border-color: #86efac; }
+.betaOff { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+.refreshBtn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; border: 1px solid #e5e7eb; background: #fff; }
+.betaBanner { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 10px; color: #1e40af; font-size: 13px; margin-bottom: 24px; }
+
+/* Sections */
+.section { margin-bottom: 40px; }
+.section h2 { font-size: 20px; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
+.sectionNote { color: #888; font-size: 13px; margin: 0 0 16px; }
+
+/* Plan Cards */
+.plansGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.planCard { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; background: #fff; }
+.planCard.disabled { opacity: 0.5; }
+.planHeader { margin-bottom: 12px; }
+.planHeader h3 { font-size: 18px; margin: 0; display: flex; align-items: center; gap: 8px; }
+.tierBadge { padding: 2px 10px; background: #f0f9ff; color: #2563eb; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.badge { display: inline-block; padding: 2px 10px; background: #dcfce7; color: #16a34a; border-radius: 6px; font-size: 11px; font-weight: 600; }
+
+/* Plan Info/Price */
+.priceDisplay { display: flex; gap: 16px; margin-bottom: 8px; }
+.price { font-size: 20px; font-weight: 700; }
+.price small { font-size: 13px; color: #888; font-weight: 400; }
+.limits { color: #888; font-size: 13px; margin-bottom: 12px; }
+
+/* Service Cards */
+.servicesGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.serviceCard { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; background: #fff; }
+.serviceCard.disabled { opacity: 0.5; }
+.serviceHeader { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.serviceHeader h3 { font-size: 16px; margin: 0; }
+.svcKey { font-size: 11px; color: #888; background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-family: monospace; }
+.betaTag { padding: 2px 8px; background: #dcfce7; color: #16a34a; border-radius: 6px; font-size: 10px; font-weight: 700; }
+.svcPrice { font-size: 18px; font-weight: 700; display: block; margin-bottom: 4px; }
+.svcDesc { font-size: 13px; color: #666; margin: 0 0 8px; }
+.compliance { font-size: 12px; color: #d97706; background: #fef3c7; padding: 4px 8px; border-radius: 6px; margin: 4px 0 8px; }
+
+/* Edit Forms */
+.editForm { display: flex; flex-direction: column; gap: 8px; }
+.editForm label { display: flex; flex-direction: column; font-size: 12px; color: #666; font-weight: 500; }
+.editForm input { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-top: 2px; }
+.toggleLabel { flex-direction: row !important; align-items: center; justify-content: space-between; }
+.toggleLabel input { width: auto; margin: 0; }
+
+/* Buttons */
+.btnRow { display: flex; gap: 8px; margin-top: 8px; }
+.saveBtn { display: flex; align-items: center; gap: 4px; padding: 8px 16px; background: #3b82f6; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.saveBtn:hover { background: #2563eb; }
+.cancelBtn { padding: 8px 16px; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px; cursor: pointer; }
+.editBtn { padding: 6px 14px; background: #f0f9ff; color: #2563eb; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.promoBtn { display: flex; align-items: center; gap: 4px; padding: 6px 14px; background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
+.clearPromoBtn { padding: 6px 14px; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; font-size: 13px; cursor: pointer; }
+
+/* Matrix Table */
+.tableWrap { overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 12px; }
+.matrixTable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.matrixTable th { background: #f9fafb; padding: 10px 12px; border-bottom: 2px solid #e5e7eb; font-weight: 600; text-align: center; }
+.matrixTable th:first-child { text-align: left; }
+.matrixTable td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; }
+.featName { font-weight: 500; min-width: 160px; }
+.featCat { color: #888; font-size: 12px; }
+.checkCell { text-align: center; cursor: pointer; vertical-align: middle; }
+.checkCell:hover { background: #f0f9ff; }
+.on { color: #10b981; }
+.off { color: #d1d5db; }
+.limitTag { font-size: 10px; color: #3b82f6; margin-top: 2px; }
+
+/* Subscribers Table */
+.subsTable { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid #e5e7eb; border-radius: 12px; }
+.subsTable th { background: #f9fafb; padding: 10px 12px; border-bottom: 2px solid #e5e7eb; text-align: left; font-weight: 600; }
+.subsTable td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; }
+.subsTable small { color: #888; }
+.empty { text-align: center; color: #999; padding: 24px !important; }
+.planSelect { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; }
+
+/* Modal */
+.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: #fff; border-radius: 16px; padding: 24px; width: 90%; max-width: 480px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal h2 { font-size: 18px; margin: 0 0 16px; display: flex; align-items: center; gap: 8px; }
+.modal label { display: flex; flex-direction: column; font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 500; }
+.modal input { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; margin-top: 2px; }
+
+@media (max-width: 768px) {
+  .plansGrid, .servicesGrid { grid-template-columns: 1fr; }
+  .header { flex-direction: column; }
+}
