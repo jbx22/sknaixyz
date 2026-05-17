@@ -97,6 +97,9 @@ export type RegaFormType = "kyc" | "risk_acknowledgment" | "subscription_terms" 
 export type TokenTxType = "buy" | "sell" | "transfer" | "distribution" | "mint" | "burn";
 export type TokenTxStatus = "pending" | "completed" | "failed" | "cancelled";
 export type WorkflowType = "fractional" | "tokenization" | "secondary";
+export type SubscriptionPlanTier = "free" | "professional" | "enterprise";
+export type SubscriptionStatus = "active" | "cancelled" | "expired" | "trial" | "past_due";
+export type FeatureCategory = "rent" | "tokenization" | "analytics" | "ai" | "integration" | "support" | "listing" | "payment";
 
 export interface PropertyMembers {
   id: Generated<number>;
@@ -406,6 +409,94 @@ export interface WorkflowAudit {
   actor: string;
   action: string;
   details: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface SubscriptionPlans {
+  id: Generated<number>;
+  tier: SubscriptionPlanTier;
+  nameEn: string;
+  nameAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  monthlyPriceSar: Generated<Numeric>;
+  annualPriceSar: Generated<Numeric>;
+  perUnitPriceSar: Generated<Numeric>;
+  maxProperties: number | null;
+  maxUnitsPerProperty: number | null;
+  isActive: Generated<boolean>;
+  sortOrder: Generated<number>;
+  launchBadge: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface PlanFeatures {
+  id: Generated<number>;
+  featureKey: string;
+  nameEn: string;
+  nameAr: string;
+  descriptionEn: string | null;
+  descriptionAr: string | null;
+  category: Generated<FeatureCategory>;
+  iconName: string | null;
+  isPublic: Generated<boolean>;
+  sortOrder: Generated<number>;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface PlanFeatureAccess {
+  id: Generated<number>;
+  planTier: SubscriptionPlanTier;
+  featureKey: string;
+  isIncluded: Generated<boolean>;
+  usageLimit: number | null;
+  displayValue: string | null;
+  createdAt: Generated<Timestamp>;
+}
+
+export interface UserSubscriptions {
+  id: Generated<number>;
+  userId: number;
+  planTier: Generated<SubscriptionPlanTier>;
+  status: Generated<SubscriptionStatus>;
+  currentPeriodStart: Generated<Timestamp>;
+  currentPeriodEnd: Timestamp | null;
+  trialEndsAt: Timestamp | null;
+  cancelledAt: Timestamp | null;
+  billingProvider: Generated<string>;
+  billingProviderId: string | null;
+  metadata: Generated<Json>;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface ServiceCatalog {
+  id: Generated<number>;
+  serviceKey: string;
+  nameEn: string;
+  nameAr: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  priceSar: Generated<Numeric>;
+  pricingModel: Generated<string>;
+  category: Generated<string>;
+  isActive: Generated<boolean>;
+  isBetaFree: Generated<boolean>;
+  betaBadge: string | null;
+  complianceNotes: string | null;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
+}
+
+export interface UserServicePurchases {
+  id: Generated<number>;
+  userId: number;
+  serviceKey: string;
+  propertyId: number | null;
+  amountPaidSar: Generated<Numeric>;
+  status: Generated<string>;
+  metadata: Generated<Json>;
   createdAt: Generated<Timestamp>;
 }
 
@@ -830,6 +921,12 @@ export interface DB {
   oauthAccounts: OauthAccounts;
   notifications: Notifications;
   userDashboardPreferences: UserDashboardPreferences;
+  subscriptionPlans: SubscriptionPlans;
+  planFeatures: PlanFeatures;
+  planFeatureAccess: PlanFeatureAccess;
+  userSubscriptions: UserSubscriptions;
+  serviceCatalog: ServiceCatalog;
+  userServicePurchases: UserServicePurchases;
   oauthStates: OauthStates;
   properties: Properties;
   propertyListings: PropertyListings;

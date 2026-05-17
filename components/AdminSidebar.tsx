@@ -18,7 +18,8 @@ import {
   ShieldAlert,
   ClipboardCheck,
   Percent,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Tag
 } from "lucide-react";
 import { useAuth } from "../helpers/useAuth";
 import { Button } from "./Button";
@@ -57,6 +58,7 @@ export const AdminSidebar = () => {
     { path: "/admin/rent/investors", label: language === 'ar' ? 'المستثمرون' : 'Investors', icon: <Percent size={20} /> },
     { path: "/admin/rent/reports", label: language === 'ar' ? 'التقارير' : 'Reports', icon: <Activity size={20} /> },
     { path: "/admin/rent/expenses", label: language === 'ar' ? 'المصروفات' : 'Expenses', icon: <FileSearch size={20} /> },
+    { path: "/pricing", label: language === 'ar' ? 'الأسعار والباقات' : 'Pricing & Plans', icon: <Tag size={20} /> },
   ];
 
   const toggleSidebar = () => setIsOpen(!isOpen);

@@ -1,0 +1,38 @@
+.locked {
+  border: 1px dashed var(--border-color, #e0e0e0);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  background: var(--bg-secondary, #f8f9fa);
+  opacity: 0.75;
+}
+.lockContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary, #666);
+}
+.lockText {
+  font-size: 14px;
+}
+.upgradeLink {
+  display: inline-block;
+  padding: 8px 20px;
+  background: var(--primary, #2563eb);
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 4px;
+  transition: opacity 0.2s;
+}
+.upgradeLink:hover {
+  opacity: 0.9;
+}
+.loading {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-secondary, #999);
+}

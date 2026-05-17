@@ -97,6 +97,8 @@ import Page_46 from "./pages/rent.portal.tsx";
 import PageLayout_46 from "./pages/rent.portal.pageLayout.tsx";
 import Page_47 from "./pages/rent.manage.tsx";
 import PageLayout_47 from "./pages/rent.manage.pageLayout.tsx";
+import Page_48 from "./pages/pricing.tsx";
+import PageLayout_48 from "./pages/pricing.pageLayout.tsx";
 
 if (!window.requestIdleCallback) {
   window.requestIdleCallback = (cb) => {
@@ -167,6 +169,7 @@ const fileNameToComponent = new Map([
 ["./pages/rent.tsx", Page_45],
 ["./pages/rent.portal.tsx", Page_46],
 ["./pages/rent.manage.tsx", Page_47],
+["./pages/pricing.tsx", Page_48],
   ]);
 
 function makePageRoute(filename: string) {
@@ -315,6 +318,7 @@ export function App() {
 "./pages/rent.tsx": PageLayout_45,
 "./pages/rent.portal.tsx": PageLayout_46,
 "./pages/rent.manage.tsx": PageLayout_47,
+"./pages/pricing.tsx": PageLayout_48,
 }), fileNameToRoute, makePageRoute })} 
           <Route path="*" element={<NotFound />} />
         </Routes>

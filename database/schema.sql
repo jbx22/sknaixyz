@@ -485,3 +485,100 @@ create index idx_notifications_user on notifications(user_id, is_read, created_a
 
 alter table admin_activity_logs add column if not exists target_user_id bigint;
 alter table admin_activity_logs add column if not exists outcome text;
+
+-- Subscription & Monetization
+create type subscription_plan_tier as enum ('free','professional','enterprise');
+create type subscription_status as enum ('active','cancelled','expired','trial','past_due');
+create type feature_category as enum ('rent','tokenization','analytics','ai','integration','support','listing','payment');
+
+create table subscription_plans (
+  id bigserial primary key,
+  tier subscription_plan_tier not null unique,
+  name_en text not null,
+  name_ar text not null,
+  description_en text not null,
+  description_ar text not null,
+  monthly_price_sar numeric(10,2) not null default 0,
+  annual_price_sar numeric(10,2) not null default 0,
+  per_unit_price_sar numeric(10,2) not null default 0,
+  max_properties integer default null,
+  max_units_per_property integer default null,
+  is_active boolean default true,
+  sort_order integer not null default 0,
+  launch_badge text default null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table plan_features (
+  id bigserial primary key,
+  feature_key text not null unique,
+  name_en text not null,
+  name_ar text not null,
+  description_en text,
+  description_ar text,
+  category feature_category not null default 'rent',
+  icon_name text default null,
+  is_public boolean default true,
+  sort_order integer default 0,
+  created_at timestamptz default now()
+);
+
+create table plan_feature_access (
+  id bigserial primary key,
+  plan_tier subscription_plan_tier not null references subscription_plans(tier) on delete cascade,
+  feature_key text not null references plan_features(feature_key) on delete cascade,
+  is_included boolean not null default false,
+  usage_limit integer default null,
+  display_value text default null,
+  created_at timestamptz default now(),
+  unique(plan_tier, feature_key)
+);
+
+create table user_subscriptions (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade unique,
+  plan_tier subscription_plan_tier not null default 'free',
+  status subscription_status not null default 'active',
+  current_period_start timestamptz not null default now(),
+  current_period_end timestamptz,
+  trial_ends_at timestamptz,
+  cancelled_at timestamptz,
+  billing_provider text default 'manual',
+  billing_provider_id text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+create index idx_user_subscriptions_user on user_subscriptions(user_id);
+create index idx_user_subscriptions_status on user_subscriptions(status);
+
+create table service_catalog (
+  id bigserial primary key,
+  service_key text not null unique,
+  name_en text not null,
+  name_ar text not null,
+  description_en text not null,
+  description_ar text not null,
+  price_sar numeric(10,2) not null default 0,
+  pricing_model text not null default 'one_time',
+  category text not null default 'addon',
+  is_active boolean default true,
+  is_beta_free boolean default true,
+  beta_badge text default null,
+  compliance_notes text default null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table user_service_purchases (
+  id bigserial primary key,
+  user_id bigint not null references users(id) on delete cascade,
+  service_key text not null references service_catalog(service_key),
+  property_id bigint references properties(id) on delete set null,
+  amount_paid_sar numeric(10,2) not null default 0,
+  status text not null default 'completed',
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+create index idx_user_service_purchases_user on user_service_purchases(user_id);
