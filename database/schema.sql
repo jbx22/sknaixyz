@@ -324,7 +324,8 @@ create table rent_reminders (
   contract_id bigint not null references rental_contracts(id) on delete cascade,
   reminder_type text not null default 'due_soon',
   sent_at timestamptz default now(),
-  delivery_status text not null default 'sent'
+  delivery_status text not null default 'sent',
+  created_at timestamptz default now()
 );
 
 create table property_ownership_shares (
@@ -485,6 +486,7 @@ create index idx_notifications_user on notifications(user_id, is_read, created_a
 
 alter table admin_activity_logs add column if not exists target_user_id bigint;
 alter table admin_activity_logs add column if not exists outcome text;
+alter table rent_reminders add column if not exists created_at timestamptz default now();
 
 -- Subscription & Monetization
 create type subscription_plan_tier as enum ('free','professional','enterprise');

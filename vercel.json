@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/_api/cron/rent-checks",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
   "framework": "vite",

@@ -4,10 +4,11 @@ import { notifyTenant, notifyLandlord } from "../../helpers/notify";
 
 export async function handle(request: Request) {
   try {
-    // Auth: must be called with cron secret or by admin
+    // Auth: must be called with cron secret or by Vercel cron system
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET || "sknai-cron-2024";
-    if (authHeader !== `Bearer ${cronSecret}`) {
+    const isVercelCron = request.headers.get("x-vercel-cron") === "true";
+    if (!isVercelCron && authHeader !== `Bearer ${cronSecret}`) {
       return new Response(superjson.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
     }
 
