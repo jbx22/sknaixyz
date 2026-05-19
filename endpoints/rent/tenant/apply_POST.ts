@@ -3,6 +3,7 @@ import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
 import { superjson } from "../../../helpers/schema";
 import type { Request } from "express";
 import { db } from "../../../helpers/db";
+import { notifyLandlord } from "../../../helpers/notify";
 
 export async function handle(request: Request) {
   try {
@@ -102,6 +103,16 @@ export async function handle(request: Request) {
         metadata: { propertyId, unitId, startDate, endDate },
       })
       .execute();
+
+    // Notify property owner/landlord about the application
+    const property = await db.selectFrom("properties").where("id", "=", Number(propertyId)).select(["userId", "title"]).executeTakeFirst();
+    if (property) {
+      await notifyLandlord(property.userId, "tenant_applied", {
+        propertyTitle: property.title,
+        unitId: Number(unitId),
+        tenantId: session.user.id,
+      });
+    }
 
     return new Response(
       superjson.stringify({

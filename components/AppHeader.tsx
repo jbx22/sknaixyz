@@ -7,6 +7,7 @@ import { useLanguage } from "../helpers/useLanguage";
 import { useAuth } from "../helpers/useAuth";
 import { useMediaQuery } from "../helpers/useMediaQuery";
 import { Globe, Map as MapIcon, Search, Bot, User as UserIcon, LogIn, LogOut, Shield, Coins, LayoutDashboard, Percent, ClipboardCheck } from "lucide-react";
+import { NotificationBell } from "./NotificationBell";
 import { ADMIN_STRINGS } from "../helpers/adminTranslations";
 import styles from "./AppHeader.module.css";
 
@@ -119,6 +120,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <div className={`${styles.divider} ${isSmallScreen ? styles.hiddenOnMobile : ""}`} aria-hidden="true" />
 
           <ThemeModeSwitch className={isSmallScreen ? styles.compactThemeSwitch : ""} />
+
+          {authState.type === "authenticated" && <NotificationBell />}
 
           {authState.type === "authenticated" ? (
             <>

@@ -3,6 +3,7 @@ import superjson from "superjson";
 import { db } from "../../../helpers/db";
 import { getServerUserSession } from "../../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
+import { notifyInvestor } from "../../../helpers/notify";
 
 export async function handle(request: Request) {
   try {
@@ -50,6 +51,10 @@ export async function handle(request: Request) {
         allocatedAmount: String(investorShare),
         allocationStatus: "calculated",
       }).execute();
+      await notifyInvestor(share.userId, "allocation_ready", {
+        propertyTitle: (await db.selectFrom("properties").where("id", "=", input.propertyId).select(["title"]).executeTakeFirst())?.title || "Property",
+        amount: investorShare,
+      });
       count++;
     }
     return new Response(superjson.stringify({ success: true, allocationsCreated: count } satisfies OutputType));

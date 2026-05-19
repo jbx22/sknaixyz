@@ -3,6 +3,7 @@ import superjson from "superjson";
 import { db } from "../../../helpers/db";
 import { getServerUserSession } from "../../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
+import { notifyInvestor } from "../../../helpers/notify";
 
 export async function handle(request: Request) {
   try {
@@ -20,6 +21,15 @@ export async function handle(request: Request) {
       notes: input.notes ?? null,
     }).execute();
     await db.updateTable("rentalIncomeAllocations").set({ allocationStatus: "pending", updatedAt: new Date() }).where("id", "=", input.allocationId).execute();
+
+    // Notify investor about the distribution
+    const property = await db.selectFrom("properties").where("id", "=", allocation.propertyId).select(["title"]).executeTakeFirst();
+    await notifyInvestor(allocation.ownerUserId, "distribution_received", {
+      amount: allocation.allocatedAmount,
+      propertyTitle: property?.title || "Property",
+      allocationId: allocation.id,
+    });
+
     return new Response(superjson.stringify({ success: true, distributionsCreated: 1 } satisfies OutputType));
   } catch (error) {
     if (error instanceof NotAuthenticatedError) return new Response(superjson.stringify({ error: "Unauthorized" }), { status: 401 });

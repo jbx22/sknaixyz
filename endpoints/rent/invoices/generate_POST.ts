@@ -3,6 +3,7 @@ import superjson from "superjson";
 import { db } from "../../../helpers/db";
 import { getServerUserSession } from "../../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
+import { notifyTenant } from "../../../helpers/notify";
 
 export async function handle(request: Request) {
   try {
@@ -36,6 +37,14 @@ export async function handle(request: Request) {
       invoiceStatus: "pending",
       paidAmount: "0",
     }).returning("id").executeTakeFirstOrThrow();
+
+    // Notify tenant about new invoice
+    await notifyTenant(contract.tenantUserId, "invoice_generated", {
+      amount: contract.monthlyRent,
+      dueDate: dueDate.toLocaleDateString(),
+      invoiceId: invoice.id,
+    });
+
     return new Response(superjson.stringify({ success: true, invoice: { id: Number(invoice.id) } } satisfies OutputType));
   } catch (error) {
     if (error instanceof NotAuthenticatedError) return new Response(superjson.stringify({ error: "Unauthorized" }), { status: 401 });
