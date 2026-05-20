@@ -1,14 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { LandingNavigation } from "../components/LandingNavigation";
 import { Button } from "../components/Button";
-import { ArrowRight, ArrowLeft, Mail, Phone, MapPin } from "lucide-react";
+import { Input } from "../components/Input";
+import { ArrowRight, ArrowLeft, Mail, Phone, MapPin, Send, CheckCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "../helpers/useLanguage";
 import styles from "./contact.module.css";
 
+const CONTACT_EMAIL = "contact@sknai.xyz";
+
 export default function ContactPage() {
   const { language, direction } = useLanguage();
+  const [formState, setFormState] = useState({ name: "", email: "", subject: "", message: "" });
+  const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const t = {
     ar: {
@@ -23,9 +29,21 @@ export default function ContactPage() {
       locationTitle: "الموقع",
       locationDesc: "زر مكتبنا في الرياض خلال ساعات العمل",
       locationValue: "الرياض، المملكة العربية السعودية",
-      comingSoon: "قريباً",
-      comingSoonSubtext: "سيتم إطلاق نموذج الاتصال والدردشة المباشرة قريباً",
-      backToHome: "العودة للرئيسية"
+      formTitle: "أرسل لنا رسالة",
+      formName: "الاسم الكامل",
+      formEmail: "بريدك الإلكتروني",
+      formSubject: "الموضوع",
+      formMessage: "الرسالة",
+      formSend: "إرسال الرسالة",
+      formSuccess: "تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.",
+      formSending: "جاري الإرسال...",
+      backToHome: "العودة للرئيسية",
+      formPlaceholderName: "أدخل اسمك الكامل",
+      formPlaceholderEmail: "أدخل بريدك الإلكتروني",
+      formPlaceholderSubject: "ما هو موضوع رسالتك؟",
+      formPlaceholderMessage: "اكتب رسالتك هنا...",
+      orSendDirect: "أو أرسل مباشرة",
+      sendAnother: "إرسال رسالة أخرى",
     },
     en: {
       title: "Contact Us - SKNAI",
@@ -39,23 +57,58 @@ export default function ContactPage() {
       locationTitle: "Location",
       locationDesc: "Visit our office in Riyadh during working hours",
       locationValue: "Riyadh, Saudi Arabia",
-      comingSoon: "Coming Soon",
-      comingSoonSubtext: "Contact form and live chat will be launched soon",
-      backToHome: "Back to Home"
+      formTitle: "Send Us a Message",
+      formName: "Full Name",
+      formEmail: "Your Email",
+      formSubject: "Subject",
+      formMessage: "Message",
+      formSend: "Send Message",
+      formSuccess: "Your message was sent successfully! We'll get back to you soon.",
+      formSending: "Sending...",
+      backToHome: "Back to Home",
+      formPlaceholderName: "Enter your full name",
+      formPlaceholderEmail: "Enter your email address",
+      formPlaceholderSubject: "What is your message about?",
+      formPlaceholderMessage: "Write your message here...",
+      orSendDirect: "Or send directly",
+      sendAnother: "Send Another Message",
     }
   };
 
   const content = t[language];
   const ArrowIcon = direction === "rtl" ? ArrowRight : ArrowLeft;
 
+  const handleChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormState(prev => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    // Build mailto link with form data
+    const mailtoLink = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(formState.subject || (language === "ar" ? "رسالة من SKNAI.xyz" : "Message from SKNAI.xyz"))}&body=${encodeURIComponent(
+      (language === "ar"
+        ? `الاسم: ${formState.name}\nالبريد الإلكتروني: ${formState.email}\n\nالرسالة:\n${formState.message}`
+        : `Name: ${formState.name}\nEmail: ${formState.email}\n\nMessage:\n${formState.message}`)
+    )}`;
+    // Open mailto link
+    window.location.href = mailtoLink;
+    // Simulate brief delay for UX
+    await new Promise(r => setTimeout(r, 800));
+    setSending(false);
+    setSubmitted(true);
+  };
+
+  const handleReset = () => {
+    setFormState({ name: "", email: "", subject: "", message: "" });
+    setSubmitted(false);
+  };
+
   return (
     <>
       <Helmet>
         <title>{content.title}</title>
-        <meta
-          name="description"
-          content={content.metaDescription}
-        />
+        <meta name="description" content={content.metaDescription} />
       </Helmet>
 
       <LandingNavigation />
@@ -76,10 +129,8 @@ export default function ContactPage() {
                   <Mail size={24} />
                 </div>
                 <h3 className={styles.cardTitle}>{content.emailTitle}</h3>
-                <p className={styles.cardDescription}>
-                  {content.emailDesc}
-                </p>
-                <p className={styles.cardValue}>support@sknai</p>
+                <p className={styles.cardDescription}>{content.emailDesc}</p>
+                <p className={styles.cardValue}>{CONTACT_EMAIL}</p>
               </div>
 
               <div className={styles.infoCard}>
@@ -87,9 +138,7 @@ export default function ContactPage() {
                   <Phone size={24} />
                 </div>
                 <h3 className={styles.cardTitle}>{content.phoneTitle}</h3>
-                <p className={styles.cardDescription}>
-                  {content.phoneDesc}
-                </p>
+                <p className={styles.cardDescription}>{content.phoneDesc}</p>
                 <p className={styles.cardValue} dir="ltr">+966 50 000 0000</p>
               </div>
 
@@ -98,19 +147,81 @@ export default function ContactPage() {
                   <MapPin size={24} />
                 </div>
                 <h3 className={styles.cardTitle}>{content.locationTitle}</h3>
-                <p className={styles.cardDescription}>
-                  {content.locationDesc}
-                </p>
+                <p className={styles.cardDescription}>{content.locationDesc}</p>
                 <p className={styles.cardValue}>{content.locationValue}</p>
               </div>
             </div>
 
-            <div className={styles.comingSoon}>
-              <p className={styles.comingSoonText}>{content.comingSoon}</p>
-              {language === 'ar' && <p className={styles.comingSoonTextEn}>Coming Soon</p>}
-              <p className={styles.comingSoonSubtext}>
-                {content.comingSoonSubtext}
-              </p>
+            {/* Contact Form */}
+            <div className={styles.formSection}>
+              <h2 className={styles.formTitle}>{content.formTitle}</h2>
+              
+              {submitted ? (
+                <div className={styles.formSuccess}>
+                  <CheckCircle size={48} className={styles.successIcon} />
+                  <p className={styles.successText}>{content.formSuccess}</p>
+                  <p className={styles.orSendDirect}>
+                    {content.orSendDirect}{" "}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className={styles.directEmail}>{CONTACT_EMAIL}</a>
+                  </p>
+                  <Button variant="outline" onClick={handleReset} className={styles.sendAnotherBtn}>
+                    {content.sendAnother}
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className={styles.form}>
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>{content.formName}</label>
+                      <Input
+                        className={styles.formInput}
+                        placeholder={content.formPlaceholderName}
+                        value={formState.name}
+                        onChange={handleChange("name")}
+                        required
+                      />
+                    </div>
+                    <div className={styles.formGroup}>
+                      <label className={styles.formLabel}>{content.formEmail}</label>
+                      <Input
+                        className={styles.formInput}
+                        type="email"
+                        placeholder={content.formPlaceholderEmail}
+                        value={formState.email}
+                        onChange={handleChange("email")}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>{content.formSubject}</label>
+                    <Input
+                      className={styles.formInput}
+                      placeholder={content.formPlaceholderSubject}
+                      value={formState.subject}
+                      onChange={handleChange("subject")}
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label className={styles.formLabel}>{content.formMessage}</label>
+                    <textarea
+                      className={styles.formTextarea}
+                      placeholder={content.formPlaceholderMessage}
+                      value={formState.message}
+                      onChange={handleChange("message")}
+                      required
+                      rows={6}
+                    />
+                  </div>
+                  <Button type="submit" variant="accent" size="lg" className={styles.submitBtn} disabled={sending}>
+                    {sending ? (
+                      <><Loader2 size={18} className={styles.spinner} /> {content.formSending}</>
+                    ) : (
+                      <><Send size={18} /> {content.formSend}</>
+                    )}
+                  </Button>
+                </form>
+              )}
             </div>
           </div>
         </section>

@@ -1,7 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "../helpers/useLanguage";
 import styles from "./FeaturedLocations.module.css";
+
+const FALLBACK_IMG = "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect fill='%23f1f5f9' width='600' height='400'/%3E%3Ctext fill='%2364748b' font-family='Arial' font-size='20' text-anchor='middle' x='300' y='210'%3E%D8%B5%D9%88%D8%B1%D8%A9%20%D8%BA%D9%8A%D8%B1%20%D9%85%D8%AA%D9%88%D9%81%D8%B1%D8%A9%3C/text%3E%3C/svg%3E";
+
+function LocationImage({ src, alt }: { src: string; alt: string }) {
+  const [error, setError] = useState(false);
+  return (
+    <img
+      src={error ? FALLBACK_IMG : src}
+      alt={alt}
+      className={styles.image}
+      loading="lazy"
+      onError={() => setError(true)}
+    />
+  );
+}
 
 const LOCATIONS = [
   {
@@ -71,7 +86,7 @@ export const FeaturedLocations = () => {
                 className={styles.card}
               >
                 <div className={styles.imageWrapper}>
-                  <img src={location.image} alt={name} className={styles.image} loading="lazy" />
+                  <LocationImage src={location.image} alt={name} />
                   <div className={styles.overlay} />
                 </div>
                 <div className={styles.content}>

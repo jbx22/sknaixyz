@@ -114,9 +114,6 @@ export const LandingHero = () => {
         </div>
       </div>
       
-      {/* Abstract background elements */}
-      <div className={styles.bgGradientLeft} />
-      <div className={styles.bgGradientRight} />
     </section>
   );
 };

@@ -24,6 +24,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 }) => {
   const [showAIReport, setShowAIReport] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const { authState } = useAuth();
   const navigate = useNavigate();
   
@@ -96,9 +97,9 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const formattedPrice = formatPrice(property.price);
 
   const imageUrl =
-    property.images && property.images.length > 0
+    !imgError && property.images && property.images.length > 0
       ? property.images[0]
-      : "https://placehold.co/600x400?text=No+Image";
+      : "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect fill='%23f1f5f9' width='600' height='400'/%3E%3Ctext fill='%2364748b' font-family='Arial' font-size='20' text-anchor='middle' x='300' y='210'%3Eصورة%20غير%20متوفرة%3C/text%3E%3Ctext fill='%2364748b' font-family='Arial' font-size='16' text-anchor='middle' x='300' y='240'%3ENo%20Image%20Available%3C/text%3E%3C/svg%3E";
 
   const translations = {
     beds: language === "ar" ? "سرير" : "Beds",
@@ -143,6 +144,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           alt={language === "ar" ? `صورة ${property.title}` : `Image of ${property.title}`}
           className={styles.image}
           loading="lazy"
+          onError={() => setImgError(true)}
         />
         <div className={styles.badges} aria-label="Property tags">
           <Badge variant="secondary" className={styles.typeBadge}>

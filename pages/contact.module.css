@@ -117,35 +117,160 @@
   word-break: break-word;
 }
 
-.comingSoon {
-  text-align: center;
-  padding: var(--spacing-8);
-  background-color: var(--secondary);
+.formSection {
+  background: var(--surface);
   border-radius: var(--radius);
+  padding: var(--spacing-10);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+}
+
+.formTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 var(--spacing-8) 0;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-4);
+}
+
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
 }
 
-.comingSoonText {
-  font-size: 1.25rem;
+.formLabel {
+  font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--primary);
-  margin: 0;
+  color: var(--foreground);
 }
 
-.comingSoonTextEn {
-  font-size: 1rem;
-  color: var(--muted-foreground);
-  margin: 0;
+.formInput {
+  width: 100%;
+  height: 3rem !important;
+  font-size: 1rem !important;
+}
+
+.formTextarea {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-family-base);
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 140px;
+  transition: border-color var(--animation-duration-fast) ease;
+  box-sizing: border-box;
+  line-height: 1.6;
 }
 
-.comingSoonSubtext {
+.formTextarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
+}
+
+.formTextarea::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.6;
+}
+
+.submitBtn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: 1.0625rem;
+  padding: var(--spacing-3) var(--spacing-8) !important;
+  min-width: 200px;
+  justify-content: center;
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.formSuccess {
+  text-align: center;
+  padding: var(--spacing-10) var(--spacing-6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-4);
+}
+
+.successIcon {
+  color: var(--success);
+}
+
+.successText {
+  font-size: 1.125rem;
+  color: var(--foreground);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.orSendDirect {
   font-size: 0.9375rem;
   color: var(--muted-foreground);
   margin: 0;
-  margin-top: var(--spacing-2);
+}
+
+.directEmail {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.directEmail:hover {
+  text-decoration: underline;
+}
+
+.sendAnotherBtn {
+  margin-top: var(--spacing-4);
+}
+
+@media (max-width: 768px) {
+  .formSection {
+    padding: var(--spacing-6);
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .formTitle {
+    font-size: 1.375rem;
+  }
+
+  .submitBtn {
+    width: 100%;
+  }
 }
 
 .cta {

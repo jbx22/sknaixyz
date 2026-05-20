@@ -134,30 +134,6 @@
   background-color: var(--surface) !important;
 }
 
-/* Background elements */
-.bgGradientLeft {
-  position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 50%;
-  height: 80%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--primary) 20%, transparent) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 0;
-  pointer-events: none;
-}
-
-.bgGradientRight {
-  position: absolute;
-  bottom: -20%;
-  right: -10%;
-  width: 60%;
-  height: 70%;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 15%, transparent) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 0;
-  pointer-events: none;
-}
 
 @media (min-width: 768px) {
   .title {

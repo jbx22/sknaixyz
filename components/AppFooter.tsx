@@ -26,7 +26,7 @@ export const AppFooter = ({ className = "", showBottomPadding = true }: AppFoote
   const content = {
     ar: {
       brandDescription: "منصة عقارية ذكية مدعومة بالذكاء الاصطناعي لمساعدتك في العثور على منزل أحلامك في المملكة العربية السعودية بسهولة وأمان.",
-      contactEmail: "hello@sknai",
+      contactEmail: "contact@sknai.xyz",
       contactLocation: "الرياض، المملكة العربية السعودية",
       
       headers: {
@@ -55,7 +55,7 @@ export const AppFooter = ({ className = "", showBottomPadding = true }: AppFoote
     },
     en: {
       brandDescription: "Smart AI-powered real estate platform helping you find your dream home in Saudi Arabia with ease and security.",
-      contactEmail: "hello@sknai",
+      contactEmail: "contact@sknai.xyz",
       contactLocation: "Riyadh, Saudi Arabia",
 
       headers: {
