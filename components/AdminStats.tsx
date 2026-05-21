@@ -4,9 +4,11 @@ import { useAdminStats, useInvestorStats, useOwnerBrokerStats, useRoleAdminStats
 import { useLanguage } from "../helpers/useLanguage";
 import { ADMIN_STRINGS } from "../helpers/adminTranslations";
 import { Skeleton } from "./Skeleton";
-import { Users, Building2, CreditCard, Activity, ClipboardCheck, Coins, ShieldCheck, FileSearch, TrendingUp, Eye, Heart, Package, DollarSign, CheckCircle, AlertTriangle, Server, Database } from "lucide-react";
+import { Users, Building2, CreditCard, Activity, ClipboardCheck, Coins, ShieldCheck, FileSearch, TrendingUp, Eye, Heart, Package, DollarSign, CheckCircle, AlertTriangle, Server, Database, FileText, Percent, CircleDollarSign, ShieldAlert } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { readApplications } from "../helpers/subscriptionCompliance";
+import { useRentContracts } from "../helpers/useRent";
+import { getComplianceLevel, daysUntil } from "../helpers/compliance";
 import { readAdminUsageLogs, readManagedAdmins } from "../helpers/adminGovernance";
 import styles from "./AdminStats.module.css";
 
@@ -21,6 +23,7 @@ function localArrayCount(key: string) {
 
 export const AdminStats = () => {
   const { data, isLoading } = useAdminStats();
+  const { data: contractsData } = useRentContracts({ page: 1, limit: 200 });
   const investorStats = useInvestorStats();
   const ownerBrokerStats = useOwnerBrokerStats();
   const roleAdminStats = useRoleAdminStats();
@@ -29,6 +32,37 @@ export const AdminStats = () => {
   const { language } = useLanguage();
   const t = ADMIN_STRINGS[language];
   const ar = language === "ar";
+
+  const complianceStats = useMemo(() => {
+    const contracts = contractsData?.contracts ?? [];
+    const total = contracts.length;
+    let criticalCount = 0;
+    let warningCount = 0;
+    let validCount = 0;
+    let monthlyCollection = 0;
+
+    contracts.forEach(c => {
+      const level = getComplianceLevel(c.endDate);
+      if (level === "critical") criticalCount++;
+      else if (level === "warning") warningCount++;
+      else validCount++;
+
+      if (c.contractStatus === "active") {
+        monthlyCollection += Number(c.monthlyRent || 0);
+      }
+    });
+
+    const complianceRate = total > 0 ? Math.round((validCount / total) * 100) : 100;
+
+    return {
+      totalContracts: total,
+      totalCritical: criticalCount,
+      totalWarning: warningCount,
+      monthlyCollection,
+      complianceRate,
+      activeContractCount: contracts.filter(c => c.contractStatus === "active").length,
+    };
+  }, [contractsData]);
 
   const localStats = useMemo(() => {
     const applications = readApplications();
@@ -102,8 +136,104 @@ export const AdminStats = () => {
   const chartData = localStats.subscriptionsByTier.map((item) => ({ name: t.tiers[item.tier as keyof typeof t.tiers] || item.tier, value: item.count }));
   const COLORS = ["var(--primary)", "var(--success)", "var(--accent)"];
 
+  const criticalBadgeColor = "#dc2626";
+  const warningBadgeColor = "#d97706";
+  const validBadgeColor = "#16a34a";
+
   return (
     <div className={styles.container}>
+      {/* Rent Compliance Stats */}
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>
+          <ShieldAlert size={16} style={{ verticalAlign: "middle", marginRight: "6px" }} />
+          {ar ? "إحصائيات امتثال الإيجارات" : "Rent Compliance Stats"}
+        </h2>
+        <div className={styles.grid}>
+          {/* Card 1: Total Contracts */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>{ar ? "إجمالي العقود" : "Total Contracts"}</span>
+              <div className={styles.iconWrapper} style={{ backgroundColor: `rgba(37, 99, 235, 0.15)`, color: "#2563eb" }}>
+                <FileText size={18} />
+              </div>
+            </div>
+            <div className={styles.cardValue}>{complianceStats.totalContracts}</div>
+            <div className={styles.cardSubtext}>
+              {complianceStats.activeContractCount > 0
+                ? ar
+                  ? `${complianceStats.activeContractCount} نشط`
+                  : `${complianceStats.activeContractCount} active`
+                : ar ? "لا توجد عقود" : "No contracts"}
+            </div>
+          </div>
+
+          {/* Card 2: Critical / Warning */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>{ar ? "حرجة / تنبيه" : "Critical / Warning"}</span>
+              <div className={styles.iconWrapper} style={{ backgroundColor: `${complianceStats.totalCritical > 0 ? "rgba(239, 68, 68, 0.15)" : "rgba(245, 158, 11, 0.15)"}`, color: complianceStats.totalCritical > 0 ? criticalBadgeColor : warningBadgeColor }}>
+                <AlertTriangle size={18} />
+              </div>
+            </div>
+            <div className={styles.cardValue} style={{ color: complianceStats.totalCritical > 0 ? criticalBadgeColor : complianceStats.totalWarning > 0 ? warningBadgeColor : validBadgeColor }}>
+              {complianceStats.totalCritical + complianceStats.totalWarning}
+              {complianceStats.totalCritical > 0 && (
+                <span style={{ fontSize: "12px", fontWeight: 600, color: criticalBadgeColor, marginLeft: "6px" }}>
+                  ({complianceStats.totalCritical} {ar ? "حرجة" : "critical"})
+                </span>
+              )}
+            </div>
+            <div className={styles.cardSubtext}>
+              {ar ? "أقل من 60 يوماً على الانتهاء" : "Within 60-day notice window"}
+            </div>
+          </div>
+
+          {/* Card 3: Monthly Collection */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>{ar ? "التحصيل الشهري" : "Monthly Collection"}</span>
+              <div className={styles.iconWrapper} style={{ backgroundColor: "rgba(16, 185, 129, 0.15)", color: "#10b981" }}>
+                <CircleDollarSign size={18} />
+              </div>
+            </div>
+            <div className={styles.cardValue}>
+              {complianceStats.monthlyCollection.toLocaleString()} <span style={{ fontSize: "14px", fontWeight: 500 }}>{ar ? "ر.س" : "SAR"}</span>
+            </div>
+            <div className={styles.cardSubtext}>
+              {ar ? "العقود النشطة فقط" : "Active contracts only"}
+            </div>
+          </div>
+
+          {/* Card 4: Compliance Rate */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>{ar ? "معدل الامتثال" : "Compliance Rate"}</span>
+              <div className={styles.iconWrapper} style={{ backgroundColor: "rgba(99, 102, 241, 0.15)", color: "#6366f1" }}>
+                <Percent size={18} />
+              </div>
+            </div>
+            <div className={styles.cardValue}>
+              <span style={{
+                color: complianceStats.complianceRate >= 80 ? validBadgeColor
+                  : complianceStats.complianceRate >= 50 ? warningBadgeColor
+                  : criticalBadgeColor,
+                fontWeight: 800,
+                fontSize: "28px",
+              }}>
+                {complianceStats.complianceRate}%
+              </span>
+            </div>
+            <div className={styles.cardSubtext}>
+              {complianceStats.totalContracts > 0
+                ? ar
+                  ? `${complianceStats.totalContracts - complianceStats.totalCritical - complianceStats.totalWarning} من ${complianceStats.totalContracts} متوافقة`
+                  : `${complianceStats.totalContracts - complianceStats.totalCritical - complianceStats.totalWarning} of ${complianceStats.totalContracts} compliant`
+                : ar ? "لا توجد عقود" : "No contracts"}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main overview stats */}
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>{ar ? "الملخص العام" : "Platform Overview"}</h2>

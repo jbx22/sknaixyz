@@ -1,7 +1,7 @@
 import { getServerUserSession } from "../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../helpers/getSetServerSession";
 import { db } from "../../helpers/db";
-import { superjson } from "../../helpers/schema";
+import superjson from "superjson";
 import { logAdminActivity } from "../../helpers/logAdminActivity";
 import type { Request } from "express";
 

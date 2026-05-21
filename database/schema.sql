@@ -59,7 +59,7 @@ create table admin_activity_logs (id bigserial primary key, admin_id bigint not 
 create table compliance_logs (id bigserial primary key, user_id bigint references users(id) on delete set null, entity_type text not null, entity_id bigint, action text not null, details jsonb default '{}'::jsonb, ip_address text, created_at timestamptz default now());
 create table data_deletion_requests (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, status deletion_request_status not null default 'pending', notes text, requested_at timestamptz default now(), processed_at timestamptz);
 
-create table kyc_records (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, status kyc_status not null default 'pending', suitability investor_suitability not null default 'retail', full_name_ar text, full_name_en text, national_id text, date_of_birth timestamptz, nationality text, phone text, address text, risk_score integer, rejection_reason text, verified_at timestamptz, expires_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
+create table kyc_records (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, status kyc_status not null default 'pending', suitability investor_suitability not null default 'retail', full_name_ar text, full_name_en text, national_id text, national_id_encrypted text, date_of_birth timestamptz, nationality text, phone text, phone_encrypted text, address text, risk_score integer, rejection_reason text, ndmo_masked_national_id text, verified_at timestamptz, expires_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
 create table investor_acknowledgements (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, acknowledgement_type text not null, version text not null default '1.0', ip_address text, acknowledged_at timestamptz default now());
 create table spvs (id bigserial primary key, name text not null, registration_number text, legal_structure text, legal_documents jsonb, status spv_status not null default 'draft', created_at timestamptz default now(), updated_at timestamptz default now());
 create table tokenized_assets (id bigserial primary key, property_id bigint not null references properties(id) on delete cascade, spv_id bigint not null references spvs(id), total_value numeric not null, total_tokens integer not null, token_price numeric not null default 100, tokens_sold integer not null default 0, offering_status offering_status not null default 'draft', annual_rental_yield numeric, title_deed_url text, valuation_report_url text, income_rights boolean not null default true, voting_rights boolean not null default false, transferable boolean not null default false, zoning_eligible boolean not null default false, lock_up_days integer not null default 90, settled_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now());
@@ -228,6 +228,8 @@ create table property_units (
   updated_at timestamptz default now()
 );
 
+create type rega_compliance_status as enum ('valid','warning','critical','pending_validation');
+
 create table rental_contracts (
   id bigserial primary key,
   property_id bigint not null references properties(id) on delete cascade,
@@ -241,8 +243,43 @@ create table rental_contracts (
   contract_status rent_contract_status not null default 'draft',
   payment_due_day integer not null default 1,
   auto_generate_invoice boolean not null default true,
+  auto_renew_flag boolean not null default false,
+  -- REGA/RER Compliance fields
+  ejar_contract_number text unique,
+  rega_license_number text,
+  rega_last_verified_at timestamptz,
+  compliance_status rega_compliance_status not null default 'pending_validation',
+  last_compliance_check timestamptz,
+  next_compliance_due timestamptz,
   notes text,
   contract_document_url text,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- FAL License validation cache (avoid hitting REGA API too often)
+create table rega_license_cache (
+  id bigserial primary key,
+  license_number text not null unique,
+  license_type text not null default 'fal',
+  is_valid boolean not null default false,
+  holder_name text,
+  holder_type text, -- 'individual' or 'entity'
+  expiry_date timestamptz,
+  last_checked timestamptz not null default now(),
+  raw_response jsonb default '{}'::jsonb
+);
+
+-- Property-specific REGA compliance tracking
+create table property_rega_status (
+  id bigserial primary key,
+  property_id bigint not null references properties(id) on delete cascade unique,
+  rega_registration_id text,
+  rega_registration_date timestamptz,
+  rer_reference text,
+  compliance_score numeric(5,2) default 100.00,
+  last_audit_at timestamptz,
+  ndmo_encryption_verified boolean not null default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
@@ -397,6 +434,11 @@ create index idx_property_units_property on property_units(property_id);
 create index idx_rental_contracts_property on rental_contracts(property_id);
 create index idx_rental_contracts_tenant on rental_contracts(tenant_user_id);
 create index idx_rental_contracts_status on rental_contracts(contract_status);
+create index idx_rental_contracts_ejar on rental_contracts(ejar_contract_number);
+create index idx_rental_contracts_compliance on rental_contracts(compliance_status);
+create index idx_rental_contracts_end_date on rental_contracts(end_date);
+create index idx_rega_license_cache_license on rega_license_cache(license_number);
+create index idx_property_rega_status_property on property_rega_status(property_id);
 create index idx_rent_invoices_contract on rent_invoices(contract_id);
 create index idx_rent_invoices_tenant on rent_invoices(tenant_user_id);
 create index idx_rent_invoices_status on rent_invoices(invoice_status);

@@ -2,7 +2,11 @@
   "crons": [
     {
       "path": "/_api/cron/rent-checks",
-      "schedule": "0 6 * * *"
+      "schedule": "0 21 * * *",
+      "headers": {
+        "authorization": "Bearer %CRON_SECRET%",
+        "x-vercel-cron": "true"
+      }
     }
   ],
   "buildCommand": "pnpm build",

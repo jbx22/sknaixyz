@@ -1,5 +1,5 @@
 import { db } from "../../helpers/db";
-import { superjson } from "../../helpers/schema";
+import superjson from "superjson";
 import type { Request } from "express";
 
 export async function handle(request: Request) {

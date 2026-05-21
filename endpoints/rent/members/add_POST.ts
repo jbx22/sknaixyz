@@ -1,6 +1,6 @@
 import { getServerUserSession } from "../../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
-import { superjson } from "../../../helpers/schema";
+import superjson from "superjson";
 import { isPlatformAdmin, canAccessProperty } from "../../../helpers/propertyAccess";
 import type { Request } from "express";
 import { db } from "../../../helpers/db";

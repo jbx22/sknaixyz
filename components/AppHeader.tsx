@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Logo } from "./Logo";
 import { ThemeModeSwitch } from "./ThemeModeSwitch";
@@ -6,7 +6,7 @@ import { Button } from "./Button";
 import { useLanguage } from "../helpers/useLanguage";
 import { useAuth } from "../helpers/useAuth";
 import { useMediaQuery } from "../helpers/useMediaQuery";
-import { Globe, Map as MapIcon, Search, Bot, User as UserIcon, LogIn, LogOut, Shield, Coins, LayoutDashboard, Percent, ClipboardCheck } from "lucide-react";
+import { Globe, Map as MapIcon, Search, Bot, User as UserIcon, LogIn, LogOut, Shield, Coins, LayoutDashboard, Percent, ClipboardCheck, ChevronDown, PlusCircle, FileText } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { ADMIN_STRINGS } from "../helpers/adminTranslations";
 import styles from "./AppHeader.module.css";
@@ -40,6 +40,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   const isAdmin = authState.type === "authenticated" && (authState.user.role === "admin" || authState.user.role === "superadmin");
   const isSuperadmin = authState.type === "authenticated" && authState.user.role === "superadmin";
   const adminLink = isSuperadmin ? "/superadmin" : "/admin/dashboard";
+
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
+  const subscriptionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (subscriptionRef.current && !subscriptionRef.current.contains(e.target as Node)) {
+        setSubscriptionOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -92,14 +105,38 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <Bot size={16} aria-hidden="true" />
               <span>{language === "ar" ? "الذكاء الاصطناعي" : "AI Tools"}</span>
             </Link>
-            <Link
-              to="/subscription/apply"
-              className={`${styles.navLink} ${location.pathname.startsWith("/subscription") ? styles.active : ""}`}
-              aria-current={isActive("/subscription/apply") ? "page" : undefined}
-            >
-              <ClipboardCheck size={16} aria-hidden="true" />
-              <span>{language === "ar" ? "طلب اشتراك" : "Apply"}</span>
-            </Link>
+            <div className={styles.subscriptionDropdown} ref={subscriptionRef}>
+              <button
+                className={`${styles.navLink} ${styles.dropdownToggle} ${location.pathname.startsWith("/subscription") ? styles.active : ""}`}
+                onClick={() => setSubscriptionOpen(!subscriptionOpen)}
+                aria-expanded={subscriptionOpen}
+                onMouseEnter={() => setSubscriptionOpen(true)}
+              >
+                <ClipboardCheck size={16} aria-hidden="true" />
+                <span>{language === "ar" ? "الاشتراكات" : "Subscriptions"}</span>
+                <ChevronDown size={12} className={`${styles.dropdownChevron} ${subscriptionOpen ? styles.dropdownChevronOpen : ""}`} />
+              </button>
+              {subscriptionOpen && (
+                <div className={styles.dropdownMenu} onMouseLeave={() => setSubscriptionOpen(false)}>
+                  <Link
+                    to="/subscription/apply"
+                    className={`${styles.dropdownItem} ${isActive("/subscription/apply") ? styles.active : ""}`}
+                    onClick={() => setSubscriptionOpen(false)}
+                  >
+                    <PlusCircle size={16} />
+                    <span>{language === "ar" ? "إضافة اشتراك" : "Add Subscription"}</span>
+                  </Link>
+                  <Link
+                    to="/subscription/status"
+                    className={`${styles.dropdownItem} ${isActive("/subscription/status") ? styles.active : ""}`}
+                    onClick={() => setSubscriptionOpen(false)}
+                  >
+                    <FileText size={16} />
+                    <span>{language === "ar" ? "حالة الاشتراك" : "Subscription Status"}</span>
+                  </Link>
+                </div>
+              )}
+            </div>
           </nav>
         )}
 

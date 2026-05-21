@@ -25,6 +25,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from "./DropdownMenu";
 import { useLanguage } from "../helpers/useLanguage";
 import styles from "./Logo.module.css";
@@ -89,12 +92,15 @@ export const Logo: React.FC<LogoProps> = ({
       to: "/contact",
     },
     {
-      label: isArabic ? "الاشتراكات" : "Subscriptions",
-      icon: <Crown size={16} className={styles.menuIcon} />,
-      to: "/subscription",
+      label: isArabic ? "السوق الثانوية" : "Secondary Market",
+      icon: <ArrowLeftRight size={16} className={styles.menuIcon} />,
+      to: "/secondary-market",
     },
+  ];
+
+  const subscriptionSubItems = [
     {
-      label: isArabic ? "طلب اشتراك" : "Apply Subscription",
+      label: isArabic ? "إضافة اشتراك" : "Add Subscription",
       icon: <ClipboardCheck size={16} className={styles.menuIcon} />,
       to: "/subscription/apply",
     },
@@ -102,11 +108,6 @@ export const Logo: React.FC<LogoProps> = ({
       label: isArabic ? "حالة الاشتراك" : "Subscription Status",
       icon: <Clock size={16} className={styles.menuIcon} />,
       to: "/subscription/status",
-    },
-    {
-      label: isArabic ? "السوق الثانوية" : "Secondary Market",
-      icon: <ArrowLeftRight size={16} className={styles.menuIcon} />,
-      to: "/secondary-market",
     },
   ];
 
@@ -158,6 +159,23 @@ export const Logo: React.FC<LogoProps> = ({
                 </Link>
               </DropdownMenuItem>
             ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className={styles.subTrigger}>
+                <Crown size={16} className={styles.menuIcon} />
+                <span>{isArabic ? "الاشتراكات" : "Subscriptions"}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className={styles.subContent}>
+                {subscriptionSubItems.map((subItem, index) => (
+                  <DropdownMenuItem key={index} asChild>
+                    <Link to={subItem.to} className={styles.menuItemLink}>
+                      {subItem.icon}
+                      {subItem.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>

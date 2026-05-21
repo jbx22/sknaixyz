@@ -77,13 +77,7 @@ export default function RentBrowsePage() {
             <option value="">{language === "ar" ? "غرف نوم" : "Bedrooms"}</option>
             {[1,2,3,4].map(n => <option key={n} value={n}>{n}+</option>)}
           </select>
-          <select className={styles.select} value={filters.maxRent || ""} onChange={e => setFilters(f => ({ ...f, maxRent: e.target.value ? Number(e.target.value) : undefined, page: 1 }))}>
-            <option value="">{language === "ar" ? "أقصى إيجار" : "Max Rent"}</option>
-            <option value="3000">3,000 {t.sar}</option>
-            <option value="5000">5,000 {t.sar}</option>
-            <option value="8000">8,000 {t.sar}</option>
-            <option value="15000">15,000 {t.sar}</option>
-          </select>
+                    {/* Max Rent filter removed per user request */}
         </div>
 
         {isLoading && <div className={styles.loading}>{t.loading}</div>}

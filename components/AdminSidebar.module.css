@@ -1,3 +1,90 @@
+.subscriptionSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.subscriptionToggle {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  justify-content: flex-start;
+  gap: var(--spacing-3);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.subscriptionToggle.active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.subscriptionToggle.active:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.chevron {
+  margin-left: auto;
+  transition: transform var(--animation-duration-normal) ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.subLinks {
+  display: flex;
+  flex-direction: column;
+  margin-left: var(--spacing-6);
+  border-left: 2px solid var(--border);
+  padding-left: var(--spacing-2);
+  margin-top: var(--spacing-1);
+  margin-bottom: var(--spacing-1);
+}
+
+:global([dir="rtl"]) .subLinks {
+  margin-left: 0;
+  margin-right: var(--spacing-6);
+  border-left: none;
+  border-right: 2px solid var(--border);
+  padding-left: 0;
+  padding-right: var(--spacing-2);
+}
+
+.subLink {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all var(--animation-duration-fast) ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.subLink:hover {
+  background-color: var(--secondary);
+  color: var(--foreground);
+}
+
+.subLink.active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.subLink.active:hover {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
 .sidebar {
   width: 260px;
   background-color: var(--sidebar);

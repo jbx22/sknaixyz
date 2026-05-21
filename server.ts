@@ -2,6 +2,7 @@ import "./loadEnv.js";
 import { Hono } from 'hono'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { serve } from '@hono/node-server';
+import cron from "node-cron";
 
 const app = new Hono();
 
@@ -384,6 +385,62 @@ app.get('_api/auth/oauth_authorize',async c => {
 app.get('_api/admin/compliance/logs',async c => {
   try {
     const { handle } = await import("./endpoints/admin/compliance/logs_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message,  500)
+  }
+})
+app.get('_api/admin/compliance/stats',async c => {
+  try {
+    const { handle } = await import("./endpoints/admin/compliance/stats_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message,  500)
+  }
+})
+app.get('_api/admin/compliance/check-fal-license',async c => {
+  try {
+    const { handle } = await import("./endpoints/admin/compliance/checkFalLicense_GET.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message,  500)
+  }
+})
+app.post('_api/admin/compliance/ejar-mirror',async c => {
+  try {
+    const { handle } = await import("./endpoints/admin/compliance/ejarMirror_POST.js");
+    let request = c.req.raw;
+    const response = await handle(request);
+    if (!(response instanceof Response) && response.constructor.name !== "Response") {
+      return c.text("Invalid response format. handle should always return a Response object." + response.constructor.name, 500);
+    }
+    return response;
+  } catch (e) {
+    console.error(e);
+    return c.text("Error loading endpoint code " + e.message,  500)
+  }
+})
+app.get('_api/admin/compliance/checklist',async c => {
+  try {
+    const { handle } = await import("./endpoints/admin/compliance/checklist_GET.js");
     let request = c.req.raw;
     const response = await handle(request);
     if (!(response instanceof Response) && response.constructor.name !== "Response") {
@@ -1598,6 +1655,34 @@ app.get("*", async (c, next) => {
 });
 const port = Number(process.env.PORT || 3333);
 export { app };
+
+// ============================================================
+// Cron Jobs (node-cron) — Scheduled Tasks
+// ============================================================
+
+// Midnight Riyadh time (UTC+3) = 21:00 UTC
+cron.schedule("0 21 * * *", async () => {
+  console.log("[cron] Running midnight rent-checks scan (Riyadh time)...");
+  try {
+    const { handle } = await import("./endpoints/cron/rent-checks_GET.js");
+    const request = new Request("http://localhost/_api/cron/rent-checks", {
+      headers: {
+        "authorization": `Bearer ${process.env.CRON_SECRET || "sknai-cron-2024"}`,
+        "x-vercel-cron": "true",
+      },
+    });
+    const response = await handle(request);
+    const body = await response.text();
+    console.log(`[cron] rent-checks complete (${response.status}): ${body}`);
+  } catch (err: any) {
+    console.error("[cron] rent-checks failed:", err.message);
+  }
+}, {
+  scheduled: true,
+  timezone: "Asia/Riyadh",
+});
+
+console.log("[cron] Scheduled: midnight daily rent-checks (Asia/Riyadh)");
 
 if (!process.env.VERCEL) {
   serve({ fetch: app.fetch, port });

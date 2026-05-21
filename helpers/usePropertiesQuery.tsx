@@ -17,9 +17,25 @@ export function usePropertiesQuery(filters: InputType) {
 
   const query = useQuery<OutputType>({
     queryKey: [...PROPERTIES_QUERY_KEY, queryFilters],
-    queryFn: () => {
-      // Try to get properties from API first
-      return getProperties(queryFilters).catch((error) => {
+    queryFn: async () => {
+      try {
+        const result = await getProperties(queryFilters);
+        // If API returns empty results (no DB data), fallback to seed data
+        if (!result.properties || result.properties.length === 0) {
+          console.log("API returned no properties, falling back to seed data");
+          const seedProperties = getSeedProperties();
+          const filteredProperties = filterSeedProperties(seedProperties, queryFilters);
+          return {
+            properties: filteredProperties as any,
+            pagination: {
+              page: queryFilters.page || 1,
+              pageSize: queryFilters.pageSize || 20,
+              totalCount: filteredProperties.length,
+            },
+          };
+        }
+        return result;
+      } catch (error) {
         console.log("API failed, falling back to seed data for development", error);
         
         // Fallback to seed data for development
@@ -27,21 +43,13 @@ export function usePropertiesQuery(filters: InputType) {
         const filteredProperties = filterSeedProperties(seedProperties, queryFilters);
         
         return {
-          properties: filteredProperties,
-          total: filteredProperties.length,
-          page: queryFilters.page || 1,
-          pageSize: queryFilters.pageSize || 20,
-          totalPages: Math.ceil(filteredProperties.length / (queryFilters.pageSize || 20)),
+          properties: filteredProperties as any,
+          pagination: {
+            page: queryFilters.page || 1,
+            pageSize: queryFilters.pageSize || 20,
+            totalCount: filteredProperties.length,
+          },
         };
-      });
-    },
-    // Initialize seed data if not exists
-    onSuccess: (data) => {
-      if (data.properties.length > 0) {
-        const existingData = localStorage.getItem("sknai.seedProperties");
-        if (!existingData) {
-          localStorage.setItem("sknai.seedProperties", JSON.stringify(data.properties));
-        }
       }
     },
     placeholderData: keepPreviousData,

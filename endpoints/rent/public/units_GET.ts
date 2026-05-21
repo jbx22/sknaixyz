@@ -1,6 +1,6 @@
 import { getServerUserSession } from "../../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
-import { superjson } from "../../../helpers/schema";
+import superjson from "superjson";
 import type { Request } from "express";
 import { db } from "../../../helpers/db";
 
@@ -46,8 +46,24 @@ export async function handle(request: Request) {
       eb("properties.city", "ilike", `%${search}%`),
     ]));
 
-    // Count total
-    const countResult = await query
+    // Count total - use a separate query without the conflicting select()
+    const countQuery = db
+      .selectFrom("propertyUnits")
+      .innerJoin("properties", "propertyUnits.propertyId", "properties.id")
+      .where("propertyUnits.status", "=", "available");
+
+    if (propertyId) countQuery.where("propertyUnits.propertyId", "=", Number(propertyId));
+    if (minRent) countQuery.where("propertyUnits.monthlyRent", ">=", Number(minRent));
+    if (maxRent) countQuery.where("propertyUnits.monthlyRent", "<=", Number(maxRent));
+    if (minBedrooms) countQuery.where("propertyUnits.bedrooms", ">=", Number(minBedrooms));
+    if (search) countQuery.where((eb) => eb.or([
+      eb("propertyUnits.unitNumber", "ilike", `%${search}%`),
+      eb("propertyUnits.description", "ilike", `%${search}%`),
+      eb("properties.title", "ilike", `%${search}%`),
+      eb("properties.city", "ilike", `%${search}%`),
+    ]));
+
+    const countResult = await countQuery
       .select(db.fn.count("propertyUnits.id").as("total"))
       .executeTakeFirst();
     const total = Number(countResult?.total ?? 0);
@@ -67,7 +83,7 @@ export async function handle(request: Request) {
         "propertyUnits.status",
         "propertyUnits.description",
         "properties.title as propertyTitle",
-        "properties.city as propertyCity",
+        "properties.locationName as propertyCity",
       ])
       .orderBy("propertyUnits.monthlyRent", "asc")
       .limit(limit)
