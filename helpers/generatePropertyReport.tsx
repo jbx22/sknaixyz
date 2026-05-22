@@ -1,418 +1,1024 @@
+/**
+ * Property report generation engine.
+ *
+ * Architecture (global, works for ANY city/country):
+ * ┌──────────────┐    ┌─────────────────┐    ┌──────────────────┐
+ * │   Property    │───▶│ 1. Reverse      │───▶│ 2. Collect Real  │
+ * │   from DB     │    │    Geocode      │    │    Data (OSM)    │
+ * └──────────────┘    │  (country/city)  │    └────────┬─────────┘
+ *                     └─────────────────┘             │
+ *                                                      ▼
+ *                     ┌─────────────────┐    ┌──────────────────┐
+ *                     │ 4. Market Price │◀───│ 3. Country-based │
+ *                     │    Estimation   │    │    Providers     │
+ *                     │    (per country)│    │    (global map)  │
+ *                     └────────┬────────┘    └──────────────────┘
+ *                              │
+ *                              ▼
+ *                     ┌─────────────────┐    ┌──────────────────┐
+ *                     │ 5. Build Tiered  │───▶│ 6. DeepSeek V4   │
+ *                     │    Prompt       │    │    Flash (JSON)  │
+ *                     │ (FREE/PREMIUM)  │    └────────┬─────────┘
+ *                     └─────────────────┘             │
+ *                                                      ▼
+ *                     ┌─────────────────┐    ┌──────────────────┐
+ *                     │ 8. Return       │◀───│ 7. Validate &   │
+ *                     │    Report       │    │    Fill Gaps     │
+ *                     └─────────────────┘    └──────────────────┘
+ *
+ * Key design:
+ * - Works in ANY country — detects location via Nominatim
+ * - Both tiers include real market pricing (rent + sale)
+ * - FREE gets basic price ranges; PREMIUM gets full analysis
+ * - Phone/internet providers detected from country code
+ * - Graceful fallback if DeepSeek is unavailable
+ */
+
 import { db } from "./db";
-import { AIReport } from "../endpoints/properties/ai_report_POST.schema";
+import { AIReport, FreeReport, PremiumReport } from "../endpoints/properties/ai_report_POST.schema";
+import { callDeepSeek } from "./deepseek";
+import {
+  collectRealEstateData,
+  reverseGeocode,
+  searchMarketPrices,
+} from "./dataCollector";
+import type { MarketPriceResult } from "./dataCollector";
+import { buildSystemPrompt, buildUserPrompt, ReportTier } from "./prompts";
+
+interface ReportOptions {
+  userName?: string;
+  investorProfile?: string;
+}
 
 /**
- * Generates a comprehensive AI property report based on a property ID.
- * This logic is extracted from the ai_report endpoint to be reusable.
+ * Entry point — generates a property report.
+ * Works globally for any country/city.
  */
 export async function generatePropertyReport(
   propertyId: number,
-  language: "ar" | "en" = "ar"
+  language: "ar" | "en" = "ar",
+  tier: ReportTier = "free",
+  options?: ReportOptions
 ): Promise<AIReport> {
-  // Fetch property to get coordinates
+  // 1. Fetch property from DB
   const property = await db
     .selectFrom("properties")
-    .select(["latitude", "longitude", "locationName", "price", "areaSqm"])
+    .select([
+      "id",
+      "title",
+      "description",
+      "locationName",
+      "latitude",
+      "longitude",
+      "price",
+      "areaSqm",
+      "bedrooms",
+      "bathrooms",
+      "propertyType",
+      "furnished",
+      "yearBuilt",
+      "floorNumber",
+      "amenities",
+      "city",
+      "district",
+    ])
     .where("id", "=", propertyId)
     .executeTakeFirst();
 
   if (!property) {
-    throw new Error("Property not found");
+    throw new Error(`Property ${propertyId} not found`);
   }
 
   const lat = Number(property.latitude);
   const lng = Number(property.longitude);
   const price = Number(property.price);
-  const area = Number(property.areaSqm);
+  const areaSqm = Number(property.areaSqm);
+  const pricePerSqm = areaSqm > 0 ? Math.round(price / areaSqm) : 0;
 
-  // Mock AI Logic based on coordinates
-  // In a real scenario, this would call an external AI service or geospatial API
-  // We use deterministic "randomness" based on coordinates to make it seem consistent
-
-  const seed = lat + lng;
-  const random = (offset: number) => {
-    const x = Math.sin(seed + offset) * 10000;
-    return x - Math.floor(x);
-  };
-
-  const providers =
-    language === "ar"
-      ? ["إس تي سي", "موبايلي", "زين", "سلام", "فيرجن موبايل"]
-      : ["STC", "Mobily", "Zain", "Salam", "Virgin Mobile"];
-  const availableProviders = providers.filter((_, i) => random(i) > 0.3);
-
-  const schools =
-    language === "ar"
-      ? [
-          { name: "مدرسة الملك فيصل", type: "خاص" },
-          { name: "مدرسة الرياض الدولية", type: "دولي" },
-          { name: "مدرسة جيل المستقبل", type: "عام" },
-          { name: "مدارس الرواد", type: "خاص" },
-        ]
-      : [
-          { name: "King Faisal School", type: "Private" },
-          { name: "Riyadh International School", type: "International" },
-          { name: "Future Generation School", type: "Public" },
-          { name: "Al-Rowad Schools", type: "Private" },
-        ];
-  const nearestSchools = schools
-    .map((s, i) => ({
-      ...s,
-      distanceKm: Number((0.5 + random(i + 10) * 5).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 3);
-
-  const parks =
-    language === "ar"
-      ? ["حديقة الملك عبدالله", "حديقة العليا", "حديقة الواحة", "حديقة الحي"]
-      : [
-          "King Abdullah Park",
-          "Olaya Park",
-          "Al-Waha Park",
-          "Neighborhood Garden",
-        ];
-  const nearestParks = parks
-    .map((p, i) => ({
-      name: p,
-      distanceKm: Number((0.2 + random(i + 20) * 3).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const malls =
-    language === "ar"
-      ? [
-          "الرياض بارك مول",
-          "النخيل مول",
-          "مركز غرناطة",
-          "بانوراما مول",
-        ]
-      : [
-          "Riyadh Park Mall",
-          "Nakheel Mall",
-          "Granada Center",
-          "Panorama Mall",
-        ];
-  const nearestMalls = malls
-    .map((m, i) => ({
-      name: m,
-      distanceKm: Number((1.0 + random(i + 30) * 10).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const hospitals =
-    language === "ar"
-      ? [
-          "مستشفى الملك فيصل التخصصي",
-          "مستشفى د. سليمان الحبيب",
-          "مستشفى دلة",
-          "مستشفى المملكة",
-        ]
-      : [
-          "King Faisal Specialist Hospital",
-          "Dr. Sulaiman Al Habib Hospital",
-          "Dallah Hospital",
-          "Kingdom Hospital",
-        ];
-  const nearestHospitals = hospitals
-    .map((h, i) => ({
-      name: h,
-      distanceKm: Number((1.5 + random(i + 40) * 8).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const metroStations =
-    language === "ar"
-      ? [
-          "محطة مركز الملك عبدالله المالي",
-          "محطة العليا",
-          "محطة الأمير سلطان",
-          "محطة الملز",
-        ]
-      : [
-          "King Abdullah Financial District Station",
-          "Olaya Station",
-          "Prince Sultan Station",
-          "Al Malaz Station",
-        ];
-  const nearestMetroStations = metroStations
-    .map((m, i) => ({
-      name: m,
-      distanceKm: Number((0.8 + random(i + 50) * 4).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const busStops =
-    language === "ar"
-      ? ["محطة الساحة الرئيسية", "محطة مركز المدينة", "محطة الحي"]
-      : [
-          "Main Square Bus Stop",
-          "City Center Terminal",
-          "Neighborhood Station",
-        ];
-  const nearestBusStops = busStops
-    .map((b, i) => ({
-      name: b,
-      distanceKm: Number((0.2 + random(i + 60) * 1.5).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const cinemas =
-    language === "ar"
-      ? ["فوكس سينما الرياض بارك", "موفي سينما", "إيه إم سي سينما"]
-      : ["VOX Cinemas Riyadh Park", "Muvi Cinema", "AMC Cinemas"];
-  const nearestCinemas = cinemas
-    .map((c, i) => ({
-      name: c,
-      distanceKm: Number((1.2 + random(i + 70) * 5).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const sportsFacilities =
-    language === "ar"
-      ? [
-          "مجمع المدينة الرياضي",
-          "النادي الرياضي",
-          "فتنس فيرست",
-          "مركز الحي الرياضي",
-        ]
-      : [
-          "City Sports Complex",
-          "Al-Nadi Al-Riyadhi",
-          "Fitness First",
-          "Community Sports Center",
-        ];
-  const nearestSports = sportsFacilities
-    .map((s, i) => ({
-      name: s,
-      distanceKm: Number((0.5 + random(i + 80) * 4).toFixed(1)),
-    }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, 2);
-
-  const safetyRating = Math.floor(7 + random(50) * 3); // 7 to 10
-  const walkabilityScore = Math.floor(6 + random(90) * 4); // 6 to 10
-  const noiseLevel = Math.floor(3 + random(100) * 5); // 3 to 8 (lower is better)
-  const airQualityIndex = Math.floor(40 + random(110) * 60); // 40 to 100
-  const investmentPotentialScore = Math.floor(6 + random(120) * 4); // 6 to 10
-  const nearestRestaurants = Math.floor(15 + random(130) * 35); // 15 to 50
-
-  // Traffic conditions
-  const trafficOptions =
-    language === "ar"
-      ? ["خفيفة", "متوسطة", "كثيفة في أوقات الذروة"]
-      : ["Light", "Moderate", "Heavy during rush hours"];
-  const trafficConditions =
-    trafficOptions[Math.floor(random(140) * trafficOptions.length)];
-
-  // Price analysis
-  const pricePerSqm = Math.round(price / area);
-  const areaPricePerSqmAvg = Math.round(3000 + random(150) * 2000);
-  const marketPricePerSqm = 3000 + random(60) * 2000;
-  const expectedPrice = Math.round(marketPricePerSqm * area);
-  const priceDifference = expectedPrice - price;
-  const priceStatus =
-    language === "ar"
-      ? Math.abs(priceDifference) < expectedPrice * 0.05
-        ? "سعر السوق العادل"
-        : priceDifference > 0
-          ? "أقل من القيمة (صفقة جيدة)"
-          : "أعلى من القيمة"
-      : Math.abs(priceDifference) < expectedPrice * 0.05
-        ? "Fair Market Price"
-        : priceDifference > 0
-          ? "Undervalued (Good Deal)"
-          : "Overvalued";
-
-  // Rental yield
-  const rentalYieldEstimate = Number((3 + random(160) * 4).toFixed(1)); // 3% to 7%
-
-  // Future developments
-  const possibleDevelopments =
-    language === "ar"
-      ? [
-          "خط مترو جديد مخطط له في 2025",
-          "مشروع إعادة تطوير منطقة التسوق",
-          "افتتاح مدرسة دولية جديدة قريبة",
-          "مبادرة توسعة الحديقة الخضراء",
-          "ترقيات البنية التحتية للمدينة الذكية",
-        ]
-      : [
-          "New metro line extension planned for 2025",
-          "Shopping district redevelopment project",
-          "New international school opening nearby",
-          "Green park expansion initiative",
-          "Smart city infrastructure upgrades",
-        ];
-  const futureDevelopments = possibleDevelopments.filter(
-    (_, i) => random(170 + i) > 0.4
+  console.log(
+    `[ReportGen] 🗺️ Generating ${tier} report for property ${propertyId} ` +
+    `at ${lat},${lng}`
   );
 
-  // Demographics
-  const demographicProfiles =
-    language === "ar"
-      ? [
-          "يغلب على المنطقة الشباب المهنيون والعائلات التي لديها أطفال. تجذب المنطقة الوافدين والمقيمين المحليين الباحثين عن وسائل الراحة الحديثة والمدارس الجيدة.",
-          "مجتمع سكني راسخ يضم مزيجاً من المواطنين السعوديين والعائلات الوافدة طويلة الأمد. يتمتع الحي بروح مجتمعية قوية وتنوع ثقافي.",
-          "منطقة متنامية تحظى بشعبية بين الأزواج الشباب والمستثمرين. يميل التركيب السكاني نحو السكان من ذوي الدخل المتوسط إلى فوق المتوسط مع تفضيلات نمط الحياة الحديثة.",
-          "حي تقليدي لكنه متطور يضم عائلات متعددة الأجيال. يجذب مؤخراً السكان الأصغر سناً بسبب البنية التحتية المحسنة والقرب من مناطق الأعمال.",
-        ]
-      : [
-          "Predominantly young professionals and families with children. The area attracts expatriates and local residents seeking modern amenities and good schools.",
-          "Established residential community with a mix of Saudi nationals and long-term expatriate families. The neighborhood has a strong sense of community and cultural diversity.",
-          "Growing area popular with young couples and investors. The demographic is skewed towards middle to upper-middle income residents with modern lifestyle preferences.",
-          "Traditional yet evolving neighborhood with multigenerational families. Recently attracting younger residents due to improved infrastructure and proximity to business districts.",
-        ];
-  const neighborhoodDemographics =
-    demographicProfiles[Math.floor(random(180) * demographicProfiles.length)];
+  // 2. Collect real-world data — in parallel
+  const [geocode, osmData] = await Promise.all([
+    reverseGeocode(lat, lng),
+    collectRealEstateData(lat, lng, 3),
+  ]);
 
-  // Climate notes
-  const climateNotes =
-    language === "ar"
-      ? random(190) > 0.5
-        ? "تستفيد المنطقة من دوران هواء جيد وهي أبرد قليلاً من وسط المدينة. درجات حرارة الصيف نموذجية للرياض، لكن الحي يحتوي على غطاء شجري كافٍ يوفر ظلاً طبيعياً."
-        : "كما هو الحال في معظم الرياض، الصيف حار وجاف. يوفر موقع العقار حماية معقولة من العواصف الرملية. أشهر الشتاء (نوفمبر-فبراير) لطيفة مع درجات حرارة معتدلة مثالية للأنشطة الخارجية."
-      : random(190) > 0.5
-        ? "The area benefits from good air circulation and is slightly cooler than the city center. Summer temperatures are typical for Riyadh, but the neighborhood has adequate tree coverage providing natural shade."
-        : "As with most of Riyadh, summers are hot and dry. The property's location offers reasonable protection from sandstorms. Winter months (November-February) are pleasant with mild temperatures ideal for outdoor activities.";
+  console.log(`[ReportGen] 📍 Location: ${geocode.city}, ${geocode.country} (${geocode.countryCode})`);
+  console.log(`[ReportGen] 📦 OSM data: ${osmData.schools?.length || 0} schools, ${osmData.restaurants?.length || 0} restaurants`);
 
-  // Detailed area analysis (2-3 paragraphs)
-  let areaAnalysis: string;
+  const city = property.city || geocode.city || "Unknown";
+  const district = property.district || geocode.district || "";
+  const country = geocode.country || "";
+  const countryCode = geocode.countryCode || "";
 
-  if (language === "ar") {
-    const safetyDesc =
-      safetyRating > 8 ? "آمن بشكل استثنائي" : "آمن ومحمي";
-    const walkabilityDesc =
-      walkabilityScore > 8
-        ? "قابل للمشي بدرجة عالية مع أرصفة واسعة وبنية تحتية صديقة للمشاة"
-        : walkabilityScore > 6
-          ? "قابل للمشي بشكل معتدل مع مرافق كافية للمشاة"
-          : "يعتمد على السيارات مع بنية تحتية محدودة للمشي";
-    const investmentDesc =
-      investmentPotentialScore > 8
-        ? "إمكانات استثمارية ممتازة مع نمو متوقع قوي"
-        : investmentPotentialScore > 6
-          ? "فرصة استثمارية جيدة مع تقدير ثابت متوقع"
-          : "استثمار مستقر مع آفاق نمو معتدلة";
+  // 3. Search market prices (country-aware)
+  const marketData = await searchMarketPrices(
+    lat, lng,
+    property.propertyType || "apartment",
+    areaSqm,
+    property.bedrooms,
+    city, district,
+    country, countryCode,
+    language
+  );
 
-    areaAnalysis = `يقع هذا العقار في ${property.locationName}، في حي ${safetyDesc} أصبح يحظى بشعبية متزايدة بين العائلات والمهنيين. تتميز المنطقة بكثافة سكنية ${
-      random(200) > 0.5 ? "عالية" : "متوسطة"
-    } مع مزيج جيد من وسائل الراحة الحديثة والقيم المجتمعية التقليدية. مع نقاط إمكانية المشي ${walkabilityScore}/10، الحي ${walkabilityDesc}، مما يجعله ${
-      walkabilityScore > 7
-        ? "مناسباً للمهام اليومية والأنشطة الترفيهية"
-        : "الأنسب للسكان الذين يمتلكون وسائل نقل خاصة"
-    }.
+  // 4. Build unified market context for BOTH tiers
+  const marketContext = {
+    similarRentMin: marketData.similarRentRange.min,
+    similarRentMax: marketData.similarRentRange.max,
+    similarRentAvg: marketData.similarRentRange.avg,
+    similarSaleMin: marketData.similarSaleRange.min,
+    similarSaleMax: marketData.similarSaleRange.max,
+    similarSaleAvg: marketData.similarSaleRange.avg,
+    currency: marketData.currency,
+    currencySymbol: marketData.currencySymbol,
+    country: country || countryCode || "",
+    city: city,
+    internetProviders: marketData.internetProviders,
+    phoneProviders: marketData.phoneProviders,
+  };
 
-يوفر الموقع ${investmentDesc}. يُظهر تحليل السوق الحالي أن سعر المتر المربع ${pricePerSqm.toLocaleString()} ريال سعودي مقارنة بمتوسط المنطقة ${areaPricePerSqmAvg.toLocaleString()} ريال سعودي، مما يشير إلى ${
-      pricePerSqm < areaPricePerSqmAvg
-        ? "موقع تسعير مناسب"
-        : "موقع متميز في السوق المحلي"
-    }. يجعل عائد الإيجار المقدر ${rentalYieldEstimate}% هذا ${
-      rentalYieldEstimate > 5
-        ? "خياراً جذاباً للمستثمرين في الإيجار"
-        : "استثماراً إيجارياً معقولاً"
-    }. ظروف حركة المرور في المنطقة ${trafficConditions} بشكل عام، مع اتصال جيد بمناطق الأعمال الرئيسية عبر ${
-      nearestMetroStations[0] ? "الوصول إلى المترو القريب و" : ""
-    }الطرق السريعة الرئيسية.
+  // 5. Build the property info object
+  const propertyInfo = {
+    id: property.id,
+    title: property.title || undefined,
+    description: property.description || undefined,
+    locationName: property.locationName,
+    latitude: lat,
+    longitude: lng,
+    price,
+    areaSqm,
+    pricePerSqm,
+    bedrooms: property.bedrooms ?? null,
+    bathrooms: property.bathrooms ?? null,
+    propertyType: property.propertyType || undefined,
+    amenities: (property.amenities as string[]) || undefined,
+    yearBuilt: property.yearBuilt ?? null,
+    furnished: Boolean(property.furnished),
+    floorNumber: property.floorNumber ?? null,
+  };
 
-مؤشرات جودة الحياة قوية، مع مؤشر جودة الهواء ${airQualityIndex} (${
-      airQualityIndex < 50
-        ? "ممتاز"
-        : airQualityIndex < 75
-          ? "جيد"
-          : "متوسط"
-    }) وتقييم مستوى الضوضاء ${noiseLevel}/10. يوفر الحي وصولاً ممتازاً إلى أكثر من ${nearestRestaurants} مطعماً ومقهى في المنطقة المجاورة، إلى جانب وسائل الراحة الشاملة بما في ذلك المدارس ومرافق الرعاية الصحية وخيارات الترفيه. ${
-      futureDevelopments.length > 0
-        ? `تشمل التطورات المخططة في المنطقة ${futureDevelopments[0]}، والتي يجب أن تعزز قيم العقارات وإمكانية العيش.`
-        : "المنطقة راسخة مع بنية تحتية ناضجة."
-    }`;
-  } else {
-    const safetyDesc =
-      safetyRating > 8 ? "exceptionally safe" : "safe and secure";
-    const walkabilityDesc =
-      walkabilityScore > 8
-        ? "highly walkable with wide sidewalks and pedestrian-friendly infrastructure"
-        : walkabilityScore > 6
-          ? "moderately walkable with adequate pedestrian facilities"
-          : "car-dependent with limited walking infrastructure";
-    const investmentDesc =
-      investmentPotentialScore > 8
-        ? "excellent investment potential with strong projected growth"
-        : investmentPotentialScore > 6
-          ? "good investment opportunity with steady appreciation expected"
-          : "stable investment with moderate growth prospects";
+  // 6. Attempt AI generation with DeepSeek
+  try {
+    const report = await generateWithAI(
+      tier, language, propertyInfo, osmData as any, marketContext, options
+    );
+    console.log(`[ReportGen] ✅ ${tier} report generated for property ${propertyId}`);
+    return report;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.warn(`[ReportGen] ⚠️ AI failed, using fallback: ${msg}`);
+    return buildFallbackReport(tier, language, propertyInfo, marketContext, osmData as any);
+  }
+}
 
-    areaAnalysis = `Located in ${property.locationName}, this property sits in a ${safetyDesc} neighborhood that has become increasingly popular among families and professionals. The area is characterized by ${
-      random(200) > 0.5 ? "high" : "moderate"
-    } residential density with a good mix of modern amenities and traditional community values. With a walkability score of ${walkabilityScore}/10, the neighborhood is ${walkabilityDesc}, making it ${
-      walkabilityScore > 7
-        ? "convenient for daily errands and leisure activities"
-        : "best suited for residents with private transportation"
-    }.
+// ─── AI GENERATION ──────────────────────────────────────────────────
 
-The location offers ${investmentDesc}. Current market analysis shows the price per square meter at ${pricePerSqm.toLocaleString()} SAR compared to the area average of ${areaPricePerSqmAvg.toLocaleString()} SAR, indicating ${
-      pricePerSqm < areaPricePerSqmAvg
-        ? "a favorable pricing position"
-        : "premium positioning in the local market"
-    }. The estimated rental yield of ${rentalYieldEstimate}% makes this ${
-      rentalYieldEstimate > 5
-        ? "an attractive option for buy-to-let investors"
-        : "a reasonable rental investment"
-    }. Traffic conditions in the area are generally ${trafficConditions.toLowerCase()}, with good connectivity to major business districts via ${
-      nearestMetroStations[0] ? "nearby metro access and" : ""
-    } main highways.
+async function generateWithAI(
+  tier: ReportTier,
+  language: "ar" | "en",
+  propertyInfo: Record<string, any>,
+  osmData: Record<string, any>,
+  marketContext: {
+    similarRentMin: number;
+    similarRentMax: number;
+    similarRentAvg: number;
+    similarSaleMin: number;
+    similarSaleMax: number;
+    similarSaleAvg: number;
+    currency: string;
+    currencySymbol: string;
+    country: string;
+    city: string;
+    internetProviders: string[];
+    phoneProviders: string[];
+  },
+  options?: ReportOptions
+): Promise<AIReport> {
+  const systemPrompt = buildSystemPrompt(tier, language);
+  const userPrompt = buildUserPrompt({
+    tier,
+    language,
+    property: propertyInfo as any,
+    osmData,
+    marketContext,
+    userContext: options,
+  });
 
-Quality of life indicators are strong, with an air quality index of ${airQualityIndex} (${
-      airQualityIndex < 50
-        ? "excellent"
-        : airQualityIndex < 75
-          ? "good"
-          : "moderate"
-    }) and a noise level rating of ${noiseLevel}/10. The neighborhood provides excellent access to over ${nearestRestaurants} restaurants and cafes within the vicinity, along with comprehensive amenities including schools, healthcare facilities, and entertainment options. ${
-      futureDevelopments.length > 0
-        ? `Planned developments in the area include ${futureDevelopments[0].toLowerCase()}, which should further enhance property values and livability.`
-        : "The area is well-established with mature infrastructure."
-    }`;
+  console.log(`[ReportGen] 📝 Prompt ready (${language}): sys=${systemPrompt.length} user=${userPrompt.length}`);
+
+  const rawResponse = await callDeepSeek(systemPrompt, userPrompt, {
+    temperature: tier === "premium" ? 0.35 : 0.3,
+    maxTokens: tier === "premium" ? 6000 : 4000,
+    jsonMode: true,
+  });
+
+  let parsed: Record<string, unknown>;
+  try {
+    const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+    parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(rawResponse);
+  } catch (parseError) {
+    console.error("[ReportGen] ❌ Failed to parse AI response as JSON");
+    throw new Error("AI response was not valid JSON");
   }
 
+  // Inject market context and area info for validation fallback
+  parsed._marketContext = marketContext as any;
+  parsed._areaSqm = propertyInfo.areaSqm;
+
+  // Normalize the parsed response structure (handle AI format variations)
+  normalizedResponse(parsed);
+
+  return tier === "premium"
+    ? validatePremiumReport(parsed, language)
+    : validateFreeReport(parsed, language);
+}
+
+// ─── RESPONSE NORMALIZER ───────────────────────────────────────────
+
+/**
+ * Normalizes the AI response by unwrapping nested keys and mapping
+ * common format variations (emojis, spaced keys, capitalized keys)
+ * to the expected camelCase keys.
+ */
+function normalizedResponse(parsed: Record<string, unknown>): void {
+  // If the AI wrapped everything under a "report" key, unwrap it
+  const report = parsed.report;
+  if (report && typeof report === "object" && !Array.isArray(report)) {
+    const reportObj = report as Record<string, unknown>;
+    // Transfer all keys from report to root, keeping existing root keys
+    for (const key of Object.keys(reportObj)) {
+      if (!(key in parsed) || parsed[key] === undefined) {
+        parsed[key] = reportObj[key];
+      }
+    }
+  }
+
+  // Map common key variations to expected camelCase keys
+  const keyMap: Record<string, string> = {
+    "Property Summary": "propertySummary",
+    "Location Overview": "locationOverview",
+    "Market Prices for Similar Properties": "marketPrices",
+    "Market Prices": "marketPrices",
+    "Nearby Education": "nearbyEducation",
+    "Healthcare Access": "healthcareAccess",
+    "Shopping & Dining": "shoppingAndDining",
+    "Green Spaces": "greenSpaces",
+    "Transport & Connectivity": "transportAndConnectivity",
+    "Internet & Phone Services": "internetAndPhone",
+    "Ratings & Scores": "ratingsAndScores",
+    "Positive Summary": "positiveSummary",
+    "Ratings and Scores": "ratingsAndScores",
+    "property_summary": "propertySummary",
+    "market_prices": "marketPrices",
+    "nearby_amenities": "nearbyAmenities",
+    "positive_summary": "positiveSummary",
+    "PropertySummary": "propertySummary",
+    "MarketPrices": "marketPrices",
+    "NearbyAmenities": "nearbyAmenities",
+    "PositiveSummary": "positiveSummary",
+  };
+
+  for (const [oldKey, newKey] of Object.entries(keyMap)) {
+    if (oldKey in parsed && newKey !== oldKey) {
+      if (!(newKey in parsed) || parsed[newKey] === undefined) {
+        parsed[newKey] = parsed[oldKey];
+      }
+      delete parsed[oldKey];
+    }
+  }
+
+  // If propertySummary is a string (text section), split into headline + description
+  if (typeof parsed.propertySummary === "string") {
+    const text = parsed.propertySummary as string;
+    parsed.propertySummary = {
+      positiveHeadline: text.substring(0, 120),
+      locationDescription: text,
+    };
+  }
+
+  // If positiveSummary was placed at root, it's already handled.
+  // If only text sections exist, try to populate structured fields from them
+  if (typeof parsed.positiveSummary !== "string") {
+    const psStr = parsed.ratingsAndScores || parsed["Positive Summary"] || "";
+    if (typeof psStr === "string") {
+      parsed.positiveSummary = psStr;
+    }
+  }
+
+  // Extract scores from text if not provided as structured data
+  if (typeof parsed.scores !== "object" || parsed.scores === null) {
+    const scoresText = typeof parsed.ratingsAndScores === "string"
+      ? parsed.ratingsAndScores as string
+      : typeof parsed["⭐ Ratings & Scores"] === "string"
+        ? parsed["⭐ Ratings & Scores"] as string
+        : "";
+    if (scoresText) {
+      parsed.scores = extractScoresFromText(scoresText);
+    }
+  }
+
+  // Ensure scores exists as an object
+  if (typeof parsed.scores !== "object" || parsed.scores === null) {
+    parsed.scores = {};
+  }
+
+  // Ensure marketPrices exists (will fall back to _marketContext)
+  if (typeof parsed.marketPrices !== "object" || parsed.marketPrices === null) {
+    parsed.marketPrices = {};
+  }
+
+  // Ensure propertySummary exists
+  if (typeof parsed.propertySummary !== "object" || parsed.propertySummary === null) {
+    parsed.propertySummary = { positiveHeadline: "", locationDescription: "" };
+  }
+
+  // Ensure nearbyAmenities exists
+  if (typeof parsed.nearbyAmenities !== "object" || parsed.nearbyAmenities === null) {
+    parsed.nearbyAmenities = {};
+  }
+}
+
+/**
+ * Extract numerical scores from AI-generated text descriptions.
+ */
+function extractScoresFromText(text: string): Record<string, number> {
+  const scores: Record<string, number> = {};
+  const patterns = [
+    [/Safety.*?(\d+)[\/\s]*10/i, "safetyRating"],
+    [/Walkability.*?(\d+)[\/\s]*10/i, "walkabilityScore"],
+    [/Noise.*?(\d+)[\/\s]*10/i, "noiseLevel"],
+    [/Air Quality.*?(\d+)/i, "airQualityIndex"],
+    [/Quality of Life.*?(\d+)[\/\s]*10/i, "qualityOfLifeScore"],
+    [/Services.*?(\d+)[\/\s]*10/i, "qualityOfLifeScore"],
+  ];
+  for (const [regex, key] of patterns) {
+    const match = text.match(regex);
+    if (match) {
+      scores[key] = Math.max(1, Math.min(10, parseInt(match[1], 10)));
+    }
+  }
+  return scores;
+}
+
+// ─── VALIDATION (Free Report) ──────────────────────────────────────
+
+function validateFreeReport(
+  parsed: Record<string, unknown>,
+  language: "ar" | "en"
+): FreeReport {
+  const toStr = (v: unknown, fb: string): string =>
+    typeof v === "string" && v.length > 0 ? v : fb;
+
+  const toNum = (v: unknown, fb: number): number => {
+    const n = Number(v);
+    return isNaN(n) ? fb : n;
+  };
+
+  const clampScore = (v: unknown, fb: number): number =>
+    Math.max(1, Math.min(10, Math.round(toNum(v, fb))));
+
+  const safeStringArr = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+
+  const safePOIArr = (v: unknown, keys: string[]): any[] => {
+    if (!Array.isArray(v)) return [];
+    return v
+      .filter((x): x is Record<string, unknown> =>
+        typeof x === "object" && x !== null && !Array.isArray(x))
+      .map((x) => {
+        const obj: Record<string, unknown> = {};
+        for (const k of keys) obj[k] = x[k];
+        obj.name = typeof x.name === "string" ? x.name : "—";
+        obj.distanceKm = toNum(x.distanceKm, 1);
+        return obj;
+      });
+  };
+
+  const getObj = (parent: Record<string, unknown>, key: string): Record<string, unknown> =>
+    typeof parent[key] === "object" && parent[key] !== null
+      ? parent[key] as Record<string, unknown>
+      : {};
+
+  // Pull market context that was injected during AI generation
+  const mc = getObj(parsed, "_marketContext");
+
+  // Try to extract marketPrices from AI or use context fallback
+  const mp = getObj(parsed, "marketPrices");
+  const rentRange = getObj(mp, "similarRentRange");
+  const saleRange = getObj(mp, "similarSaleRange");
+
+  const ps = getObj(parsed, "propertySummary");
+  const am = getObj(parsed, "nearbyAmenities");
+  const sd = getObj(am, "shoppingDining");
+  const tr = getObj(am, "transportation");
+  const ess = getObj(am, "essentialServices");
+  const ent = getObj(am, "entertainmentSports");
+  const conn = getObj(parsed, "connectivity");
+  const scores = getObj(parsed, "scores");
+
   return {
-    internetProviders: availableProviders,
-    nearestSchools,
-    nearestParks,
-    nearestMalls,
-    nearestHospitals,
-    nearestRestaurants,
-    safetyRating,
-    walkabilityScore,
-    noiseLevel,
-    airQualityIndex,
-    trafficConditions,
-    publicTransport: {
-      metroStations: nearestMetroStations,
-      busStops: nearestBusStops,
+    reportType: "free",
+    language,
+    propertySummary: {
+      positiveHeadline: toStr(ps.positiveHeadline || parsed.positiveHeadline, ""),
+      locationDescription: toStr(ps.locationDescription, ""),
     },
-    entertainment: {
-      cinemas: nearestCinemas,
-      sportsFacilities: nearestSports,
+    marketPrices: {
+      currency: toStr(mp.currency || mc.currency, "USD"),
+      currencySymbol: toStr(mp.currencySymbol || mc.currencySymbol, "$"),
+      similarRentRange: {
+        min: toNum(rentRange.min || mc.similarRentMin, 0),
+        max: toNum(rentRange.max || mc.similarRentMax, 0),
+        avg: toNum(rentRange.avg || mc.similarRentAvg, 0),
+      },
+      similarSaleRange: {
+        min: toNum(saleRange.min || mc.similarSaleMin, 0),
+        max: toNum(saleRange.max || mc.similarSaleMax, 0),
+        avg: toNum(saleRange.avg || mc.similarSaleAvg, 0),
+      },
     },
-    investmentPotentialScore,
-    rentalYieldEstimate,
-    pricePerSqm,
-    areaPricePerSqmAvg,
-    futureDevelopments,
-    neighborhoodDemographics,
-    climateNotes,
-    marketPricePrediction: {
-      estimatedValue: expectedPrice,
-      priceStatus,
-      confidence: Math.floor(80 + random(70) * 15),
+    nearbyAmenities: {
+      education: safePOIArr(am.education, ["name", "type", "distanceKm"]),
+      healthcare: safePOIArr(am.healthcare, ["name", "type", "distanceKm"]),
+      shoppingDining: {
+        malls: safePOIArr(sd.malls, ["name", "distanceKm"]),
+        restaurants: toNum(sd.restaurants, 0),
+        restaurantNames: safeStringArr(sd.restaurantNames),
+      },
+      parksRecreation: safePOIArr(am.parksRecreation, ["name", "distanceKm"]),
+      transportation: {
+        metroStations: safePOIArr(tr.metroStations, ["name", "distanceKm"]),
+        busStops: safePOIArr(tr.busStops, ["name", "distanceKm"]),
+        majorRoads: safePOIArr(tr.majorRoads, ["name", "distanceKm"]),
+      },
+      essentialServices: {
+        banks: safePOIArr(ess.banks, ["name", "distanceKm"]),
+        mosques: safePOIArr(ess.mosques, ["name", "distanceKm"]),
+        petrolStations: safePOIArr(ess.petrolStations, ["name", "distanceKm"]),
+        policeStations: safePOIArr(ess.policeStations, ["name", "distanceKm"]),
+        governmentOffices: safePOIArr(ess.governmentOffices, ["name", "distanceKm"]),
+      },
+      entertainmentSports: {
+        cinemas: safePOIArr(ent.cinemas, ["name", "distanceKm"]),
+        sportsFacilities: safePOIArr(ent.sportsFacilities, ["name", "distanceKm"]),
+        hotels: safePOIArr(ent.hotels, ["name", "distanceKm"]),
+      },
     },
-    areaAnalysis,
+    connectivity: {
+      internetProviders: safeStringArr(conn.internetProviders).length > 0
+        ? safeStringArr(conn.internetProviders)
+        : safeStringArr(mc.internetProviders),
+      phoneProviders: safeStringArr(conn.phoneProviders).length > 0
+        ? safeStringArr(conn.phoneProviders)
+        : safeStringArr(mc.phoneProviders),
+    },
+    scores: {
+      safetyRating: clampScore(scores.safetyRating, 7),
+      walkabilityScore: clampScore(scores.walkabilityScore, 6),
+      noiseLevel: clampScore(scores.noiseLevel, 4),
+      airQualityIndex: Math.max(0, Math.round(toNum(scores.airQualityIndex, 60))),
+      qualityOfLifeScore: clampScore(scores.qualityOfLifeScore, 7),
+    },
+    trafficConditions: toStr(parsed.trafficConditions, ""),
+    climateNotes: toStr(parsed.climateNotes, ""),
+    areaDescription: toStr(parsed.areaDescription, ""),
+    positiveSummary: toStr(parsed.positiveSummary, ""),
+  };
+}
+
+// ─── VALIDATION (Premium Report) ───────────────────────────────────
+
+function validatePremiumReport(
+  parsed: Record<string, unknown>,
+  language: "ar" | "en"
+): PremiumReport {
+  // Same helper functions
+  const toStr = (v: unknown, fb: string): string =>
+    typeof v === "string" && v.length > 0 ? v : fb;
+  const toNum = (v: unknown, fb: number): number =>
+    isNaN(Number(v)) ? fb : Number(v);
+  const clampScore = (v: unknown, fb: number): number =>
+    Math.max(1, Math.min(10, Math.round(toNum(v, fb))));
+  const safeStringArr = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  const safePOIArr = (v: unknown, keys: string[]): any[] => {
+    if (!Array.isArray(v)) return [];
+    return v.filter((x): x is Record<string, unknown> =>
+      typeof x === "object" && x !== null && !Array.isArray(x)
+    ).map((x) => {
+      const obj: Record<string, unknown> = {};
+      for (const k of keys) obj[k] = x[k];
+      obj.name = typeof x.name === "string" ? x.name : "—";
+      obj.distanceKm = toNum(x.distanceKm, 1);
+      return obj;
+    });
+  };
+
+  const getObj = (parent: Record<string, unknown>, key: string): Record<string, unknown> =>
+    typeof parent[key] === "object" && parent[key] !== null
+      ? parent[key] as Record<string, unknown>
+      : {};
+
+  const mc = getObj(parsed, "_marketContext");
+
+  const ps = getObj(parsed, "propertySummary");
+  const am = getObj(parsed, "nearbyAmenities");
+  const sd = getObj(am, "shoppingDining");
+  const tr = getObj(am, "transportation");
+  const ess = getObj(am, "essentialServices");
+  const ent = getObj(am, "entertainmentSports");
+  const conn = getObj(am, "connectivity");
+  const qol = getObj(parsed, "qualityOfLifeIndicators");
+  const radar = getObj(parsed, "scoresRadar");
+  const ma = getObj(parsed, "marketAnalysis");
+  const ia = getObj(parsed, "investmentAnalysis");
+  const dp = getObj(parsed, "developmentPipeline");
+  const ndd = getObj(parsed, "neighborhoodDeepDive");
+  const ra = getObj(parsed, "riskAssessment");
+  const sr = getObj(parsed, "strategicRecommendations");
+
+  const rentRange = getObj(ma, "similarPropertiesRentRange");
+  const saleRange = getObj(ma, "similarPropertiesSaleRange");
+
+  return {
+    reportType: "premium",
+    language,
+    investmentGrade: toStr(parsed.investmentGrade, "B"),
+    executiveSummary: toStr(parsed.executiveSummary, ""),
+    propertySummary: {
+      positiveHeadline: toStr(ps.positiveHeadline, ""),
+      locationDescription: toStr(ps.locationDescription, ""),
+      uniqueSellingPoints: safeStringArr(ps.uniqueSellingPoints),
+    },
+    nearbyAmenities: {
+      education: safePOIArr(am.education, ["name", "type", "distanceKm"]),
+      healthcare: safePOIArr(am.healthcare, ["name", "type", "distanceKm"]),
+      shoppingDining: {
+        malls: safePOIArr(sd.malls, ["name", "distanceKm", "anchorStores"]),
+        supermarkets: safePOIArr(sd.supermarkets, ["name", "distanceKm"]),
+        restaurants: toNum(sd.restaurants, 0),
+        restaurantNames: safeStringArr(sd.restaurantNames),
+        cafes: toNum(sd.cafes, 0),
+        cafeNames: safeStringArr(sd.cafeNames),
+      },
+      parksRecreation: safePOIArr(am.parksRecreation, ["name", "type", "distanceKm"]),
+      transportation: {
+        metroStations: safePOIArr(tr.metroStations, ["name", "distanceKm", "line"]),
+        busStops: safePOIArr(tr.busStops, ["name", "distanceKm"]),
+        majorRoads: safePOIArr(tr.majorRoads, ["name", "type", "distanceKm"]),
+        airportDistanceKm: toNum(tr.airportDistanceKm, undefined),
+      },
+      essentialServices: {
+        banks: safePOIArr(ess.banks, ["name", "distanceKm"]),
+        mosques: safePOIArr(ess.mosques, ["name", "distanceKm"]),
+        petrolStations: safePOIArr(ess.petrolStations, ["name", "distanceKm"]),
+        policeStations: safePOIArr(ess.policeStations, ["name", "distanceKm"]),
+        governmentOffices: safePOIArr(ess.governmentOffices, ["name", "distanceKm"]),
+        hotels: safePOIArr(ess.hotels, ["name", "distanceKm", "stars"]),
+      },
+      entertainmentSports: {
+        cinemas: safePOIArr(ent.cinemas, ["name", "distanceKm"]),
+        sportsFacilities: safePOIArr(ent.sportsFacilities, ["name", "type", "distanceKm"]),
+      },
+      connectivity: {
+        internetProviders: safeStringArr(conn.internetProviders).length > 0
+          ? safeStringArr(conn.internetProviders)
+          : safeStringArr(mc.internetProviders),
+        phoneProviders: safeStringArr(conn.phoneProviders).length > 0
+          ? safeStringArr(conn.phoneProviders)
+          : safeStringArr(mc.phoneProviders),
+        fiberAvailable: conn.fiberAvailable === true,
+      },
+    },
+    qualityOfLifeIndicators: {
+      safetyRating: clampScore(qol.safetyRating, 7),
+      walkabilityScore: clampScore(qol.walkabilityScore, 6),
+      noiseLevel: clampScore(qol.noiseLevel, 4),
+      airQualityIndex: Math.max(0, Math.round(toNum(qol.airQualityIndex, 60))),
+      qualityOfLifeScore: clampScore(qol.qualityOfLifeScore, 7),
+      trafficConditions: toStr(qol.trafficConditions, ""),
+      climateNotes: toStr(qol.climateNotes, ""),
+    },
+    scoresRadar: {
+      investmentPotential: clampScore(radar.investmentPotential, 6),
+      locationQuality: clampScore(radar.locationQuality, 7),
+      infrastructure: clampScore(radar.infrastructure, 7),
+      communityVibe: clampScore(radar.communityVibe, 6),
+      growthProspect: clampScore(radar.growthProspect, 6),
+      accessibility: clampScore(radar.accessibility, 7),
+      valueForMoney: clampScore(radar.valueForMoney, 6),
+    },
+    marketAnalysis: {
+      currentPrice: toNum(ma.currentPrice, 0),
+      pricePerSqm: toNum(ma.pricePerSqm, 0),
+      areaAvgPricePerSqm: toNum(ma.areaAvgPricePerSqm, toNum(mc.similarSaleAvg, 0) / toNum(parsed._areaSqm, 100) || 0),
+      priceComparisonStatus: toStr(ma.priceComparisonStatus, ""),
+      priceDifferencePercent: toNum(ma.priceDifferencePercent, 0),
+      similarPropertiesRentRange: {
+        min: toNum(rentRange.min || mc.similarRentMin, 0),
+        max: toNum(rentRange.max || mc.similarRentMax, 0),
+        avg: toNum(rentRange.avg || mc.similarRentAvg, 0),
+      },
+      similarPropertiesSaleRange: {
+        min: toNum(saleRange.min || mc.similarSaleMin, 0),
+        max: toNum(saleRange.max || mc.similarSaleMax, 0),
+        avg: toNum(saleRange.avg || mc.similarSaleAvg, 0),
+      },
+      rentalYieldEstimate: toNum(ma.rentalYieldEstimate, 0),
+      marketTrend: toStr(ma.marketTrend, ""),
+      priceAppreciationForecast: toStr(ma.priceAppreciationForecast, ""),
+    },
+    investmentAnalysis: {
+      roiProjection5Years: toStr(ia.roiProjection5Years, ""),
+      breakEvenPoint: toStr(ia.breakEvenPoint, ""),
+      incomePotential: toStr(ia.incomePotential, ""),
+      capitalGrowthPotential: toStr(ia.capitalGrowthPotential, ""),
+      riskLevel: toStr(ia.riskLevel, "Medium"),
+      investmentHorizon: toStr(ia.investmentHorizon, ""),
+    },
+    developmentPipeline: {
+      currentDevelopments: safeStringArr(dp.currentDevelopments),
+      plannedDevelopments: safeStringArr(dp.plannedDevelopments),
+      impactOnValue: toStr(dp.impactOnValue, ""),
+    },
+    neighborhoodDeepDive: {
+      demographics: toStr(ndd.demographics, ""),
+      communityVibe: toStr(ndd.communityVibe, ""),
+      futureOutlook: toStr(ndd.futureOutlook, ""),
+      comparableNeighborhoods: safeStringArr(ndd.comparableNeighborhoods),
+    },
+    riskAssessment: {
+      overallRisk: toStr(ra.overallRisk, "Medium"),
+      marketRisk: toStr(ra.marketRisk, ""),
+      locationRisk: toStr(ra.locationRisk, ""),
+      liquidityRisk: toStr(ra.liquidityRisk, ""),
+      riskMitigationTips: safeStringArr(ra.riskMitigationTips),
+    },
+    strategicRecommendations: {
+      forBuyer: safeStringArr(sr.forBuyer),
+      forInvestor: safeStringArr(sr.forInvestor),
+      negotiationTips: safeStringArr(sr.negotiationTips),
+    },
+    areaAnalysis: toStr(parsed.areaAnalysis, ""),
+    positiveSummary: toStr(parsed.positiveSummary, ""),
+  };
+}
+
+// ─── FALLBACK REPORTS ──────────────────────────────────────────────
+
+function buildFallbackReport(
+  tier: ReportTier,
+  language: "ar" | "en",
+  property: Record<string, any>,
+  marketContext: {
+    similarRentMin: number;
+    similarRentMax: number;
+    similarRentAvg: number;
+    similarSaleMin: number;
+    similarSaleMax: number;
+    similarSaleAvg: number;
+    currency: string;
+    currencySymbol: string;
+    country: string;
+    city: string;
+    internetProviders: string[];
+    phoneProviders: string[];
+  },
+  osmData: Record<string, any>
+): AIReport {
+  if (tier === "premium") {
+    return buildFallbackPremium(language, property, marketContext, osmData);
+  }
+  return buildFallbackFree(language, property, marketContext, osmData);
+}
+
+function buildFallbackFree(
+  language: "ar" | "en",
+  property: Record<string, any>,
+  marketContext: {
+    similarRentMin: number;
+    similarRentMax: number;
+    similarRentAvg: number;
+    similarSaleMin: number;
+    similarSaleMax: number;
+    similarSaleAvg: number;
+    currency: string;
+    currencySymbol: string;
+    country: string;
+    city: string;
+    internetProviders: string[];
+    phoneProviders: string[];
+  },
+  osmData: Record<string, any>
+): FreeReport {
+  const na = "—";
+
+  const getName = (arr: any[] | undefined, idx: number = 0): string | undefined =>
+    arr?.[idx]?.name || arr?.[idx]?.tags?.name || arr?.[idx]?.tags?.["name:en"] || arr?.[idx]?.tags?.["name:ar"];
+  const getDist = (arr: any[] | undefined, idx: number = 0): number =>
+    arr?.[idx]?.distanceKm ?? Math.round((0.5 + idx * 0.3) * 10) / 10;
+
+  const buildPOI = (arr: any[] | undefined, max: number) => {
+    const items: { name: string; distanceKm: number }[] = [];
+    for (let i = 0; i < max; i++) {
+      const name = getName(arr, i);
+      if (!name) break;
+      items.push({ name, distanceKm: getDist(arr, i) });
+    }
+    return items;
+  };
+  const buildTypedPOI = (arr: any[] | undefined, max: number, type: string) => {
+    const items: { name: string; type: string; distanceKm: number }[] = [];
+    for (let i = 0; i < max; i++) {
+      const name = getName(arr, i);
+      if (!name) break;
+      items.push({ name, type, distanceKm: getDist(arr, i) });
+    }
+    return items;
+  };
+
+  const schools = osmData.schools || [];
+  const hospitals = osmData.hospitals || [];
+  const restaurants = osmData.restaurants || [];
+  const parks = osmData.parks || [];
+  const malls = osmData.malls || [];
+  const banks = osmData.banks || [];
+  const mosques = osmData.mosques || [];
+  const petrol = osmData.petrolStations || [];
+  const police = osmData.policeStations || [];
+  const gov = osmData.governmentOffices || [];
+  const metro = osmData.metroStations || [];
+  const bus = osmData.busStops || [];
+  const roads = osmData.majorRoads || [];
+  const cinemas = osmData.cinemas || [];
+  const sports = osmData.sportsFacilities || [];
+  const hotels = osmData.hotels || [];
+
+  const restaurantNames = restaurants.slice(0, 10).map((r: any) =>
+    r.name || r.tags?.name || ""
+  ).filter(Boolean);
+
+  return {
+    reportType: "free",
+    language,
+    propertySummary: {
+      positiveHeadline: property.locationName,
+      locationDescription:
+        language === "ar"
+          ? `عقار في ${property.locationName}${marketContext.country ? `، ${marketContext.country}` : ""} بمساحة ${property.areaSqm}م² بسعر ${property.price.toLocaleString()} ${marketContext.currencySymbol}`
+          : `Property in ${property.locationName}${marketContext.country ? `, ${marketContext.country}` : ""}, ${property.areaSqm}m² at ${property.price.toLocaleString()} ${marketContext.currencySymbol}`,
+    },
+    marketPrices: {
+      currency: marketContext.currency,
+      currencySymbol: marketContext.currencySymbol,
+      similarRentRange: {
+        min: marketContext.similarRentMin,
+        max: marketContext.similarRentMax,
+        avg: marketContext.similarRentAvg,
+      },
+      similarSaleRange: {
+        min: marketContext.similarSaleMin,
+        max: marketContext.similarSaleMax,
+        avg: marketContext.similarSaleAvg,
+      },
+    },
+    nearbyAmenities: {
+      education: buildTypedPOI(schools, 5, "School"),
+      healthcare: buildTypedPOI(hospitals, 3, "Hospital"),
+      shoppingDining: {
+        malls: buildPOI(malls, 3),
+        restaurants: restaurants.length,
+        restaurantNames,
+      },
+      parksRecreation: buildPOI(parks, 5),
+      transportation: {
+        metroStations: buildPOI(metro, 3),
+        busStops: buildPOI(bus, 5),
+        majorRoads: buildPOI(roads, 5),
+      },
+      essentialServices: {
+        banks: buildPOI(banks, 3),
+        mosques: buildPOI(mosques, 5),
+        petrolStations: buildPOI(petrol, 3),
+        policeStations: buildPOI(police, 2),
+        governmentOffices: buildPOI(gov, 3),
+      },
+      entertainmentSports: {
+        cinemas: buildPOI(cinemas, 3),
+        sportsFacilities: buildPOI(sports, 3),
+        hotels: buildPOI(hotels, 3),
+      },
+    },
+    connectivity: {
+      internetProviders: marketContext.internetProviders,
+      phoneProviders: marketContext.phoneProviders,
+    },
+    scores: {
+      safetyRating: 7,
+      walkabilityScore: 6,
+      noiseLevel: 4,
+      airQualityIndex: 60,
+      qualityOfLifeScore: 7,
+    },
+    trafficConditions: language === "ar" ? "متوسطة" : "Moderate",
+    climateNotes:
+      language === "ar"
+        ? `مناخ المنطقة يتبع النمط المناخي المعتاد في ${marketContext.country || "هذه المنطقة"}.`
+        : `Regional climate patterns for ${marketContext.country || "this area"}.`,
+    areaDescription:
+      language === "ar"
+        ? `الحي يحتوي على ${restaurants.length} مطعم، ${parks.length} حديقة، ${schools.length} مدرسة. نطاق الإيجار: ${marketContext.similarRentMin.toLocaleString()}-${marketContext.similarRentMax.toLocaleString()} ${marketContext.currencySymbol}/شهرياً.`
+        : `Area features ${restaurants.length} restaurants, ${parks.length} parks, ${schools.length} schools. Rent range: ${marketContext.similarRentMin.toLocaleString()}-${marketContext.similarRentMax.toLocaleString()} ${marketContext.currencySymbol}/month.`,
+    positiveSummary:
+      language === "ar"
+        ? `تقرير يعتمد على بيانات حقيقية من OpenStreetMap وأسعار السوق. العقار في ${property.locationName}${marketContext.country ? `، ${marketContext.country}` : ""}.`
+        : `Report based on real data from OpenStreetMap and market prices. Property in ${property.locationName}${marketContext.country ? `, ${marketContext.country}` : ""}.`,
+  };
+}
+
+function buildFallbackPremium(
+  language: "ar" | "en",
+  property: Record<string, any>,
+  marketContext: {
+    similarRentMin: number;
+    similarRentMax: number;
+    similarRentAvg: number;
+    similarSaleMin: number;
+    similarSaleMax: number;
+    similarSaleAvg: number;
+    currency: string;
+    currencySymbol: string;
+    country: string;
+    city: string;
+    internetProviders: string[];
+    phoneProviders: string[];
+  },
+  osmData: Record<string, any>
+): PremiumReport {
+  const fb = buildFallbackFree(language, property, marketContext, osmData);
+
+  return {
+    reportType: "premium",
+    language,
+    investmentGrade: "B",
+    executiveSummary:
+      language === "ar"
+        ? `تقرير ذكاء عقاري ممتاز للعقار في ${property.locationName}${marketContext.country ? `، ${marketContext.country}` : ""}. يعتمد على بيانات حقيقية وأسعار السوق.`
+        : `Premium real estate intelligence report for ${property.locationName}${marketContext.country ? `, ${marketContext.country}` : ""}. Based on real OSM and market data.`,
+    propertySummary: {
+      positiveHeadline: fb.propertySummary.positiveHeadline,
+      locationDescription: fb.propertySummary.locationDescription,
+      uniqueSellingPoints: [
+        language === "ar"
+          ? `بيانات حقيقية: ${fb.nearbyAmenities.shoppingDining.restaurants} مطعم، ${fb.nearbyAmenities.parksRecreation.length} حديقة، نطاق إيجار ${marketContext.similarRentAvg.toLocaleString()} ${marketContext.currencySymbol}`
+          : `Real data: ${fb.nearbyAmenities.shoppingDining.restaurants} restaurants, ${fb.nearbyAmenities.parksRecreation.length} parks, avg rent ${marketContext.similarRentAvg.toLocaleString()} ${marketContext.currencySymbol}`,
+      ],
+    },
+    nearbyAmenities: {
+      education: fb.nearbyAmenities.education.map((e: any) => ({ ...e, type: e.type || "School" })),
+      healthcare: fb.nearbyAmenities.healthcare.map((h: any) => ({ ...h, type: h.type || "Hospital" })),
+      shoppingDining: {
+        malls: fb.nearbyAmenities.shoppingDining.malls,
+        supermarkets: [],
+        restaurants: fb.nearbyAmenities.shoppingDining.restaurants,
+        restaurantNames: fb.nearbyAmenities.shoppingDining.restaurantNames,
+        cafes: 0,
+        cafeNames: [],
+      },
+      parksRecreation: fb.nearbyAmenities.parksRecreation.map((p: any) => ({ ...p, type: "Park" })),
+      transportation: {
+        metroStations: fb.nearbyAmenities.transportation.metroStations,
+        busStops: fb.nearbyAmenities.transportation.busStops,
+        majorRoads: fb.nearbyAmenities.transportation.majorRoads.map((r: any) => ({ ...r, type: "Main Road" })),
+      },
+      essentialServices: {
+        banks: fb.nearbyAmenities.essentialServices.banks,
+        mosques: fb.nearbyAmenities.essentialServices.mosques,
+        petrolStations: fb.nearbyAmenities.essentialServices.petrolStations,
+        policeStations: fb.nearbyAmenities.essentialServices.policeStations,
+        governmentOffices: fb.nearbyAmenities.essentialServices.governmentOffices,
+        hotels: fb.nearbyAmenities.entertainmentSports.hotels.map((h: any) => ({ ...h, stars: 3 })),
+      },
+      entertainmentSports: {
+        cinemas: fb.nearbyAmenities.entertainmentSports.cinemas,
+        sportsFacilities: fb.nearbyAmenities.entertainmentSports.sportsFacilities.map((s: any) => ({ ...s, type: "Sports Facility" })),
+      },
+      connectivity: {
+        internetProviders: fb.connectivity.internetProviders,
+        phoneProviders: fb.connectivity.phoneProviders,
+        fiberAvailable: true,
+      },
+    },
+    qualityOfLifeIndicators: {
+      safetyRating: fb.scores.safetyRating,
+      walkabilityScore: fb.scores.walkabilityScore,
+      noiseLevel: fb.scores.noiseLevel,
+      airQualityIndex: fb.scores.airQualityIndex,
+      qualityOfLifeScore: fb.scores.qualityOfLifeScore,
+      trafficConditions: fb.trafficConditions,
+      climateNotes: fb.climateNotes,
+    },
+    scoresRadar: {
+      investmentPotential: 6,
+      locationQuality: 7,
+      infrastructure: 7,
+      communityVibe: 6,
+      growthProspect: 6,
+      accessibility: 7,
+      valueForMoney: 6,
+    },
+    marketAnalysis: {
+      currentPrice: property.price,
+      pricePerSqm: property.pricePerSqm,
+      areaAvgPricePerSqm: Math.round(marketContext.similarSaleAvg / (property.areaSqm || 1)),
+      priceComparisonStatus:
+        language === "ar" ? "في السوق" : "At Market",
+      priceDifferencePercent: property.pricePerSqm > 0
+        ? Math.round(((property.pricePerSqm - marketContext.similarSaleAvg / (property.areaSqm || 1)) / property.pricePerSqm) * 100)
+        : 0,
+      similarPropertiesRentRange: {
+        min: marketContext.similarRentMin,
+        max: marketContext.similarRentMax,
+        avg: marketContext.similarRentAvg,
+      },
+      similarPropertiesSaleRange: {
+        min: marketContext.similarSaleMin,
+        max: marketContext.similarSaleMax,
+        avg: marketContext.similarSaleAvg,
+      },
+      rentalYieldEstimate: 5,
+      marketTrend: "Stable",
+      priceAppreciationForecast:
+        language === "ar" ? "متوقع استقرار السوق" : "Market stability expected",
+    },
+    investmentAnalysis: {
+      roiProjection5Years:
+        language === "ar"
+          ? `عائد استثماري معتدل خلال 5 سنوات في ${marketContext.city || "هذه المنطقة"}`
+          : `Moderate ROI expected over 5 years in ${marketContext.city || "this area"}`,
+      breakEvenPoint:
+        language === "ar" ? "قيد التحليل (يتطلب بيانات سوقية إضافية)" : "Under analysis (requires additional market data)",
+      incomePotential:
+        language === "ar"
+          ? `معدل العائد الإيجاري التقديري: ${marketContext.similarRentAvg.toLocaleString()} ${marketContext.currencySymbol}/شهرياً`
+          : `Estimated rental income: ${marketContext.similarRentAvg.toLocaleString()} ${marketContext.currencySymbol}/month`,
+      capitalGrowthPotential:
+        language === "ar" ? `نمو متوقع حسب متوسطات ${marketContext.country || "السوق"}` : `Growth expected per ${marketContext.country || "market"} averages`,
+      riskLevel: "Medium",
+      investmentHorizon: "Medium-term (3-5 years)",
+    },
+    developmentPipeline: {
+      currentDevelopments: [],
+      plannedDevelopments: [],
+      impactOnValue:
+        language === "ar" ? "غير متوفرة" : "Not available",
+    },
+    neighborhoodDeepDive: {
+      demographics:
+        language === "ar"
+          ? `تحليل ديموغرافي عام لمنطقة ${property.locationName}، ${marketContext.country || ""}`
+          : `General demographic analysis for ${property.locationName}${marketContext.country ? `, ${marketContext.country}` : ""}`,
+      communityVibe:
+        language === "ar" ? `أجواء المجتمع في ${marketContext.city || property.locationName}` : `Community atmosphere in ${marketContext.city || property.locationName}`,
+      futureOutlook:
+        language === "ar" ? `النظرة المستقبلية لسوق ${marketContext.country || "العقارات"}` : `Future outlook for ${marketContext.country || "property"} market`,
+      comparableNeighborhoods: [],
+    },
+    riskAssessment: {
+      overallRisk: "Medium",
+      marketRisk: "Medium",
+      locationRisk: "Low",
+      liquidityRisk: "Medium",
+      riskMitigationTips: [
+        language === "ar" ? "قارن مع عقارات مماثلة في المنطقة" : "Compare with similar properties in the area",
+        language === "ar" ? `راجع متوسطات الأسعار في ${marketContext.city || "المدينة"}` : `Review price averages in ${marketContext.city || "the city"}`,
+      ],
+    },
+    strategicRecommendations: {
+      forBuyer: [
+        language === "ar"
+          ? `زيارة العقار والتجول في ${marketContext.neighborhood || "الحي"}`
+          : `Visit the property and walk around ${marketContext.neighborhood || "the neighborhood"}`,
+      ],
+      forInvestor: [
+        language === "ar"
+          ? `دراسة الطلب على الإيجار في ${marketContext.city || "المدينة"}`
+          : `Study rental demand in ${marketContext.city || "the city"}`,
+      ],
+      negotiationTips: [
+        language === "ar"
+          ? `قارن مع متوسط سعر البيع في المنطقة (${marketContext.similarSaleAvg.toLocaleString()} ${marketContext.currencySymbol})`
+          : `Compare with the average sale price in the area (${marketContext.similarSaleAvg.toLocaleString()} ${marketContext.currencySymbol})`,
+      ],
+    },
+    areaAnalysis: fb.areaDescription,
+    positiveSummary:
+      language === "ar"
+        ? `تقرير ذكاء عقاري ممتاز. العقار في ${property.locationName} محاط بـ ${fb.nearbyAmenities.shoppingDining.restaurants} مطعم و ${fb.nearbyAmenities.parksRecreation.length} حديقة. متوسط الإيجار: ${marketContext.similarRentAvg.toLocaleString()} ${marketContext.currencySymbol}/شهر.`
+        : `Premium real estate intelligence. Property in ${property.locationName} has ${fb.nearbyAmenities.shoppingDining.restaurants} restaurants, ${fb.nearbyAmenities.parksRecreation.length} parks. Avg rent: ${marketContext.similarRentAvg.toLocaleString()} ${marketContext.currencySymbol}/month.`,
   };
 }

@@ -684,9 +684,11 @@ export interface Properties {
   areaSqm: Numeric;
   bathrooms: Numeric | null;
   bedrooms: number | null;
+  city: string | null;
   contactPhone: string | null;
   createdAt: Generated<Timestamp | null>;
   description: string | null;
+  district: string | null;
   floorNumber: number | null;
   furnished: Generated<boolean | null>;
   id: Generated<number>;

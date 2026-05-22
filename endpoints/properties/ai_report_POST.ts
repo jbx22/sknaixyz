@@ -5,6 +5,7 @@ import { db } from "../../helpers/db";
 import { getServerUserSession } from "../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../helpers/getSetServerSession";
 import { SubscriptionTier } from "../../helpers/schema";
+import type { ReportTier } from "../../helpers/prompts";
 
 // Define AI report limits per tier
 const AI_REPORT_LIMITS: Record<SubscriptionTier, number> = {
@@ -12,6 +13,15 @@ const AI_REPORT_LIMITS: Record<SubscriptionTier, number> = {
   basic: 30,
   premium: 100,
 };
+
+/**
+ * Maps a user's subscription tier to the maximum report tier they can access.
+ * Free users get the "free" report; premium users can request "premium".
+ */
+function resolveAllowedTier(subscriptionTier: SubscriptionTier): ReportTier {
+  if (subscriptionTier === "premium") return "premium";
+  return "free";
+}
 
 export async function handle(request: Request) {
   try {
@@ -29,9 +39,17 @@ export async function handle(request: Request) {
         "subscriptionTier",
         "aiReportsUsed",
         "aiReportsResetAt",
+        "displayName",
       ])
       .where("id", "=", userId)
       .executeTakeFirstOrThrow();
+
+    // 3. Determine which report tier the user is allowed to access
+    const allowedTier = resolveAllowedTier(user.subscriptionTier as SubscriptionTier);
+    
+    // If user requested premium but isn't premium, silently downgrade
+    const effectiveTier: ReportTier =
+      input.tier === "premium" && allowedTier === "premium" ? "premium" : "free";
 
     let aiReportsUsed = user.aiReportsUsed;
     let aiReportsResetAt = user.aiReportsResetAt
@@ -40,7 +58,7 @@ export async function handle(request: Request) {
           : user.aiReportsResetAt)
       : new Date(); // If null, set to now
 
-    // 3. Check if ai_reports_reset_at is older than 1 month - if so, reset
+    // 4. Check if ai_reports_reset_at is older than 1 month - if so, reset
     const now = new Date();
     const oneMonthAgo = new Date(now);
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -60,11 +78,11 @@ export async function handle(request: Request) {
       console.log(`Reset AI report usage for user ${userId}`);
     }
 
-    // 4. Get the limit for the user's tier
+    // 5. Get the limit for the user's tier
     const currentTier = user.subscriptionTier as SubscriptionTier;
     const limit = AI_REPORT_LIMITS[currentTier] || AI_REPORT_LIMITS.free;
 
-    // 5. Check if the property already has a completed AI report
+    // 6. Check if the property already has a completed AI report
     const property = await db
       .selectFrom("properties")
       .select([
@@ -84,7 +102,6 @@ export async function handle(request: Request) {
     }
 
     // If a completed report exists, return it immediately (fast response)
-    // No need to check limits or increment usage for cached reports
     if (
       property.aiReportStatus === "completed" &&
       property.aiReportData !== null
@@ -95,11 +112,12 @@ export async function handle(request: Request) {
       return new Response(
         superjson.stringify({
           report: property.aiReportData as unknown as AIReport,
-        } satisfies OutputType)
+          tier: effectiveTier,
+        } satisfies OutputType & { tier: string })
       );
     }
 
-    // 6. Check if user has reached their limit (only for NEW report generation)
+    // 7. Check if user has reached their limit (only for NEW report generation)
     if (aiReportsUsed >= limit) {
       const remaining = 0;
       console.log(
@@ -115,33 +133,36 @@ export async function handle(request: Request) {
       );
     }
 
-    // If no report exists, status is 'failed', or 'pending', generate a new report
+    // If no report exists, generate a new one
     console.log(
-      `Generating new AI report for property ${input.propertyId} (status: ${property.aiReportStatus || "null"})`
+      `Generating new ${effectiveTier} AI report for property ${input.propertyId} (user tier: ${user.subscriptionTier})`
     );
 
     try {
       // Generate the AI report using the reusable helper
       const report = await generatePropertyReport(
         input.propertyId,
-        input.language || "ar"
+        input.language || "ar",
+        effectiveTier,
+        {
+          userName: user.displayName || undefined,
+          investorProfile: effectiveTier === "premium" ? "Premium Member" : undefined,
+        }
       );
 
       // Update the database with the generated report and increment usage
       await db.transaction().execute(async (trx) => {
-        // Update property with the report
         await trx
           .updateTable("properties")
           .set({
             aiReportData: report as unknown as string,
             aiReportStatus: "completed",
             aiReportGeneratedAt: new Date(),
-            aiReportError: null, // Clear any previous error
+            aiReportError: null,
           })
           .where("id", "=", input.propertyId)
           .execute();
 
-        // 7. Increment ai_reports_used by 1
         await trx
           .updateTable("users")
           .set({
@@ -152,11 +173,11 @@ export async function handle(request: Request) {
       });
 
       console.log(
-        `Successfully generated and cached AI report for property ${input.propertyId}. User ${userId} usage: ${aiReportsUsed + 1}/${limit}`
+        `Successfully generated ${effectiveTier} report for property ${input.propertyId}. User ${userId} usage: ${aiReportsUsed + 1}/${limit}`
       );
 
       return new Response(
-        superjson.stringify({ report } satisfies OutputType)
+        superjson.stringify({ report, tier: effectiveTier } satisfies OutputType & { tier: string })
       );
     } catch (generationError) {
       // If generation fails, update status to 'failed' and store the error
