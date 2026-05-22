@@ -356,6 +356,9 @@ export async function handle(request: Request) {
 
     return response;
   } catch (error) {
-    return Response.json({ message: "Authentication failed" }, { status: 400 });
+    return Response.json({
+      message: "Authentication failed",
+      detail: error instanceof Error ? error.message : String(error),
+    }, { status: 400 });
   }
 }

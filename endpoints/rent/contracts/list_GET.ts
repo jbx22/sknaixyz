@@ -21,12 +21,19 @@ export async function handle(request: Request) {
       contractStatus: sp.contractStatus || undefined,
     });
     const offset = (input.page - 1) * input.limit;
+    // Base filter query
     let q = db.selectFrom("rentalContracts").selectAll();
     if (input.propertyId) q = q.where("propertyId", "=", input.propertyId);
     if (input.landlordId) q = q.where("landlordUserId", "=", input.landlordId);
     if (input.tenantId) q = q.where("tenantUserId", "=", input.tenantId);
     if (input.contractStatus) q = q.where("contractStatus", "=", input.contractStatus);
-    const countR = await q.select((eb) => eb.fn.count("rentalContracts.id").as("cnt")).executeTakeFirst();
+    // Separate count query (cannot reuse 'q' because selectAll() + count() creates invalid SQL)
+    let countQ = db.selectFrom("rentalContracts");
+    if (input.propertyId) countQ = countQ.where("propertyId", "=", input.propertyId);
+    if (input.landlordId) countQ = countQ.where("landlordUserId", "=", input.landlordId);
+    if (input.tenantId) countQ = countQ.where("tenantUserId", "=", input.tenantId);
+    if (input.contractStatus) countQ = countQ.where("contractStatus", "=", input.contractStatus);
+    const countR = await countQ.select((eb) => eb.fn.count("rentalContracts.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const contracts = await q.orderBy("rentalContracts.createdAt", "desc").limit(input.limit).offset(offset).execute();
     const mapped = contracts.map(c => ({ ...c, monthlyRent: Number(c.monthlyRent), securityDeposit: Number(c.securityDeposit) }));

@@ -1,4 +1,5 @@
 import superjson from "superjson";
+import { sql } from "kysely";
 import { db } from "../../../helpers/db";
 import { getServerUserSession } from "../../../helpers/getServerUserSession";
 import { NotAuthenticatedError } from "../../../helpers/getSetServerSession";
@@ -13,7 +14,7 @@ export type ComplianceStats = {
   totalMonthlyRent: number;
   totalEjarLinked: number;
   complianceRate: number;
-  recentLogs: number; // last 7 days
+  recentLogs: number;
   activeFalLicenses: number;
   expiredFalLicenses: number;
   contractsExpiringIn60Days: number;
@@ -42,17 +43,17 @@ export async function handle(request: Request) {
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    // Total contracts by compliance status
+    // Use raw SQL for CASE expressions to avoid Kysely case() builder incompatibility
     const contractStats = await db
       .selectFrom("rentalContracts")
-      .select((eb: any) => [
-        eb.fn.count<number>("id").as("total"),
-        eb.fn.sum<number>(eb.case().when("complianceStatus", "=", "valid").then(1).else(0)).as("valid"),
-        eb.fn.sum<number>(eb.case().when("complianceStatus", "=", "warning").then(1).else(0)).as("warning"),
-        eb.fn.sum<number>(eb.case().when("complianceStatus", "=", "critical").then(1).else(0)).as("critical"),
-        eb.fn.sum<number>(eb.case().when("complianceStatus", "=", "pending_validation").then(1).else(0)).as("pendingValidation"),
-        eb.fn.sum<number>("monthlyRent").as("totalMonthlyRent"),
-        eb.fn.sum<number>(eb.case().when("ejarContractNumber").isNotNull().then(1).else(0)).as("ejarLinked"),
+      .select([
+        sql<number>`COUNT(*)`.as("total"),
+        sql<number>`COUNT(CASE WHEN compliance_status = 'valid' THEN 1 END)`.as("valid"),
+        sql<number>`COUNT(CASE WHEN compliance_status = 'warning' THEN 1 END)`.as("warning"),
+        sql<number>`COUNT(CASE WHEN compliance_status = 'critical' THEN 1 END)`.as("critical"),
+        sql<number>`COUNT(CASE WHEN compliance_status = 'pending_validation' THEN 1 END)`.as("pendingValidation"),
+        sql<number>`COALESCE(SUM(monthly_rent), 0)`.as("totalMonthlyRent"),
+        sql<number>`COUNT(CASE WHEN ejar_contract_number IS NOT NULL THEN 1 END)`.as("ejarLinked"),
       ])
       .executeTakeFirst();
 
@@ -62,7 +63,7 @@ export async function handle(request: Request) {
       .where("endDate", "<=", sixtyDaysFromNow)
       .where("endDate", ">", now)
       .where("contractStatus", "=", "active")
-      .select((eb: any) => eb.fn.count<number>("id").as("count"))
+      .select(sql<number>`COUNT(*)`.as("count"))
       .executeTakeFirst();
 
     const expiringIn30 = await db
@@ -70,7 +71,7 @@ export async function handle(request: Request) {
       .where("endDate", "<=", thirtyDaysFromNow)
       .where("endDate", ">", now)
       .where("contractStatus", "=", "active")
-      .select((eb: any) => eb.fn.count<number>("id").as("count"))
+      .select(sql<number>`COUNT(*)`.as("count"))
       .executeTakeFirst();
 
     const expiringIn7 = await db
@@ -78,22 +79,22 @@ export async function handle(request: Request) {
       .where("endDate", "<=", sevenDaysFromNow)
       .where("endDate", ">", now)
       .where("contractStatus", "=", "active")
-      .select((eb: any) => eb.fn.count<number>("id").as("count"))
+      .select(sql<number>`COUNT(*)`.as("count"))
       .executeTakeFirst();
 
     // Recent compliance logs
     const recentLogsCount = await db
       .selectFrom("complianceLogs")
       .where("createdAt", ">=", sevenDaysAgo)
-      .select((eb: any) => eb.fn.count<number>("id").as("count"))
+      .select(sql<number>`COUNT(*)`.as("count"))
       .executeTakeFirst();
 
     // FAL license cache stats
     const falLicenseStats = await db
       .selectFrom("regaLicenseCache")
-      .select((eb: any) => [
-        eb.fn.sum<number>(eb.case().when("isValid", "=", true).then(1).else(0)).as("active"),
-        eb.fn.sum<number>(eb.case().when("isValid", "=", false).then(1).else(0)).as("expired"),
+      .select([
+        sql<number>`COUNT(CASE WHEN is_valid = true THEN 1 END)`.as("active"),
+        sql<number>`COUNT(CASE WHEN is_valid = false THEN 1 END)`.as("expired"),
       ])
       .executeTakeFirst();
 
@@ -106,10 +107,10 @@ export async function handle(request: Request) {
     const auditChecklist = {
       falLicensesValidated: (falLicenseStats?.active || 0) > 0,
       ejarMirroringEnabled: ejarLinked > 0,
-      ndmoCompliant: valid > 0, // Simplified: if we have valid contracts, NDMO is configured
+      ndmoCompliant: valid > 0,
       complianceLogsActive: Number(recentLogsCount?.count || 0) > 0,
       paymentGatewayLicensed: process.env.EJAR_API_KEY ? true : false,
-      cronEngineRunning: true, // Cron is running when server is up
+      cronEngineRunning: true,
     };
 
     const stats: ComplianceStats = {

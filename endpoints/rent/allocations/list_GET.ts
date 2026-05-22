@@ -15,7 +15,12 @@ export async function handle(request: Request) {
     if (input.propertyId) q = q.where("propertyId", "=", input.propertyId);
     if (input.ownerUserId) q = q.where("ownerUserId", "=", input.ownerUserId);
     if (input.allocationStatus) q = q.where("allocationStatus", "=", input.allocationStatus);
-    const countR = await q.select((eb) => eb.fn.count("rentalIncomeAllocations.id").as("cnt")).executeTakeFirst();
+    let countQ = db.selectFrom("rentalIncomeAllocations");
+
+if (input.propertyId) countQ = countQ.where("propertyId", "=", input.propertyId);
+if (input.ownerUserId) countQ = countQ.where("ownerUserId", "=", input.ownerUserId);
+if (input.allocationStatus) countQ = countQ.where("allocationStatus", "=", input.allocationStatus);
+    const countR = await countQ.select((eb) => eb.fn.count("rentalIncomeAllocations.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const rows = await q.orderBy("rentalIncomeAllocations.createdAt", "desc").limit(input.limit).offset(offset).execute();
     const mapped = rows.map(r => ({ ...r, totalIncome: Number(r.totalIncome), totalExpenses: Number(r.totalExpenses), netIncome: Number(r.netIncome), allocatedAmount: Number(r.allocatedAmount) }));

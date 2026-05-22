@@ -14,7 +14,11 @@ export async function handle(request: Request) {
     let q = db.selectFrom("investorDistributions").selectAll();
     if (input.investorUserId) q = q.where("investorUserId", "=", input.investorUserId);
     if (input.distributionStatus) q = q.where("distributionStatus", "=", input.distributionStatus);
-    const countR = await q.select((eb) => eb.fn.count("investorDistributions.id").as("cnt")).executeTakeFirst();
+    let countQ = db.selectFrom("investorDistributions");
+
+if (input.investorUserId) countQ = countQ.where("investorUserId", "=", input.investorUserId);
+if (input.distributionStatus) countQ = countQ.where("distributionStatus", "=", input.distributionStatus);
+    const countR = await countQ.select((eb) => eb.fn.count("investorDistributions.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const rows = await q.orderBy("investorDistributions.createdAt", "desc").limit(input.limit).offset(offset).execute();
     const mapped = rows.map(r => ({ ...r, amount: Number(r.amount) }));

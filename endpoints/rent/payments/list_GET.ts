@@ -24,7 +24,12 @@ export async function handle(request: Request) {
     if (input.contractId) q = q.where("contractId", "=", input.contractId);
     if (input.tenantUserId) q = q.where("tenantUserId", "=", input.tenantUserId);
     if (input.paymentStatus) q = q.where("paymentStatus", "=", input.paymentStatus);
-    const countR = await q.select((eb) => eb.fn.count("rentPayments.id").as("cnt")).executeTakeFirst();
+    let countQ = db.selectFrom("rentPayments");
+
+if (input.contractId) countQ = countQ.where("contractId", "=", input.contractId);
+if (input.tenantUserId) countQ = countQ.where("tenantUserId", "=", input.tenantUserId);
+if (input.paymentStatus) countQ = countQ.where("paymentStatus", "=", input.paymentStatus);
+    const countR = await countQ.select((eb) => eb.fn.count("rentPayments.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const payments = await q.orderBy("rentPayments.createdAt", "desc").limit(input.limit).offset(offset).execute();
     const mapped = payments.map(p => ({ ...p, amount: Number(p.amount) }));

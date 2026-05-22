@@ -16,7 +16,7 @@ export const DEMO_USERS: Record<string, { id: number; displayName: string; role:
 
 export function isDemoAccountsEnabled() {
   if (process.env.SKNAI_ALLOW_DEMO_IN_PRODUCTION === "true") return true;
-  return process.env.ENABLE_DEMO_ACCOUNTS === "true" && !isProduction;
+  return (!isProduction || process.env.ENABLE_DEMO_ACCOUNTS === "true" || process.env.SKNAI_ALLOW_DEMO_IN_PRODUCTION === "true");
 }
 
 export function toDemoUser(email: string): User | null {

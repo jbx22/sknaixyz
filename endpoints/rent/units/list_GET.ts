@@ -22,7 +22,11 @@ export async function handle(request: Request) {
     let q = db.selectFrom("propertyUnits").selectAll();
     if (input.propertyId) q = q.where("propertyId", "=", input.propertyId);
     if (input.status) q = q.where("propertyUnits.status", "=", input.status);
-    const countR = await q.select((eb) => eb.fn.count("propertyUnits.id").as("cnt")).executeTakeFirst();
+    let countQ = db.selectFrom("propertyUnits");
+
+if (input.propertyId) countQ = countQ.where("propertyId", "=", input.propertyId);
+if (input.status) countQ = countQ.where("propertyUnits.status", "=", input.status);
+    const countR = await countQ.select((eb) => eb.fn.count("propertyUnits.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const units = await q
       .selectAll()

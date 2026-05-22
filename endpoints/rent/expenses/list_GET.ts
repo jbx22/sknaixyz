@@ -15,7 +15,11 @@ export async function handle(request: Request) {
     let q = db.selectFrom("propertyExpenses").selectAll();
     if (input.propertyId) q = q.where("propertyId", "=", input.propertyId);
     if (input.category) q = q.where("category", "=", input.category);
-    const countR = await q.select((eb) => eb.fn.count("propertyExpenses.id").as("cnt")).executeTakeFirst();
+    let countQ = db.selectFrom("propertyExpenses");
+
+if (input.propertyId) countQ = countQ.where("propertyId", "=", input.propertyId);
+if (input.category) countQ = countQ.where("category", "=", input.category);
+    const countR = await countQ.select((eb) => eb.fn.count("propertyExpenses.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const expenses = await q.orderBy("propertyExpenses.expenseDate", "desc").limit(input.limit).offset(offset).execute();
     const mapped = expenses.map(e => ({ ...e, amount: Number(e.amount) }));

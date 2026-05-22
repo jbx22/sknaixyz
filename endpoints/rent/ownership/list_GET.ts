@@ -15,7 +15,11 @@ export async function handle(request: Request) {
     let q = db.selectFrom("propertyOwnershipShares").selectAll();
     if (input.propertyId) q = q.where("propertyId", "=", input.propertyId);
     if (input.userId) q = q.where("userId", "=", input.userId);
-    const countR = await q.select((eb) => eb.fn.count("propertyOwnershipShares.id").as("cnt")).executeTakeFirst();
+    let countQ = db.selectFrom("propertyOwnershipShares");
+
+if (input.propertyId) countQ = countQ.where("propertyId", "=", input.propertyId);
+if (input.userId) countQ = countQ.where("userId", "=", input.userId);
+    const countR = await countQ.select((eb) => eb.fn.count("propertyOwnershipShares.id").as("cnt")).executeTakeFirst();
     const total = Number(countR?.cnt ?? 0);
     const shares = await q.orderBy("propertyOwnershipShares.createdAt", "desc").limit(input.limit).offset(offset).execute();
     const mapped = shares.map(s => ({ ...s, ownershipPercentage: Number(s.ownershipPercentage), investmentAmount: Number(s.investmentAmount) }));
