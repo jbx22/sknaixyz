@@ -129,18 +129,28 @@ This is a FREE general report. Focus on:
 - Mention the best internet and phone service providers in the area
 - Useful information for a potential buyer or renter
 - Make it easy to read and visually appealing
-- Output a JSON object with these root-level keys:
-- "propertySummary": { "positiveHeadline": "string with emoji", "locationDescription": "string" }
-- "marketPrices": { "currency": "string", "currencySymbol": "string", "similarRentRange": { "min": number, "max": number, "avg": number }, "similarSaleRange": { "min": number, "max": number, "avg": number } }
-- "nearbyAmenities": { "education": [{ "name": "string", "type": "string", "distanceKm": number }], "healthcare": [...], "shoppingDining": { "malls": [...], "restaurants": number, "restaurantNames": ["name1", ...] }, "parksRecreation": [...], "transportation": { "metroStations": [...], "busStops": [...], "majorRoads": [...] }, "essentialServices": { "banks": [...], "mosques": [...], "petrolStations": [...], "policeStations": [...], "governmentOffices": [...] }, "entertainmentSports": { "cinemas": [...], "sportsFacilities": [...], "hotels": [...] } }
-- "connectivity": { "internetProviders": ["string", ...], "phoneProviders": ["string", ...] }
-- "scores": { "safetyRating": 1-10, "walkabilityScore": 1-10, "noiseLevel": 1-10, "airQualityIndex": number, "qualityOfLifeScore": 1-10 }
-- "trafficConditions": "string with emoji"
-- "climateNotes": "string with emoji"
-- "areaDescription": "string with emoji"
-- "positiveSummary": "string with emoji"
+- CRITICAL: Output must be a flat JSON object with these exact root-level keys (do NOT nest under a "report" key):
+{
+  "propertySummary": { "positiveHeadline": "🏡 string with emoji", "locationDescription": "📍 string with emoji" },
+  "marketPrices": { "currency": "SAR", "currencySymbol": "SAR", "similarRentRange": { "min": 15000, "max": 30000, "avg": 22000 }, "similarSaleRange": { "min": 4000000, "max": 6000000, "avg": 5000000 } },
+  "nearbyAmenities": {
+    "education": [{ "name": "School name", "type": "school", "distanceKm": 0.5 }],
+    "healthcare": [{ "name": "Hospital name", "type": "hospital", "distanceKm": 1.2 }],
+    "shoppingDining": { "malls": [{ "name": "Mall name", "distanceKm": 1.0 }], "restaurants": 25, "restaurantNames": ["Restaurant1", "Restaurant2"] },
+    "parksRecreation": [{ "name": "Park name", "distanceKm": 0.3 }],
+    "transportation": { "metroStations": [], "busStops": [{ "name": "Stop name", "distanceKm": 0.2 }], "majorRoads": [{ "name": "King Fahd Road", "distanceKm": 0.5 }] },
+    "essentialServices": { "banks": [], "mosques": [{ "name": "Mosque name", "distanceKm": 0.8 }], "petrolStations": [], "policeStations": [], "governmentOffices": [] },
+    "entertainmentSports": { "cinemas": [], "sportsFacilities": [], "hotels": [] }
+  },
+  "connectivity": { "internetProviders": ["STC", "Mobily"], "phoneProviders": ["STC", "Zain"] },
+  "scores": { "safetyRating": 8, "walkabilityScore": 7, "noiseLevel": 3, "airQualityIndex": 55, "qualityOfLifeScore": 8 },
+  "trafficConditions": "🚗 string with emoji",
+  "climateNotes": "☀️ string with emoji",
+  "areaDescription": "🏘️ string with emoji",
+  "positiveSummary": "👍 string with emoji"
+}
 
-Each text value (positiveHeadline, locationDescription, positiveSummary, etc.) should contain rich text WITH emojis for display. Use emojis INSIDE the strings, NOT as separate keys.`,
+Each text value should contain rich text WITH emojis inside the string. Use real data from the prompt above, do not fabricate. If a facility has no data, return an empty array [] instead of making up names.`,
 };
 
 const PREMIUM_SYSTEM_EXTENSION: Record<"ar" | "en", string> = {
