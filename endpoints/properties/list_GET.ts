@@ -65,6 +65,10 @@ export async function handle(request: Request) {
       "properties.userId",
       "properties.aiReportStatus",
       "properties.aiReportGeneratedAt",
+      "properties.city",
+      "properties.district",
+      "properties.city",
+      "properties.district",
       "users.displayName as ownerName",
       "users.avatarUrl as ownerAvatarUrl",
     ]);

@@ -33,7 +33,7 @@ export async function handle(request: Request) {
     const input = schema.parse(json);
 
     // 2. Get user's subscription info and AI report usage
-    const user = await db
+    let user = await db
       .selectFrom("users")
       .select([
         "subscriptionTier",
@@ -42,7 +42,17 @@ export async function handle(request: Request) {
         "displayName",
       ])
       .where("id", "=", userId)
-      .executeTakeFirstOrThrow();
+      .executeTakeFirst();
+
+    // If user not found in DB (e.g. demo users), use session user data directly
+    if (!user) {
+      user = {
+        subscriptionTier: session.user.subscriptionTier || "free",
+        aiReportsUsed: 0,
+        aiReportsResetAt: null,
+        displayName: session.user.displayName || "User",
+      };
+    }
 
     // 3. Determine which report tier the user is allowed to access
     const allowedTier = resolveAllowedTier(user.subscriptionTier as SubscriptionTier);

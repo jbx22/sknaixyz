@@ -44,6 +44,8 @@ export async function handle(request: Request) {
         "properties.createdAt",
         "properties.updatedAt",
         "properties.userId",
+        "properties.city",
+        "properties.district",
         "users.displayName as ownerName",
         "users.avatarUrl as ownerAvatarUrl",
         "users.email as ownerEmail", // Include email for contact in details view
