@@ -7,3 +7,12 @@ env.json
 security-audit/
 *.log
 .DS_Store
+
+# OpenClaw workspace.openclaw/
+AGENTS.md
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+TOOLS.md
+USER.md
+*.bak
