@@ -15,3 +15,10 @@ SOUL.md
 TOOLS.md
 USER.md
 *.bak
+
+# Debug / test files (pre-deploy cleanup)
+_test_*
+_check_db.mjs
+_list_props.mjs
+_migrate_db.mjs
+_report_*.json
