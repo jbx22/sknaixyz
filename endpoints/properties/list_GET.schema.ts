@@ -1,11 +1,13 @@
 import { z } from "zod";
 import superjson from "superjson";
 import { Selectable } from "kysely";
-import { Properties, PropertyTypeArrayValues, AiReportStatus } from "../../helpers/schema";
+import { Properties, PropertyTypeArrayValues, ListingTypeArrayValues, AiReportStatus } from "../../helpers/schema";
 
 export const schema = z.object({
   search: z.string().optional(),
   propertyType: z.enum(PropertyTypeArrayValues).optional(),
+  listingType: z.enum(ListingTypeArrayValues).optional(),
+  status: z.enum(["available", "rented", "sold"]).optional(),
   minPrice: z.number().optional(),
   maxPrice: z.number().optional(),
   minBedrooms: z.number().optional(),
@@ -43,6 +45,8 @@ export const getProperties = async (
   const searchParams = new URLSearchParams();
   if (params.search) searchParams.append("search", params.search);
   if (params.propertyType) searchParams.append("propertyType", params.propertyType);
+  if (params.listingType) searchParams.append("listingType", params.listingType);
+  if (params.status) searchParams.append("status", params.status);
   if (params.minPrice !== undefined) searchParams.append("minPrice", params.minPrice.toString());
   if (params.maxPrice !== undefined) searchParams.append("maxPrice", params.maxPrice.toString());
   if (params.minBedrooms !== undefined) searchParams.append("minBedrooms", params.minBedrooms.toString());

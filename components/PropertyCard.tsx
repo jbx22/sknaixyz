@@ -151,10 +151,20 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             {property.propertyType}
           </Badge>
           <Badge
-            variant={property.status === "available" ? "success" : "secondary"}
+            variant={property.listingType === "rent" ? "warning" : property.listingType === "sale" ? "success" : property.status === "available" ? "success" : "secondary"}
             className={styles.statusBadge}
           >
-            {property.status}
+            {property.listingType === "rent"
+              ? (language === "ar" ? "للايجار" : "For RENT")
+              : property.listingType === "sale"
+              ? (language === "ar" ? "للبيع" : "For SALE")
+              : property.status === "available"
+              ? (language === "ar" ? "متاح" : "Available")
+              : property.status === "rented"
+              ? (language === "ar" ? "مؤجر" : "Rented")
+              : property.status === "sold"
+              ? (language === "ar" ? "مباع" : "Sold")
+              : property.status}
           </Badge>
         </div>
         <Button

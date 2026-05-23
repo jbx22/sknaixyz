@@ -14,6 +14,8 @@ export async function handle(request: Request) {
     const rawInput = {
       search: searchParams.search || undefined,
       propertyType: searchParams.propertyType || undefined,
+      listingType: searchParams.listingType || undefined,
+      status: searchParams.status || undefined,
       minPrice: searchParams.minPrice ? Number(searchParams.minPrice) : undefined,
       maxPrice: searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined,
       minBedrooms: searchParams.minBedrooms ? Number(searchParams.minBedrooms) : undefined,
@@ -57,6 +59,7 @@ export async function handle(request: Request) {
       "properties.bathrooms",
       "properties.areaSqm",
       "properties.propertyType",
+      "properties.listingType",
       "properties.status",
       "properties.zipCode",
       "properties.images",
@@ -101,6 +104,14 @@ export async function handle(request: Request) {
 
     if (input.propertyType) {
       query = query.where("properties.propertyType", "=", input.propertyType);
+    }
+
+    if (input.status) {
+      query = query.where("properties.status", "=", input.status);
+    }
+
+    if (input.listingType) {
+      query = query.where("properties.listingType", "=", input.listingType);
     }
 
     if (input.minPrice !== undefined) {
@@ -154,6 +165,14 @@ export async function handle(request: Request) {
 
     if (input.propertyType) {
       countQuery = countQuery.where("properties.propertyType", "=", input.propertyType);
+    }
+
+    if (input.status) {
+      countQuery = countQuery.where("properties.status", "=", input.status);
+    }
+
+    if (input.listingType) {
+      countQuery = countQuery.where("properties.listingType", "=", input.listingType);
     }
 
     if (input.minPrice !== undefined) {

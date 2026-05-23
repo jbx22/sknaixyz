@@ -37,6 +37,7 @@ export const AppFooter = ({ className = "", showBottomPadding = true }: AppFoote
 
       links: {
         about: "عن المنصة",
+        rentals: "عقارات للإيجار",
         map: "خريطة العقارات",
         properties: "تصفح العقارات",
         contact: "اتصل بنا",
@@ -66,6 +67,7 @@ export const AppFooter = ({ className = "", showBottomPadding = true }: AppFoote
 
       links: {
         about: "About Us",
+        rentals: "Find Rentals",
         map: "Property Map",
         properties: "Browse Properties",
         contact: "Contact Us",
@@ -117,6 +119,7 @@ export const AppFooter = ({ className = "", showBottomPadding = true }: AppFoote
             <h3 className={styles.columnHeader}>{t.headers.quickLinks}</h3>
             <ul className={styles.linkList}>
               <li><Link to="/about" className={styles.link}>{t.links.about}</Link></li>
+              <li><Link to="/properties?listingType=rent" className={styles.link}>{t.links.rentals}</Link></li>
               <li><Link to="/map" className={styles.link}>{t.links.map}</Link></li>
               <li><Link to="/properties" className={styles.link}>{t.links.properties}</Link></li>
               <li><Link to="/contact" className={styles.link}>{t.links.contact}</Link></li>

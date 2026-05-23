@@ -8,6 +8,7 @@ create type payment_status as enum ('completed','failed','pending','refunded');
 create type session_type as enum ('auth','temp_oauth');
 create type property_type as enum ('apartment','commercial','land','townhouse','villa');
 create type property_status as enum ('available','rented','sold');
+create type listing_type as enum ('sale','rent');
 create type ai_report_status as enum ('completed','failed','pending');
 create type deletion_request_status as enum ('cancelled','completed','pending');
 create type kyc_status as enum ('approved','expired','pending','rejected');
@@ -48,7 +49,7 @@ create table oauth_states (id bigserial primary key, provider text not null, sta
 create table email_verification_codes (id bigserial primary key, user_id bigint not null references users(id) on delete cascade, code text not null, expires_at timestamptz not null, used_at timestamptz, created_at timestamptz default now());
 
 create table properties (
-  id bigserial primary key, user_id bigint not null references users(id) on delete cascade, title text not null, description text, price numeric not null, location_name text not null, latitude numeric not null, longitude numeric not null, area_sqm numeric not null, bedrooms integer, bathrooms numeric, property_type property_type not null, status property_status not null default 'available', images text[] default '{}', amenities text[] default '{}', contact_phone text, floor_number integer, year_built integer, zip_code text, furnished boolean default false, is_featured boolean not null default false, ai_report_status ai_report_status, ai_report_data jsonb, ai_report_error text, ai_report_generated_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now()
+  id bigserial primary key, user_id bigint not null references users(id) on delete cascade, title text not null, description text, price numeric not null, location_name text not null, latitude numeric not null, longitude numeric not null, area_sqm numeric not null, bedrooms integer, bathrooms numeric, property_type property_type not null, status property_status not null default 'available', listing_type listing_type not null default 'sale', images text[] default '{}', amenities text[] default '{}', contact_phone text, floor_number integer, year_built integer, zip_code text, furnished boolean default false, is_featured boolean not null default false, ai_report_status ai_report_status, ai_report_data jsonb, ai_report_error text, ai_report_generated_at timestamptz, created_at timestamptz default now(), updated_at timestamptz default now()
 );
 create table property_chats (id bigserial primary key, property_id bigint not null references properties(id) on delete cascade, user_id bigint not null references users(id) on delete cascade, message text not null, deleted_by_admin boolean default false, created_at timestamptz default now(), updated_at timestamptz default now());
 create table property_views (id bigserial primary key, property_id bigint not null references properties(id) on delete cascade, user_id bigint references users(id) on delete set null, ip_address text, user_agent text, viewed_at timestamptz default now());

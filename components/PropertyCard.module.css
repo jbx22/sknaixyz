@@ -57,7 +57,8 @@
 }
 
 .statusBadge {
-  text-transform: capitalize;
+  text-transform: none;
+  font-weight: 600;
 }
 
 .favoriteButton {

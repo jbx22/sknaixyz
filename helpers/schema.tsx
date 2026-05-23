@@ -44,6 +44,7 @@ export type OfferingStatus = "closed" | "draft" | "open" | "settled";
 export type PaymentStatus = "completed" | "failed" | "pending" | "refunded";
 
 export type PropertyStatus = "available" | "maintenance" | "pending" | "rented" | "sold";
+export type ListingType = "sale" | "rent";
 
 export type PropertyType = "apartment" | "commercial" | "land" | "townhouse" | "villa";
 
@@ -699,6 +700,7 @@ export interface Properties {
   longitude: Numeric;
   price: Numeric;
   propertyType: PropertyType;
+  listingType: Generated<ListingType>;
   status: Generated<PropertyStatus>;
   title: string;
   updatedAt: Generated<Timestamp | null>;
@@ -972,6 +974,7 @@ export interface DB {
 export const UserRoleArrayValues: [UserRole, ...UserRole[]] = ["admin","broker","developer","owner","superadmin","user"];
 export const PropertyTypeArrayValues: [PropertyType, ...PropertyType[]] = ["apartment","commercial","land","townhouse","villa"];
 export const PropertyStatusArrayValues: [PropertyStatus, ...PropertyStatus[]] = ["available","maintenance","pending","rented","sold"];
+export const ListingTypeArrayValues: [ListingType, ...ListingType[]] = ["sale","rent"];
 export const SubscriptionTierArrayValues: [SubscriptionTier, ...SubscriptionTier[]] = ["basic","free","premium"];
 export const PaymentStatusArrayValues: [PaymentStatus, ...PaymentStatus[]] = ["completed","failed","pending","refunded"];
 export const SessionTypeArrayValues: [SessionType, ...SessionType[]] = ["auth","temp_oauth"];

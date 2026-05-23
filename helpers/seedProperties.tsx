@@ -274,7 +274,8 @@ export function getSeedProperties(): PropertyWithDetails[] {
     longitude: prop.lng,
     price: prop.price,
     type: prop.type,
-    status: prop.status,
+    listingType: prop.status,
+    status: "available" as const,
     bedrooms: prop.bedrooms,
     area: prop.area,
     aiScore: prop.aiScore,
@@ -302,7 +303,7 @@ export function getSeedProperties(): PropertyWithDetails[] {
       price: prop.price,
       currency: "SAR",
       pricePerSqm: prop.price / prop.area,
-      status: prop.status,
+      status: prop.status === "sale" ? "available" : "available",
       negotiable: true,
     },
     aiReportStatus: "completed",
@@ -334,6 +335,7 @@ export function filterSeedProperties(properties: PropertyWithDetails[], filters:
   search?: string;
   city?: string;
   propertyType?: string;
+  listingType?: string;
   minPrice?: number;
   maxPrice?: number;
   status?: string;
@@ -365,6 +367,11 @@ export function filterSeedProperties(properties: PropertyWithDetails[], filters:
       return false;
     }
     if (filters.maxPrice && property.price > filters.maxPrice) {
+      return false;
+    }
+
+    // Listing type filter
+    if (filters.listingType && property.listingType !== filters.listingType) {
       return false;
     }
 
